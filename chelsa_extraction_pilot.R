@@ -44,39 +44,46 @@ files_df <- tibble(files_temp, files_precip) %>%
 
 ## 1c. Merge species-coord data with files_df data
 mam_coord <- mam %>% 
-  full_join(x = ., y = files_df, by = "year") 
+  full_join(x = ., y = files_df, by = "year") %>% 
+  mutate(obj_temp = paste0("temp_",year,"_",month),
+         obj_precip = paste0("precip_",year,"_",month))
 
 ##__________________________________________________________________________________________________
 #### 2. Extract weather data at locations in the species data ####
 
 ## Going through the files_df to save computation
+x <- Sys.time()
 mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
-  
+
   # 1. extract the right data
-  c_species = dplyr::filter(mam_coord, 
-                            year == files_df[x,]$year, 
+  c_species = dplyr::filter(mam_coord,
+                            year == files_df[x,]$year,
                             month == files_df[x,]$month)
-  
+
   chelsa_temp   = raster(x = files_df[x,]$files_temp)
   chelsa_precip = raster(x = files_df[x,]$files_precip)
-  
+
   # 2. Converting the species data to spatial data and aligning with CHELSA coordinate reference
+  if(nrow(c_species) > 0){
   coordinates(c_species) = c("Longitude","Latitude")
   pbase = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
   proj4string(c_species) = pbase
   c_species = spTransform(c_species, crs(chelsa_temp))
   
+  cells_sp = cellFromXY(chelsa_temp, c_species)
+
   # 3. Extract the climate data - Takes a while
-  c_species$raster_cell = cellFromXY(chelsa_temp, c_species)
-  c_species$temp = chelsa_temp[cellFromXY(chelsa_temp, c_species)] / 10 - 273.15 # Kelvin to celcius
-  c_species$precip = chelsa_precip[cellFromXY(chelsa_precip, c_species)]
-  c_species$precip[c_species$precip > 65000] = NA_real_
+  c_species$raster_cell = cells_sp
+  c_species$temp = chelsa_temp[cells_sp] / 10 - 273.15 # Kelvin to celcius
+  c_species$precip = chelsa_precip[cells_sp]
+  c_species$precip[c_species$precip > 65000] = NA_real_}
   
   # 4. Return
   cat("\r", "Your job is ",round(x/nrow(files_df) *100, 2), "% complete          ")
   return(as_tibble(c_species))
-  
+
 }))
+Sys.time() - x
 
 ##__________________________________________________________________________________________________
 #### 3. Save ####
