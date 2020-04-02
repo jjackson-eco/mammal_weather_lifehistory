@@ -85,6 +85,20 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
 }))
 Sys.time() - x
 
+# ### Buffer method
+# coordinates(xy) <- ~ x + y
+# proj4string(xy) <- "+init=epsg:4326"
+# 
+# ## create 100-km buffer
+# xy_utm = spTransform(xy, CRS("+init=epsg:32621"))
+# gbf_utm = rgeos::gBuffer(xy_utm, width = 1e5, quadsegs = 250L)
+# gbf = spTransform(gbf_utm, CRS(proj4string(xy)))
+# 
+# ## extract values and calculate weighted mean
+# vls = extract(WOA, gbf, weights = TRUE)[[1]]
+# sum(vls[, 1] * vls[, 2])
+# # [1] 4.18117
+
 ##__________________________________________________________________________________________________
 #### 3. Save ####
 save(mam_chelsa, file = "data/mam_chelsa.RData")
