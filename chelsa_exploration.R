@@ -22,15 +22,47 @@ library(gifski)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(rgeos)
+library(raster)
 library(sf)
+library(rasterVis)
 
 load("data/mam_chelsa.RData")
 
+temp_aug1993 <- raster(x = "../rawdata/CHELSA_tmean_1993_08_V1.2.1.tif") 
+
+# coastline
+world_sp <- ne_coastline(scale = "medium")
+world_sf <- ne_coastline(scale = "medium", returnclass = "sf")
+
 ##__________________________________________________________________________________________________
-#### 1. Looking at the data ####
+#### 1. Raw raster data ####
+
+# using rasterVis 
+gplot(temp_aug1993) + 
+  geom_tile(aes(fill=value)) +
+  geom_polygon(data = world_sp,
+               aes(x=long, y=lat, group = group),
+               size = 0.2, fill = NA, colour = "black") +
+  scale_fill_viridis_c(option = "inferno",
+                       breaks = (seq(-60,60, by = 10) + 273.15)*10,
+                       labels = seq(-60,60, by = 10)) +
+  scale_x_continuous(breaks = seq(-180,180, by = 90), expand = c(0,0)) +
+  scale_y_continuous(breaks = seq(-90,90, by = 45), expand = c(0,0)) +
+  guides(fill = guide_colorbar(title = expression(paste("Temperature", ~degree~C)),
+                                 barheight = 21, barwidth = 3)) +
+  labs(x = NULL, y = NULL) +
+  theme_bw(base_size = 20) +
+  theme(axis.text.y = element_blank(),
+        axis.text.x = element_blank()) +
+  ggsave(filename = "plots/chelsa_raw/temp_aug93.jpeg",
+         width = 20, height = 12, units = "in",dpi = 400)
+
+##__________________________________________________________________________________________________
+#### 2. Raw CHELSA data for mammal study sites ####
 
 # adding year/month as a factor
-month_dat <- data.frame(month = 1:12, month_name = factor(month.name, levels = month.name)) %>% 
+month_dat <- data.frame(month = 1:12, 
+                        month_name = factor(month.name, levels = month.name)) %>% 
   expand_grid(year = 1979:2013, .) %>% 
   mutate(year_dec = year + (month/12),
          year_mon = paste0(year, " ", month_name))
@@ -41,12 +73,9 @@ mam_chelsa <- mam_chelsa %>%
   left_join(x = ., y = month_dat,
             by = c("year", "month"))
 
-# coastline
-world <- ne_coastline(scale = "medium", returnclass = "sf")
-
 #________________________________________________________
 ## 1a. Temperature
-ggplot(data = world) +
+ggplot(data = world_sf) +
   geom_sf(size = 0.1) +
   geom_point(data = mam_chelsa, 
              aes(x = Longitude, y = Latitude, 
@@ -75,7 +104,7 @@ ggplot(data = world) +
 
 #________________________________________________________
 ## 1b. Precipitation
-ggplot(data = world) +
+ggplot(data = world_sf) +
   geom_sf(size = 0.1) +
   geom_point(data = mam_chelsa, 
              aes(x = Longitude, y = Latitude, 
