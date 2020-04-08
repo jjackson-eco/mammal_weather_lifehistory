@@ -27,7 +27,7 @@ library(sf)
 #### 1. Set up data ####
 
 #_________________________________________________
-## 1a. Mammal living planet index data
+## 1a. Mammal living planet data
 load("mam.RData", verbose = T) # source different in the UCloud
 load("../rawdata/mam.RData", verbose = T)
 rm(mam_meta) # don't need the meta-data here
