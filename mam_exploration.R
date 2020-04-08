@@ -2,7 +2,7 @@
 ##                                                 ##
 ##     Global climate and population dynamics      ##
 ##                                                 ##
-##          Mammal LPI data exploration            ##
+##      Mammal Living planet data exploration      ##
 ##                                                 ##
 ##               April 7th 2020                    ##
 ##                                                 ##
@@ -26,7 +26,7 @@ library(raster)
 library(sf)
 library(rasterVis)
 
-## Load in the raw mammal data from the LPI, which we call mam
+## Load in the raw mammal data from the LPD, which we call mam
 load("../rawdata/mam.RData", verbose = T)
 
 # ID record summary
@@ -44,21 +44,22 @@ mam_spsum <- mam %>%
   summarise(study_length = n(), number_records = n_distinct(ID))
 
 ##__________________________________________________________________________________________________
-#### 1. Mammal LPI data locations ####
+#### 1. Mammal data locations ####
 
 world_sf <- ne_coastline(scale = "medium", returnclass = "sf")
 
-ggplot(data = world_sf) +
-  geom_sf(size = 0.1) +
+mam_map <- ggplot(data = world_sf) +
+  geom_sf(size = 0.4) +
   geom_point(data = mam_IDsum, 
              aes(x = Longitude, y = Latitude, 
                  colour = Order),
-             alpha = 0.6, size = 2) +
+             alpha = 0.5, size = 3) +
+  guides(colour = guide_legend(title = NULL,
+                               override.aes = list(size = 4, alpha = 1))) +
   theme_bw(base_size = 25) +
-  theme(panel.grid.major = element_line(size = 0.25)) +
-  labs(x = "Longitude", y = "Latitude") +
-  ggsave(filename = "plots/mam_raw/mam.jpeg", 
-         width = 20, height = 12, units = "in", dpi = 400)
+  theme(panel.grid.major = element_line(size = 0.25),
+        legend.position = "bottom") +
+  labs(x = "Longitude", y = "Latitude")
 
 ##__________________________________________________________________________________________________
 #### 2. Database records features ####
@@ -69,23 +70,22 @@ mam_datasum <- data.frame(Observations = nrow(mam),
                           Species = n_distinct(mam$Binomial),
                           Countries = n_distinct(mam_meta$Country))
 
-General_sum <- tableGrob(mam_datasum,rows = NULL, theme = ttheme_minimal(base_size = 15))
+General_sum <- tableGrob(mam_datasum,rows = NULL, theme = ttheme_minimal(base_size = 16))
 
 # Order
 spp_sum <- mam %>% 
   group_by(Order) %>% 
   summarise(No.species = n_distinct(Binomial))
 
-cl_spp <- ggplot(spp_sum, aes(x = Order, y = No.species, fill = Order)) +
-  geom_col(show.legend = FALSE) +
-  labs(x= NULL, y = "Number of Species") +
-  coord_flip() +
-  theme_bw(base_size = 16)
+# cl_spp <- ggplot(spp_sum, aes(x = Order, y = No.species, fill = Order)) +
+#   geom_col(show.legend = FALSE) +
+#   labs(x= NULL, y = "Number of Species") +
+#   coord_flip() +
+#   theme_bw(base_size = 16)
 
 cl_obs <- ggplot(mam, aes(x = Order, fill = Order)) + 
   geom_bar(show.legend = F,) +
   labs(x= NULL, y = "Number of Observations") +
-  scale_x_discrete(labels = NULL) +
   coord_flip() +
   theme_bw(base_size = 16)
 
@@ -113,7 +113,7 @@ studl_spp <- ggplot(mam_spsum, aes(x = study_length)) +
 rec_sp <- ggplot(mam_spsum, aes(x = number_records)) + 
   geom_histogram(bins = 30,fill = "lightblue") +
   geom_vline(linetype = "dashed", xintercept = median(mam_spsum$number_records)) +
-  labs(x = "Total years of Study", y = "Number of Species") +
+  labs(x = "Number of LPD records", y = "Number of Species") +
   theme_bw(base_size = 16)
 
 # Observations per year
@@ -125,27 +125,41 @@ obs_year <- ggplot(mam, aes(x = year)) +
 # Changes in Scaled abundance?
 mam_index <- dplyr::filter(mam, year >= 1970, year <= 2014)
 
-m_ind <- ggplot(mam_index, aes(x = year, y = scaled_abundance, group = Order)) +
+m_ind <- ggplot(mam_index, aes(x = year, y = scaled_abundance, 
+                               group = Order, colour = Order, 
+                               fill = Order)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  geom_point(alpha = 0.2, colour = "lightblue") +
-  geom_smooth(method = "lm", se = F) +
+  geom_smooth(method = "lm", alpha = 0.05) +
   labs(x = "Year", y = "Scaled abundance") +
-  facet_wrap(~Order, ncol = 4) +
   theme_bw(base_size = 16) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_blank())
 
 ## PLotting 
-ggsave(grid.arrange(General_sum, sl_obs, studl, 
-                    studl_spp, rec_sp, obs_year,
-                    ncol = 3),
-       filename = "plots/mam_raw/mam_summary.jpeg", 
-       width = 15, height = 14, units = "in", dpi = 400)
 
-ggsave(grid.arrange(cl_spp, cl_obs, ncol = 2, widths = c(6,5)),
-       filename = "plots/mam_raw/mam_order.jpeg", 
-       width = 9, height = 10, units = "in", dpi = 400)
+# 1. The numbers
+ggsave(grid.arrange(General_sum), 
+       filename = "plots/mam_raw/mam_lpd_numbers.jpeg",
+       width = 9, height = 2, units = "in",
+       dpi = 400)
+
+# 2. The distribution through time and length of study
+ggsave(grid.arrange(studl, obs_year,
+                    ncol = 1),
+       filename = "plots/mam_raw/mam_years.jpeg", 
+       width = 9, height = 8, units = "in", dpi = 400)
+
+ggsave(mam_map, 
+       filename = "plots/mam_raw/mam_locations.jpeg", 
+       width = 22, height = 14, units = "in", dpi = 400)
+
+lay <- rbind(c(1,3),
+             c(2,3))
+
+ggsave(grid.arrange(studl_spp, rec_sp, cl_obs, layout_matrix = lay),
+       filename = "plots/mam_raw/mam_sp.jpeg", 
+       width = 11, height = 11, units = "in", dpi = 400)
 
 ggsave(m_ind, filename = "plots/mam_raw/mam_scaled_abundance.jpeg",
-       width = 9, height = 10, units = "in", dpi = 400)
+       width = 9, height = 6, units = "in", dpi = 400)

@@ -29,6 +29,7 @@ library(rasterVis)
 load("data/mam_chelsa.RData")
 
 temp_aug1993 <- raster(x = "../rawdata/CHELSA_tmean_1993_08_V1.2.1.tif") 
+precip_aug1993 <- raster(x = "../rawdata/precip_aug1993.tif") 
 
 # coastline
 world_sp <- ne_coastline(scale = "medium")
@@ -38,6 +39,8 @@ world_sf <- ne_coastline(scale = "medium", returnclass = "sf")
 #### 1. Raw raster data ####
 
 # using rasterVis 
+
+# 1a. Temperature
 gplot(temp_aug1993) + 
   geom_tile(aes(fill=value)) +
   geom_polygon(data = world_sp,
@@ -55,6 +58,24 @@ gplot(temp_aug1993) +
   theme(axis.text.y = element_blank(),
         axis.text.x = element_blank()) +
   ggsave(filename = "plots/chelsa_raw/temp_aug93.jpeg",
+         width = 20, height = 12, units = "in",dpi = 400)
+
+# 1b. Precipitation
+gplot(precip_aug1993) + 
+  geom_tile(aes(fill=value)) +
+  geom_polygon(data = world_sp,
+               aes(x=long, y=lat, group = group),
+               size = 0.2, fill = NA, colour = "black") +
+  scale_fill_viridis_c(option = "viridis",na.value = "white") +
+  scale_x_continuous(breaks = seq(-180,180, by = 90), expand = c(0,0)) +
+  scale_y_continuous(breaks = seq(-90,90, by = 45), expand = c(0,0)) +
+  guides(fill = guide_colorbar(title = "Total\nPrecipitation (mm)",
+                               barheight = 21, barwidth = 3)) +
+  labs(x = NULL, y = NULL) +
+  theme_bw(base_size = 20) +
+  theme(axis.text.y = element_blank(),
+        axis.text.x = element_blank()) +
+  ggsave(filename = "plots/chelsa_raw/precip_aug93.jpeg",
          width = 20, height = 12, units = "in",dpi = 400)
 
 ##__________________________________________________________________________________________________
