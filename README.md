@@ -19,7 +19,7 @@ The analysis is split into the following sections:
 4. Detrending annual abundance data to focus on annual changes excluding underlying trends.
 5. ...
 
-Here, we will walk through the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R` and `mam_exploration.R`
+Here, we will walk through the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R` and `mam_exploration.R`. The rest of the sections can be found in separate directories.
 
 ---
 
@@ -42,9 +42,9 @@ Full bash scripts can be accessed from https://github.com/jonesor/compadre-clima
 
 ---
 
-### Living Planet Database for terrestrial mammals
+### Living Planet Database for terrestrial mammals `mam`
 
-The Living Planet Index is a key indicator of the state of global biodiversity, monitoring trends in vertebrate popualtions over many decades. Developed by the Zoological Society of London (ZSL) and the World Wildlife Fund (WWF), this index has been a crucial indicator for international policy on conservation. Here, we are using the data that underpins the LPI, which is also maintained by ZSL and the WWF. According to the Living Planet Index website: 
+The Living Planet Index is a key indicator of the state of global biodiversity, monitoring trends in vertebrate popualtions over many decades. Developed by the Zoological Society of London (ZSL) and the World Wildlife Fund (WWF), this index has been a crucial indicator for international policy on conservation. Here, we are using the data that underpins the LPI, which is also maintained by ZSL and the WWF. We are restricting to only include data from the terrestrial mammals for ease of processing and interpretation at this stage. According to the Living Planet Index website: 
 
 > *The Living Planet Database (LPD) currently holds time-series data for over 20,000 populations of more than 4,200 mammal, bird, fish, reptile and amphibian species from around the world, which are gathered from a variety of sources such as journals, online databases and government reports. Using a method developed by ZSL and WWF, these species population trends are aggregated to produce indices of the state of biodiversity. The rest of our work focusses on expanding the coverage of LPI data to more broadly represent vertebrate biodiversity from all around the globe and disaggregating the index to measure trends in different thematic areas. This includes assessing the changes in different taxonomic groups, looking at species trends at a national or regional level, identifying how different threats affect populations and providing an insight into how conservation intervention can promote species recoveries.*
 
