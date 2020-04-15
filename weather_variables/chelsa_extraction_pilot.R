@@ -154,12 +154,12 @@ Sys.time() - starttime
 
 ##__________________________________________________________________________________________________
 #### 3. Save ####
-save(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RData") # On the UCloud
+saveRDS(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RDS") # On the UCloud
 
 ##__________________________________________________________________________________________________
 #### 4. Plots to compare the CHELSA weather variables ####
 
-load("data/mam_chelsa.RData") # Load data downloaded from the UCloud
+mam_chelsa <- readRDS("data/mam_chelsa.RDS") # Load data downloaded from the UCloud
 
 ## 4a. Exact Raster Value vs. 50m Buffer
 ggplot(mam_chelsa, aes(x =  temp_50m, y = temp)) +
@@ -173,7 +173,7 @@ ggplot(mam_chelsa, aes(x =  temp_50m, y = temp)) +
   ggsave(filename = "plots/mam_chelsa/temp_50mbuffer.jpeg",
          width = 6, height = 6, units = "in", dpi = 400)
   
-ggplot(mam_chelsa, aes(x =  precip_5km, y = precip)) +
+ggplot(mam_chelsa, aes(x =  precip_50m, y = precip)) +
   geom_point(alpha = 0.01) +
   geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "red") +
   labs(x = "Precipitation mm - 50m buffer",
@@ -181,7 +181,7 @@ ggplot(mam_chelsa, aes(x =  precip_5km, y = precip)) +
   theme_bw(base_size = 17) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
-  ggsave(filename = "plots/mam_chelsa/precip_5kmbuffer.jpeg",
+  ggsave(filename = "plots/mam_chelsa/precip_50mbuffer.jpeg",
          width = 6, height = 6, units = "in", dpi = 400)
 
 
