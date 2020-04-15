@@ -23,6 +23,9 @@ library(exactextractr)
 library(rgdal)
 library(sf)
 
+library(rnaturalearth)
+library(rnaturalearthdata)
+
 ##__________________________________________________________________________________________________
 #### 1. Set up data ####
 
@@ -116,7 +119,7 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
                                       fun = "mean", progress = FALSE)/10) - 273.15
   c_species$precip_50m = exact_extract(x = chelsa_precip, y = csp_buff_wgs_small, 
                                        fun = "mean", progress = FALSE)
-  c_species$precip_50m[c_species$precip_50m > 65000] = NA_real_
+  c_species$precip_50m[c_species$precip_50m > 65000] = NA_real_        ###<--- PROBLEM WITH THESE NA VALUES I THINK
   
   #_________________________________________________________________________________________________
   # 3c. Large buffer radius of 5km - More biologically relevant?
@@ -151,4 +154,53 @@ Sys.time() - starttime
 
 ##__________________________________________________________________________________________________
 #### 3. Save ####
-save(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RData")
+save(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RData") # On the UCloud
+
+##__________________________________________________________________________________________________
+#### 4. Plots to compare the CHELSA weather variables ####
+
+load("data/mam_chelsa.RData") # Load data downloaded from the UCloud
+
+## 4a. Exact Raster Value vs. 50m Buffer
+ggplot(mam_chelsa, aes(x =  temp_50m, y = temp)) +
+  geom_point(alpha = 0.01) +
+  geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "red") +
+  labs(x = expression(paste("Temperature", ~degree~C, " - 50m buffer")),
+       y = expression(paste("Exact raster cell temperature", ~degree~C))) +
+  theme_bw(base_size = 17) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  ggsave(filename = "plots/mam_chelsa/temp_50mbuffer.jpeg",
+         width = 6, height = 6, units = "in", dpi = 400)
+  
+ggplot(mam_chelsa, aes(x =  precip_5km, y = precip)) +
+  geom_point(alpha = 0.01) +
+  geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "red") +
+  labs(x = "Precipitation mm - 50m buffer",
+       y = "Exact raster cell precipitation mm") +
+  theme_bw(base_size = 17) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  ggsave(filename = "plots/mam_chelsa/precip_5kmbuffer.jpeg",
+         width = 6, height = 6, units = "in", dpi = 400)
+
+
+## Odd precipitation values above 2000 mm in the 50m buffer
+odd_precip <- mam_chelsa %>% 
+  filter(precip_50m > 2000) %>% 
+  dplyr::select(ID, year, month, 
+                Longitude, Latitude, precip, 
+                precip_50m, precip_5km, precip_50km)
+
+
+world_sf <- ne_coastline(scale = "medium", returnclass = "sf")
+
+## All by the see - I think they are incorporating NA values into the weighted mean.
+ggplot(data = world_sf) +
+  geom_sf(size = 0.1) +
+  geom_point(data = odd_precip,
+             aes(x = Longitude, y = Latitude, colour = factor(ID)))
+  
+
+
+
