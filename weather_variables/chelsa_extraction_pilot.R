@@ -87,6 +87,9 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
   chelsa_temp   = raster(x = files_df[x,]$files_temp)
   chelsa_precip = raster(x = files_df[x,]$files_precip)
   
+  # incorporating NAs
+  chelsa_precip[values(chelsa_precip) > 65000] = NA_real_
+  
   # 2. Converting the species data to spatial data and aligning with CHELSA coordinate reference
   coordinates(c_species) = c("Longitude","Latitude")
   pbase = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
@@ -99,7 +102,6 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
   c_species$raster_cell = cells_sp
   c_species$temp = chelsa_temp[cells_sp] / 10 - 273.15 # Kelvin to celcius
   c_species$precip = chelsa_precip[cells_sp]
-  c_species$precip[c_species$precip > 65000] = NA_real_
   
   #_________________________________________________________________________________________________
   # 3b. Extracting the climate data from a small buffer radius of 50m - if ~identical will use this
@@ -119,7 +121,6 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
                                       fun = "mean", progress = FALSE)/10) - 273.15
   c_species$precip_50m = exact_extract(x = chelsa_precip, y = csp_buff_wgs_small, 
                                        fun = "mean", progress = FALSE)
-  c_species$precip_50m[c_species$precip_50m > 65000] = NA_real_        ###<--- PROBLEM WITH THESE NA VALUES I THINK
   
   #_________________________________________________________________________________________________
   # 3c. Large buffer radius of 5km - More biologically relevant?
@@ -131,7 +132,6 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
                                                      fun = "mean", progress = FALSE)/10) - 273.15
   c_species$precip_5km = exactextractr::exact_extract(x = chelsa_precip, y = csp_buff_wgs, 
                                                       fun = "mean", progress = FALSE)
-  c_species$precip_5km[c_species$precip_5km > 65000] = NA_real_
   
   #_________________________________________________________________________________________________
   # 3d. V Large buffer radius of 50km - More appropriate for species with large ranges?
@@ -143,7 +143,6 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
                                                       fun = "mean", progress = FALSE)/10) - 273.15
   c_species$precip_50km = exactextractr::exact_extract(x = chelsa_precip, y = csp_buff_wgs_large, 
                                                        fun = "mean", progress = FALSE)
-  c_species$precip_50km[c_species$precip_50km > 65000] = NA_real_
   
   # 4. Return
   cat("\r", "Your job is ",round(x/nrow(files_df) *100, 2), "% complete          ")
