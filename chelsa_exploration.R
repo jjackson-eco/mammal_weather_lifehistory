@@ -26,8 +26,6 @@ library(raster)
 library(sf)
 library(rasterVis)
 
-load("data/mam_chelsa.RData")
-
 temp_aug1993 <- raster(x = "../rawdata/CHELSA_tmean_1993_08_V1.2.1.tif") 
 precip_aug1993 <- raster(x = "../rawdata/precip_aug1993.tif") 
 
