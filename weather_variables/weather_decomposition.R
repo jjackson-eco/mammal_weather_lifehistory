@@ -63,11 +63,13 @@ plot(test_stl)
 ##__________________________________________________________________________________________________
 #### 3. STL decomposition for each study ID ####
 
-# 3a. using group_modify to do a function per study ID - very neat
+# 3a. using group_modify to do a function per study ID - very neat <---- WHEN ADDING PRECIP, TRY TO DO IT LONG FORMAT with one scale column
 temp_stl <- temp_dat %>% 
   pivot_longer(-c(ID,Binomial,Longitude, Latitude, year, month, date), 
                names_to = "temp_scale", values_to = "temp") %>% 
+  group_by(ID, temp_scale) %>% 
   mutate(temp = as.numeric(scale(temp))) %>% 
+  ungroup() %>% 
   group_by(ID, temp_scale) %>% 
   group_modify(~ {
     crr_ts = ts(zoo(.$temp, order.by= .$date),
@@ -76,7 +78,9 @@ temp_stl <- temp_dat %>%
     mutate(., 
            season = crr_stl$time.series[,1],
            trend = crr_stl$time.series[,2],
-           anomaly = crr_stl$time.series[,3])}) %>% 
+           anomaly = crr_stl$time.series[,3],
+           season_range = diff(range(crr_stl$time.series[,1])),
+           anomaly_range = diff(range(crr_stl$time.series[,3])))}) %>% 
   ungroup()
 
 # 3b. Plotting out decompositions for a random sample of studies
@@ -118,17 +122,41 @@ ggsave(grid.arrange(stl_11512, stl_11754, stl_18256, stl_18286, stl_3443,
        filename = "plots/mam_chelsa/temp_stl_sample.jpeg", 
        width = 25, height = 22, units = "in", dpi = 400)
 
+# tidy the environment
+rm(stl_11512, stl_11754, stl_18256, stl_18286, stl_3443,
+   stl_5088, stl_5595, stl_5850, stl_6394, stl_8147)
 
+##__________________________________________________________________________________________________
+#### 4. Exploring the range of anomaly vs. season ####
 
+# Want to have a look to see if the anomaly components that have been extracted 
+# are substantial relative to the season component. 
 
+temp_stl_range <- temp_stl %>% 
+  group_by(ID,temp_scale) %>% 
+  summarise(season_range = season_range[1],
+            anomaly_range = anomaly_range[1])
 
+ggplot(temp_stl_range, aes(x = anomaly_range, y = season_range)) + 
+  geom_abline(slope = 1, intercept = 0) +
+  geom_point(alpha = 0.2, size = 3) +
+  labs(x = "Range of temperature anomaly component",
+       y = "Range of temperature seasonal component") +
+  facet_wrap(~ temp_scale) +
+  theme_bw(base_size = 17) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank()) +
+  ggsave(filename = "plots/mam_chelsa/temp_anomaly_season_scales.jpeg",
+         width = 10, height = 10, units = "in", dpi = 400)
+  
+# # check
+# ID28_temp <- filter(temp_stl,  ID == 28 & temp_scale == "temp")
 
+##__________________________________________________________________________________________________
+#### 5. Save ####
 
-
-
-
-
-
+saveRDS(temp_stl, "data/temp_stl.RDS") # add in precipitation when ready
 
 
 
