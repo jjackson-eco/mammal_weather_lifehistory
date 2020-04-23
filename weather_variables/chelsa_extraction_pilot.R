@@ -38,7 +38,7 @@ rm(mam_meta) # don't need the meta-data here
 # Keeping only years from CHELSA and only 5 years of study beyond that.
 # Expand for all month-year combinations to normalise the climate data after.
 mam <- mam %>% 
-  filter(year >= 1979 & year <= 2013) %>% 
+  filter(year >= 1979 & year <= 2013) %>% # important to do this first
   group_by(ID) %>% 
   summarise(Binomial = Binomial[1], 
             Latitude = Latitude[1],
@@ -153,12 +153,26 @@ Sys.time() - starttime
 
 ##__________________________________________________________________________________________________
 #### 3. Save ####
-saveRDS(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RDS") # On the UCloud
+
+# This operation is now done in sections on the UCloud, so files are saved elsewhere.
+
+# saveRDS(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RDS") # On the UCloud
 
 ##__________________________________________________________________________________________________
 #### 4. Plots to compare the CHELSA weather variables ####
 
-mam_chelsa <- readRDS("data/mam_chelsa.RDS") # Load data downloaded from the UCloud
+# Load data downloaded from the UCloud - in chunks to save computation time on the UCloud
+mam_chelsa1979 <- readRDS("data/mam_chelsa1979.RDS")
+mam_chelsa1986 <- readRDS("data/mam_chelsa1986.RDS") 
+mam_chelsa1993 <- readRDS("data/mam_chelsa1993.RDS") 
+mam_chelsa2000 <- readRDS("data/mam_chelsa2000.RDS") 
+mam_chelsa2007 <- readRDS("data/mam_chelsa2007.RDS")
+
+mam_chelsa <- bind_rows(mam_chelsa1979,
+                        mam_chelsa1986,
+                        mam_chelsa1993,
+                        mam_chelsa2000,
+                        mam_chelsa2007)
 
 ## 4a. Exact Raster Value vs. 50m Buffer
 ggplot(mam_chelsa, aes(x =  temp_50m, y = temp)) +
