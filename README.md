@@ -60,7 +60,7 @@ There is variation in the number of observations over time and in the number of 
 
 <img src="./plots/mam_raw/mam_years.jpeg" width="800" />
 
-Crucially, each record comes with a set of coordinate for the studies location. This will allow us to link changes in vertebrate abundance to changes in weather variables globally. This is not always in reference to a specific population location, but instead gives the user a general idea about the locality of the abundance record.
+Crucially, each record comes with a set of coordinates for the study's location. This will allow us to link changes in vertebrate abundance to changes in weather variables globally. This is not always in reference to a specific population location, but instead gives the user a general idea about the locality of the abundance record.
 
 ![](./plots/mam_raw/mam_locations.jpeg)
 
@@ -68,7 +68,9 @@ As can be seen in the colours of the points in the map above, there is also lots
 
 ![](./plots/mam_raw/mam_sp.jpeg)
 
-The key feature of the Living Planet Database is the monitoring of annual abundance. Abundance here is characterised in several ways. To name a few examples, there can be estimates of density, monitoring per unit effort, indices or full population counts. We will explore the differences in these different measures of abundance later in the study, but for now, we have z-transformed the abundance for each of the records and just present overall smoothed changes in relative abundance for each order. Drawing conclusions from these patterns is is ofcourse unadvisable, but instead just a way of visualising the changes in abundance over each of the groups.
+The key feature of the Living Planet Database is the monitoring of annual abundance. Abundance here is characterised in several ways. To name a few examples, there can be estimates of density, monitoring per unit effort, indices or full population counts. In the first plot below you can see the number of observatiosn for these broad categories of abundance measure. We will explore the differences in these different measures of abundance later in the study. 
+
+To make studies comparable, we have z-transformed the abundance for each of the records. The second plot just presents overall smoothed changes in relative abundance for each order. Drawing conclusions from these patterns is is ofcourse unadvisable, but instead just a way of visualising what the data looks like.
 
 ![](./plots/mam_raw/mam_scaled_abundance.jpeg)
 
