@@ -63,7 +63,7 @@ plot(test_stl)
 ##__________________________________________________________________________________________________
 #### 3. STL decomposition for each study ID ####
 
-# 3a. using group_modify to do a function per study ID - very neat <---- WHEN ADDING PRECIP, TRY TO DO IT LONG FORMAT with one scale column
+# 3a. using group_modify to do a function per study ID - very neat <---- WHEN ADDING PRECIP, careful with scale column
 temp_stl <- temp_dat %>% 
   pivot_longer(-c(ID,Binomial,Longitude, Latitude, year, month, date), 
                names_to = "temp_scale", values_to = "temp") %>% 
