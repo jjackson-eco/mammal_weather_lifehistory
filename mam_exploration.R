@@ -33,9 +33,10 @@ load("../rawdata/mam.RData", verbose = T)
 mam_IDsum <- mam %>% 
   group_by(ID) %>% 
   summarise(Binomial = Binomial[1], Order = Order[1],
-            System = System[1], FW_biome = FW_biome[1], 
+            System = System[1], biome = biome[1], 
             Latitude = Latitude[1], Longitude = Longitude[1], 
             Specific_location = Specific_location[1],
+            abundance_measure = abundance_measure[1],
             study_length = n(), middle_year = median(year),
             delta_sa = last(scaled_abundance) - first(scaled_abundance))
 
@@ -122,6 +123,13 @@ obs_year <- ggplot(mam, aes(x = year)) +
   labs(x = "Year", y = "Number of Observations") +
   theme_bw(base_size = 16)
 
+# abundance measure
+ab_measure <- ggplot(mam, aes(x = abundance_measure)) +
+  geom_bar(fill = "lightblue") +
+  labs(x = "Abundance measure", 
+       y = "Number of observations") +
+  theme_bw(base_size = 16)
+
 # Changes in Scaled abundance?
 mam_index <- dplyr::filter(mam, year >= 1970, year <= 2014)
 
@@ -150,16 +158,21 @@ ggsave(grid.arrange(studl, obs_year,
        filename = "plots/mam_raw/mam_years.jpeg", 
        width = 9, height = 8, units = "in", dpi = 400)
 
+# 3. The map
 ggsave(mam_map, 
        filename = "plots/mam_raw/mam_locations.jpeg", 
        width = 22, height = 14, units = "in", dpi = 400)
 
+# 4. Species summaries
 lay <- rbind(c(1,3),
              c(2,3))
 
-ggsave(grid.arrange(studl_spp, rec_sp, cl_obs, layout_matrix = lay),
+ggsave(grid.arrange(studl_spp, rec_sp, cl_obs,
+                    layout_matrix = lay),
        filename = "plots/mam_raw/mam_sp.jpeg", 
-       width = 11, height = 11, units = "in", dpi = 400)
+       width = 11, height = 10, units = "in", dpi = 400)
 
-ggsave(m_ind, filename = "plots/mam_raw/mam_scaled_abundance.jpeg",
-       width = 9, height = 6, units = "in", dpi = 400)
+# 5. scaled abundance
+ggsave(grid.arrange(ab_measure,m_ind, ncol = 1),
+       filename = "plots/mam_raw/mam_scaled_abundance.jpeg",
+       width = 11, height = 12, units = "in", dpi = 400)
