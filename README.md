@@ -14,18 +14,17 @@ Here we are making use of:
 The analysis is split into the following sections:
 
 1. Exploring raw data from CHELSA and the Living Planet Database.
-2. Extracting data from CHELSA for the localities of the Living Planet studies.
-3. Salient local weather variables from the CHELSA data.
-4. Detrending annual abundance data to focus on annual changes excluding underlying trends.
-5. ...
+2. Extracting salient weather data from CHELSA for the localities of the Living Planet studies.
+3. Detrending annual abundance data to focus on annual changes excluding underlying trends.
+4. ...
 
-Here, we will walk through the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R` and `mam_exploration.R`. The rest of the sections can be found in separate directories.
+Here, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R` and `mam_exploration.R`. The rest of the sections can be found in separate directories.
 
 ---
 
 ### CHELSA
 
-The data from CHELSA is in the form of raster files (`.tif`), which can be downloaded from [here](http://chelsa-climate.org/downloads/). The rasters are at a spatial resolution of 30 arc sec, which is approximately 1 km$^2$, and records are between 1979-2013. Thus, there is data for over 900 million raster cells. There are several monthly/annual timeseries measures of temperature and precipitation. Here we focus on monthly mean temperature and total precipitation from CHELSA `version 1.2.1`.
+The data from CHELSA is in the form of raster files (`.tif`), which can be downloaded from [here](http://chelsa-climate.org/downloads/). The rasters are at a spatial resolution of 30 arc sec, which is approximately 1 kilometer squared, and records are between 1979-2013. Thus, there is data for over 900 million raster cells. There are several monthly/annual timeseries measures of temperature and precipitation. Here we focus on monthly mean temperature and total precipitation from CHELSA `version 1.2.1`.
 
 The CHELSA raster files for mean monthly temperature and total precipitation were accessed with bash scripts that took the general form:
 
