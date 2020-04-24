@@ -158,15 +158,12 @@ Sys.time() - starttime
 
 # saveRDS(mam_chelsa, file = "lpi_weather_pilot/mam_chelsa.RDS") # On the UCloud
 
-##__________________________________________________________________________________________________
-#### 4. Plots to compare the CHELSA weather variables ####
-
 # Load data downloaded from the UCloud - in chunks to save computation time on the UCloud
-mam_chelsa1979 <- readRDS("data/mam_chelsa1979.RDS")
-mam_chelsa1986 <- readRDS("data/mam_chelsa1986.RDS") 
-mam_chelsa1993 <- readRDS("data/mam_chelsa1993.RDS") 
-mam_chelsa2000 <- readRDS("data/mam_chelsa2000.RDS") 
-mam_chelsa2007 <- readRDS("data/mam_chelsa2007.RDS")
+mam_chelsa1979 <- readRDS("data/mam_chelsa_cloud/mam_chelsa1979.RDS")
+mam_chelsa1986 <- readRDS("data/mam_chelsa_cloud/mam_chelsa1986.RDS") 
+mam_chelsa1993 <- readRDS("data/mam_chelsa_cloud/mam_chelsa1993.RDS") 
+mam_chelsa2000 <- readRDS("data/mam_chelsa_cloud/mam_chelsa2000.RDS") 
+mam_chelsa2007 <- readRDS("data/mam_chelsa_cloud/mam_chelsa2007.RDS")
 
 mam_chelsa <- bind_rows(mam_chelsa1979,
                         mam_chelsa1986,
@@ -174,46 +171,67 @@ mam_chelsa <- bind_rows(mam_chelsa1979,
                         mam_chelsa2000,
                         mam_chelsa2007)
 
-## 4a. Exact Raster Value vs. 50m Buffer
-ggplot(mam_chelsa, aes(x =  temp_50m, y = temp)) +
-  geom_point(alpha = 0.01) +
-  geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "red") +
-  labs(x = expression(paste("Temperature", ~degree~C, " - 50m buffer")),
+saveRDS(mam_chelsa, file = "data/mam_chelsa.RDS")
+
+rm(mam_chelsa1979,
+   mam_chelsa1986,
+   mam_chelsa1993,
+   mam_chelsa2000,
+   mam_chelsa2007)
+
+##__________________________________________________________________________________________________
+#### 4. Plots to compare the CHELSA weather variables ####
+
+# Data
+temp_chelsa <- mam_chelsa %>% 
+  dplyr::select(ID, Binomial, year, month, 
+                temp_exact_cell = temp, 
+                temp_buffer_50m = temp_50m, 
+                temp_buffer_5km = temp_5km, 
+                temp_buffer_50km = temp_50km) %>% 
+  pivot_longer(data = ., 
+               cols = starts_with("temp_buffer"),
+               names_to = "scale", names_prefix = "temp_",
+               values_to = "temperature") %>% 
+  mutate(scale = factor(scale, levels = c("buffer_50m", "buffer_5km", "buffer_50km")))
+
+precip_chelsa <- mam_chelsa %>% 
+  dplyr::select(ID, Binomial, year, month, 
+                precip_exact_cell = precip, 
+                precip_buffer_50m = precip_50m, 
+                precip_buffer_5km = precip_5km, 
+                precip_buffer_50km = precip_50km) %>% 
+  pivot_longer(data = ., 
+               cols = starts_with("precip_buffer"),
+               names_to = "scale", names_prefix = "precip_",
+               values_to = "precipitation") %>% 
+  mutate(scale = factor(scale, levels = c("buffer_50m", "buffer_5km", "buffer_50km")))
+
+# Plots
+temp_buffer_plot <- ggplot(temp_chelsa, aes(x =  temperature, y = temp_exact_cell)) +
+  geom_point(alpha = 0.01, colour = "firebrick") +
+  geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "black") +
+  labs(x = expression(paste("Average temperature", ~degree~C)),
        y = expression(paste("Exact raster cell temperature", ~degree~C))) +
+  facet_wrap(~ scale, ncol = 3) +
   theme_bw(base_size = 17) +
   theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  ggsave(filename = "plots/mam_chelsa/temp_50mbuffer.jpeg",
-         width = 6, height = 6, units = "in", dpi = 400)
-  
-ggplot(mam_chelsa, aes(x =  precip_50m, y = precip)) +
-  geom_point(alpha = 0.01) +
-  geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "red") +
-  labs(x = "Precipitation mm - 50m buffer",
-       y = "Exact raster cell precipitation mm") +
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank())
+
+precip_buffer_plot <- ggplot(precip_chelsa, aes(x =  precipitation, y = precip_exact_cell)) +
+  geom_point(alpha = 0.01, colour = "lightblue") +
+  geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "black") +
+  labs(x = "Average precipitation (mm)",
+       y = "Exact raster cell precipitation (mm)") +
+  facet_wrap(~ scale, ncol = 3) +
   theme_bw(base_size = 17) +
   theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  ggsave(filename = "plots/mam_chelsa/precip_50mbuffer.jpeg",
-         width = 6, height = 6, units = "in", dpi = 400)
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank())
 
-
-## Odd precipitation values above 2000 mm in the 50m buffer
-odd_precip <- mam_chelsa %>% 
-  filter(precip_50m > 2000) %>% 
-  dplyr::select(ID, year, month, 
-                Longitude, Latitude, precip, 
-                precip_50m, precip_5km, precip_50km)
-
-
-world_sf <- ne_coastline(scale = "medium", returnclass = "sf")
-
-## All by the see - I think they are incorporating NA values into the weighted mean.
-ggplot(data = world_sf) +
-  geom_sf(size = 0.1) +
-  geom_point(data = odd_precip,
-             aes(x = Longitude, y = Latitude, colour = factor(ID)))
-  
-
+ggsave(grid.arrange(temp_buffer_plot,precip_buffer_plot, nrow = 2),
+      filename = "plots/mam_chelsa/weather_buffer.jpeg",
+      units = "in", width = 9, height = 8, dpi = 300)
 
 
