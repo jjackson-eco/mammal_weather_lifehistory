@@ -231,7 +231,7 @@ precip_buffer_plot <- ggplot(precip_chelsa, aes(x =  precipitation, y = precip_e
         strip.background = element_blank())
 
 ggsave(grid.arrange(temp_buffer_plot,precip_buffer_plot, nrow = 2),
-      filename = "plots/mam_chelsa/weather_buffer.jpeg",
+      filename = "plots/developing_annual_weather_variables/weather_buffer.jpeg",
       units = "in", width = 9, height = 8, dpi = 300)
 
 

@@ -211,13 +211,13 @@ for(i in sample_IDs){
 ggsave(grid.arrange(temp_11512, temp_11754, temp_18256, temp_18286, temp_3443,
                     temp_5088, temp_5595, temp_5850, temp_6394, temp_8147, 
                     ncol = 5),
-       filename = "plots/mam_chelsa/temp_stl_sample.jpeg", 
+       filename = "plots/developing_annual_weather_variables/temp_stl_sample.jpeg", 
        width = 25, height = 22, units = "in", dpi = 400)
 
 ggsave(grid.arrange(precip_11512, precip_11754, precip_18256, precip_18286, precip_3443,
                     precip_5088, precip_5595, precip_5850, precip_6394, precip_8147, 
                     ncol = 5),
-       filename = "plots/mam_chelsa/precip_stl_sample.jpeg", 
+       filename = "plots/developing_annual_weather_variables/precip_stl_sample.jpeg", 
        width = 25, height = 22, units = "in", dpi = 400)
 
 # tidy the environment
@@ -253,7 +253,7 @@ ggplot(temp_stl_range, aes(x = temp_anomaly_range, y = temp_season_range)) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_blank()) +
-  ggsave(filename = "plots/mam_chelsa/temp_anomaly_season_scales.jpeg",
+  ggsave(filename = "plots/developing_annual_weather_variables/temp_anomaly_season_scales.jpeg",
          width = 10, height = 10, units = "in", dpi = 400)
 
 ggplot(precip_stl_range, aes(x = precip_anomaly_range, y = precip_season_range)) + 
@@ -266,7 +266,7 @@ ggplot(precip_stl_range, aes(x = precip_anomaly_range, y = precip_season_range))
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_blank()) +
-  ggsave(filename = "plots/mam_chelsa/precip_anomaly_season_scales.jpeg",
+  ggsave(filename = "plots/developing_annual_weather_variables/precip_anomaly_season_scales.jpeg",
          width = 10, height = 10, units = "in", dpi = 400)
   
 # # check
