@@ -67,11 +67,6 @@ files_df <- tibble(files_temp, files_precip) %>%
   mutate(year = map_int(files_temp, ~ as.integer(strsplit(.x, "_")[[1]][3]))) %>% 
   mutate(month = map_int(files_temp, ~ as.integer(strsplit(.x, "_")[[1]][4])))
 
-## 1c. Merge species-coordinate data with files_df data
-mam_coord <- mam %>% 
-  left_join(x = ., y = files_df, 
-            by = c("year","month"))
-
 ##__________________________________________________________________________________________________
 #### 2. Extract weather data at locations in the species data ####
 
@@ -80,7 +75,7 @@ starttime <- Sys.time()
 mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
   
   # 1. extract the right data
-  c_species = dplyr::filter(mam_coord,
+  c_species = dplyr::filter(mam,
                             year == files_df[x,]$year,
                             month == files_df[x,]$month)
   
@@ -110,8 +105,8 @@ mam_chelsa <- bind_rows(lapply(X = 1:nrow(files_df), FUN = function(x){
   ## Useful information on projection systems at https://rspatial.org/raster/spatial/6-crs.html
   p_utm = CRS("+proj=utm +datum=WGS84")
   utm = spTransform(c_species, p_utm)
-  # do it by the study ID for future reference
-  # 50 line segments for the approximation of a circle
+  # buffer width is the radius in units of the CRS, using 50 line segments for the 
+  # approximation of a circle and the study ID as our is variable
   csp_buff_small = rgeos::gBuffer(utm, width = 50, quadsegs = 50,
                                   byid = TRUE, id = utm$ID)
   ## Convert back to WGS84 to extract from CHELSA and convert to sf type
