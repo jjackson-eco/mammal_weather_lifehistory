@@ -85,9 +85,11 @@ filter(precip_dat, ID == 4920)$precip_5km
 
 # 2a. Have a look at the temperature test
 ggplot(temp_test, aes(x = date, y = temp)) +
-  geom_line(colour = "firebrick") +
+  geom_line(colour = "firebrick", size = 0.2) +
   labs(x = NULL, y = "Scaled temperature") +
-  theme_bw(base_size = 16)
+  theme_bw(base_size = 9) +
+  ggsave(filename = "plots/developing_annual_weather_variables/temp_scale_cheetah_example.jpeg",
+         width = 5, height = 3, units = "in", dpi = 400)
 
 # 2b. Convert to a timeseries
 test_ts <- ts(zoo(temp_test$temp, order.by= temp_test$date),
@@ -98,7 +100,10 @@ test_ts <- ts(zoo(temp_test$temp, order.by= temp_test$date),
 test_stl <- stl(test_ts, s.window=7, t.window = 1000)
 
 # 2d. Have a look
+jpeg("plots/developing_annual_weather_variables/weather_decomposition_example_cheetah.jpeg",
+     width = 5, height = 7, units = "in", res = 400)
 plot(test_stl)
+dev.off()
 
 ##__________________________________________________________________________________________________
 #### 3. STL decomposition for each study ID ####
