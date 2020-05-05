@@ -9,8 +9,6 @@ This mardown is intended as an accompaniment to the scripts contained within the
 
 There are 3 main sections and scripts:
 
----
-
 ## 1. Extracting CHELSA data for the localities of the LPD studies
 <details>
   <summary>Click here to expand</summary>
