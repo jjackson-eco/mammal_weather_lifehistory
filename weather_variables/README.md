@@ -53,7 +53,6 @@ files_df <- tibble(files_temp, files_precip) %>%
   mutate(year = map_int(files_temp, ~ as.integer(strsplit(.x, "_")[[1]][3]))) %>% 
   mutate(month = map_int(files_temp, ~ as.integer(strsplit(.x, "_")[[1]][4])))
 ```
----
 
 ### Extract raster values
 
@@ -130,8 +129,6 @@ These extractions, both exact and for buffer polygons were repeated for all year
 
 </details>
 
----
-
 ## 2. Time series decomposition of the raw CHELSA data
 <details>
   <summary>Click here to expand</summary>
@@ -181,8 +178,6 @@ Then, in the rest of the script, we repeat the STL decomposition for each of our
 These anomalies give us a sensible evaluation of the devaitions of weather in each month of our study, and are stored in the `chelsa_stl` object.
 
 </details>
-
----
 
 ## 3. Calculating annual weather variables
 <details>
