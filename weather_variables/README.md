@@ -127,7 +127,6 @@ These extractions, both exact and for buffer polygons were repeated for all year
 
 ![](../plots/chelsa_raw/temp_mam.jpeg)
 ![](../plots/chelsa_raw/precip_mam.jpeg)
-
 <details>
 
 ---
@@ -179,7 +178,6 @@ This additive decomposition gives us the seasonal, trend, and anomaly components
 Then, in the rest of the script, we repeat the STL decomposition for each of our studies and weather variable buffer scales. In the plots/ directory are examples of temperature and precipitaion decompositions for ten randomly sampled studies. This data also enables us to explore the relative variation in the seasonal component compared to the anomaly component, because, for example, we expect that in highly seasonal envrionments at more extreme latitudes, we will see more seasonal patterns, whereas at lower latitudes we expect less variation in the season and more in the anomaly. 
 
 These anomalies give us a sensible evaluation of the devaitions of weather in each month of our study, and are stored in the `chelsa_stl` object.
-
 <details>
 
 ---
@@ -257,7 +255,6 @@ These 9 variables describe several aspects of annual weather for each of our stu
 
 ![](../plots/developing_annual_weather_variables/temp_annual_weather_correlations.jpeg)
 ![](../plots/developing_annual_weather_variables/precip_annual_weather_correlations.jpeg)
-
 </details>
 
 ---
