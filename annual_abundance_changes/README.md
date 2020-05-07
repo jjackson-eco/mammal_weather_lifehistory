@@ -1,4 +1,8 @@
-# Detrending annual abundance change data
+---
+layout: post
+published-on: 6 May 2020
+title: Detrending annual abundance change data
+---
 
 #### 2020-05-06 
 #### John Jackson
@@ -15,9 +19,9 @@ There are * main sections and scripts:
 
 ### `timeseries_gap_exploration.R`
 
-In relation to our study question of exploring how weather influencs annual population changes in vertebrates, one potential problem with the vertebrate abundance data from the Living Planet Database is that there are gaps in the timeseries. So, if we are interested in how weather influences annual changes in abundance, the number of these gaps and the way we deal with them is important. This first section is intended to explore the pervasiveness of these gaps across our studies, and deal with them in an appropriate way for further analysis.
+For our record question of how weather influencs annual population changes in vertebrates, one potential problem with the vertebrate abundance data from the Living Planet Database is that there are gaps in the timeseries. The number of these gaps and the way we deal with them is important. This first section is intended to explore the pervasiveness of these gaps across our records, and deal with them in an appropriate way for further analysis.
 
-We first have to restrict the data to only include potential studies that have sufficient data with which to explore annual changes abundance in relation to CHELSA weather data. We only include observations that overlap with the CHELSA data i.e. between 1979-2013, and those that have 5 or more years of abundance data:
+We first have to restrict the data to only include records that have sufficient data with which to explore annual changes abundance in relation to CHELSA weather data. We only include observations that overlap with the CHELSA data i.e. between 1979-2013, and those that have 5 or more years of abundance data:
 
 ```
 mam <- mam %>% 
@@ -33,9 +37,9 @@ Now we present the example of a population timeseries with 5 observations of pop
 
 ![](../plots/annual_abundance/fossa_timeseries.jpeg)
 
-However, we have a gap in the data in 2009. We could interpolate this value when we detrend the timeseries, but since we are investigating changes in annual abundance, we are actually interested in annual deviation in abundance. Therefore, a better strategy is to map these gaps across all of our studies and investigate if there is a way of splitting the timeseries up when we investigate the effect of weather.
+However, we have a gap in the data in 2009. We could interpolate this value when we detrend the timeseries, but since we are investigating changes in annual abundance, we are actually interested in annual deviation in abundance. Therefore, a better strategy is to map these gaps across all of our records and investigate if there is a way of splitting the timeseries up when we investigate the effect of weather.
 
-We make use of the differences in years to split each study's timeseries in to blocks. We compute some summary statistics for each study `mam_gaps`, including the number of these blocks, the proportion of the data that is a timeseries with 1-year transitions, and the longest continuous block in the study. In `mam_blocks`, we record all the blocks for each study and keep the raw data:
+We make use of the differences in the $years column to split each record's timeseries in to blocks. We compute some summary statistics for each record `mam_gaps`, including the number of these blocks, the proportion of the data that is a timeseries with 1-year transitions, and the longest continuous block in the record. In `mam_blocks`, we record all the blocks for each record and keep the raw data:
 
 ```
 mam_gaps <- mam %>% 
@@ -67,25 +71,54 @@ mam_blocks <- mam %>%
 ```
 ### Time series gap summaries
 
-Encouragingly, the majority of the data is occuring in continuous blocks with 1-year transitions. Here we have the distribution of the proportion of each study that is occuring in 1-year transitions. We can see that the majority have all their data as 1-year transitions. Furthermore >76% (870) of the studies have more than 2 thirds of their data in 1-year transitions.
+Encouragingly, the majority of the data is occuring in continuous blocks with 1-year transitions. Here we have the distribution of the proportion of each record that is occuring in 1-year transitions. We can see that the majority have all their data as 1-year transitions. Furthermore >76% (870) of the records have more than 2 thirds of their data in 1-year transitions.
 
 ![](../plots/annual_abundance/Proportion_1year_transitions.jpeg)
 
-However, this doesn't quite give us the full picture because we also need to know how many blocks each time series occurs in. Here we plot the number of blocks that each study occurs in against the number of years in its longest block. The colour denotes the proportion of the timeseries occuring in 1-year transitions.
+However, this doesn't quite give us the full picture because we also need to know how many blocks each timeseries occurs in. Here we plot the number of blocks that each record occurs in against the number of years in its longest block. The colour denotes the proportion of the timeseries occuring in 1-year transitions.
 
 ![](../plots/annual_abundance/Consecutive_blocks.jpeg)
 
-So it does appear that there are some studies that are primarily in timeseries with 1-year transitions (lighter colours), but do occur over quite a few blocks of observations. We can also plot these blocks of observations as timelines, where we see the years of data for each study ID. I have split these up based on the number of blocks that the timeseries occurs in for ease. Here first you have the studies that are just occuring in 1 consecutive block. Points and lines indicate where there is data for each study ID (row).
+So it does appear that there are some records that are primarily in timeseries with 1-year transitions (lighter colours), but do occur over quite a few blocks of observations. We can also plot these blocks of observations as timelines, where we see the years of data for each record ID. I have split these up based on the number of blocks that the timeseries occurs in for ease. Here first you have the records that are just occuring in 1 consecutive block. Points and lines indicate where there is data for each record ID (row).
 
-![](../plots/annual_abundance/study_timelines/1_consecutive_block_timeline.jpeg)
+![](../plots/annual_abundance/record_timelines/1_consecutive_block_timeline.jpeg)
 
-These are the 'gold standard' studies that occur solely in one consecutive chain of annual observations (with more than 5 years of data). However, the picture becomes a little bit more complex when we look at studies that occur in a greater number of blocks. Here you can see the studies taht occur in 5 blocks.
+These are the 'gold standard' records that occur solely in one consecutive chain of annual observations (with more than 5 years of data). However, the picture becomes a little bit more complex when we look at records that occur in a greater number of blocks. Here you can see the records that occur in 5 blocks.
 
-![](../plots/annual_abundance/study_timelines/5_consecutive_block_timeline.jpeg)
+![](../plots/annual_abundance/record_timelines/5_consecutive_block_timeline.jpeg)
 
-We can see here that there are scenarios where there are longer consecutive blocks of observations, with smaller satellite blocks with fewer observations.
+We can see here that there are scenarios where there are longer consecutive blocks of observations, with smaller satellite blocks that have fewer observations. Furthermore, we can see in records with more blocks, there are situations where there are several separate blocks of 1-year transitions, but that many blocks have less than 5 observations.
 
 ### Data selection
+
+We are selecting data based on the sizes of the blocks for each record - We only want to retain blocks within a record that have 5 or more consecutive annual observations.
+
+```
+# IDs and blocks that we want to keep
+ID_block_keep <- mam_blocks %>% 
+  mutate(ID = as.numeric(as.character(ID))) %>% 
+  group_by(ID, block) %>% 
+  summarise(ID_block = paste0(ID[1],"_",block[1]),
+            block_keep = if_else(n() >= 5, 1, 0)) %>%
+  ungroup() %>% 
+  filter(block_keep == 1)
+
+# Restricting the dataset
+mammal <- mam %>% 
+  group_by(ID) %>%
+  mutate(block = cumsum(c(1, diff(year) != 1)),
+         ID_block = paste0(ID[1],"_",block)) %>% 
+  ungroup() %>% 
+  filter(ID_block %in% ID_block_keep$ID_block == T) %>% 
+  select(1,21,22,2:9,11:20)
+
+```
+
+This gives us a final dataset with which to assess how weather affects changes in abundance, stored in `mammal`. Each Study has atleast 5 years of raw data, and consecutive blocks within the study with at least five years of data within them. Here is a comparison to the initial raw data:
+
+![](../plots/annual_abundance/data_summary.jpeg)
+
+This equates to ~51% of the initial observations, 33% of the initial records, and 48% of the species.
 
 </details>
 
