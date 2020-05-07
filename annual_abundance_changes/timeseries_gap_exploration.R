@@ -17,6 +17,9 @@ library(grid)
 ## Load in the raw mammal data
 load("../rawdata/mam.RData", verbose = T)
 
+mam_raw <- mam # for summary later
+summarise(mam_raw, n = n(), n_records = n_distinct(ID))
+
 ##__________________________________________________________________________________________________
 #### 1. Set up data ####
 
@@ -28,6 +31,8 @@ mam <- mam %>%
   ungroup() %>% 
   filter(n >= 5) %>% 
   dplyr::select(-n)
+
+n_distinct(mam$ID) # Initial number of records
 
 # Check for duplicated years
 # dupyer <- mam %>% 
@@ -61,7 +66,7 @@ longest_block <- max(cumsum_blocks_tab)
 # consecutive_blocks <-  length(split(tyear, cumsum(c(1, diff(tyear) != 1))))
 
 ##__________________________________________________________________________________________________
-#### 3. Exploring gaps for all studies ####
+#### 3. Exploring gaps for all records ####
 
 mam_gaps <- mam %>% 
   group_by(ID) %>% 
@@ -71,7 +76,7 @@ mam_gaps <- mam %>%
     cumsum_blocks = cumsum(c(1, diff_cyears != 1))
     
     summarise(., Binomial = Binomial[1],
-              study_length = length(cyears),
+              record_length = length(cyears),
               no_consecutive_blocks = n_distinct(cumsum_blocks),
               prop_1year_transitions = sum(diff_cyears == 1)/ length(diff_cyears),
               longest_block = max(table(cumsum_blocks)))
@@ -94,14 +99,14 @@ mam_blocks <- mam %>%
 #### 4. Exploration plots ####
 
 #____________________________________________________________
-## 4a. Proportion of the studies in 1-year transitions
+## 4a. Proportion of the records in 1-year transitions
 
-## This is good news - most studies are predominantly in 1 year blocks
+## This is good news - most records are predominantly in 1 year blocks
 prophist <- ggplot(mam_gaps, aes(x = prop_1year_transitions)) +
   geom_histogram(bins = 10, fill = "lightblue", 
                  colour = "black", size = 0.1) +
-  labs(x = "Proportion of study in 1-year transitions",
-       y = "Number of studies") +
+  labs(x = "Proportion of record in 1-year transitions",
+       y = "Number of records") +
   theme_bw(base_size = 11)
 
 propbx <- ggplot(mam_gaps, aes(y = prop_1year_transitions)) +
@@ -109,7 +114,7 @@ propbx <- ggplot(mam_gaps, aes(y = prop_1year_transitions)) +
                 colour = "black") +
   scale_x_continuous(limits = c(-0.75,0.75)) +
   labs(x = " ", 
-       y = "Proportion of study in 1-year transitions") +
+       y = "Proportion of record in 1-year transitions") +
   theme_bw(base_size = 11) +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
@@ -120,10 +125,10 @@ ggsave(grid.arrange(prophist, propbx, ncol = 2, widths = c(2,1)),
        filename = "plots/annual_abundance/Proportion_1year_transitions.jpeg",
         width = 6, height = 4, units = "in", dpi = 400)
 
-# 25th percentile is 0.66667 i.e. 2/3rds of the study in 1-year transitions
+# 25th percentile is 0.66667 i.e. 2/3rds of the record in 1-year transitions
 quantile(mam_gaps$prop_1year_transitions,probs = c(0.025,0.25,0.5,0.75,0.975))
 
-# >76% (870) of the studies have more than 2 thirds of its data in 1-year transitions
+# >76% (870) of the records have more than 2 thirds of its data in 1-year transitions
 mam_gaps %>%
   filter(prop_1year_transitions >= 2/3) %>% 
   summarise(tot = n(), full = nrow(mam_gaps),
@@ -136,7 +141,7 @@ ggplot(mam_gaps, aes(x = no_consecutive_blocks, y = longest_block,
                      colour = prop_1year_transitions)) +
   geom_point(size = 3, alpha = 0.7) +
   scale_color_viridis_c(begin = 0.1,end = 0.9,
-                        name = "Proportion\nof study in\n1-year transitions") +
+                        name = "Proportion\nof record in\n1-year transitions") +
   scale_x_continuous(breaks = 1:10, labels = 1:10) +
   scale_y_continuous(breaks = seq(0,35, by = 5), labels = seq(0,35, by = 5)) +
   labs(x = "Number of blocks", y = "Longest block (years)") +
@@ -151,7 +156,7 @@ ggplot(filter(mam_gaps, prop_1year_transitions >= 2/3),
                      colour = prop_1year_transitions)) +
   geom_point(size = 3, alpha = 0.7) +
   scale_color_viridis_c(begin = 0.1,end = 0.9,
-                        name = "Proportion\nof study in\n1-year transitions") +
+                        name = "Proportion\nof record in\n1-year transitions") +
   scale_x_continuous(breaks = 1:10, labels = 1:10) +
   scale_y_continuous(breaks = seq(0,35, by = 5), labels = seq(0,35, by = 5)) +
   labs(x = "Number of blocks", y = "Longest block (years)") +
@@ -162,14 +167,14 @@ ggplot(filter(mam_gaps, prop_1year_transitions >= 2/3),
          width = 6, height = 4, units = "in", dpi = 400)
 
 #____________________________________________________________
-## 4c. Study timelines
+## 4c. record timelines
 
 for(i in 1:10){
   
   cdat = filter(mam_blocks, max_block == i)
   
-  if(i == 1){tit = paste0("Studies with ", i, " consecutive block")}
-    else{tit = paste0("Studies with ", i, " consecutive blocks")}
+  if(i == 1){tit = paste0("Records with ", i, " consecutive block")}
+    else{tit = paste0("Records with ", i, " consecutive blocks")}
   
   ggplot(cdat, aes(x = ID, y = year, 
                          colour = factor(block))) + 
@@ -179,7 +184,7 @@ for(i in 1:10){
     scale_y_continuous(breaks = seq(1980,2015,by = 5),
                        labels = c(1980, "", 1990, "", 
                                   2000, "", 2010, "")) +
-    labs(x = "Study ID", y = "Year",
+    labs(x = "Record ID", y = "Year",
          title = tit) +
     coord_flip() +
     theme_bw(base_size = 28) +
@@ -187,7 +192,7 @@ for(i in 1:10){
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
           strip.background = element_blank()) +
-    ggsave(filename = paste0("plots/annual_abundance/study_timelines/", i,
+    ggsave(filename = paste0("plots/annual_abundance/record_timelines/", i,
                              "_consecutive_block_timeline.jpeg"),
            width = 210, height = 297, units = "mm", dpi = 400)
 }
@@ -195,15 +200,49 @@ for(i in 1:10){
 ##__________________________________________________________________________________________________
 #### 5. Data restriction and save ####
 
-# Restricting to only include studies with 2/3 of data in 1-year transitions
+#____________________________________________________________
+## 5a. Restricting by the blocks
+# Want only blocks from records that have 5 or more observations
 
+# IDs and blocks that we want to keep - 901 out of 2756 ID-block combinations
+ID_block_keep <- mam_blocks %>% 
+  mutate(ID = as.numeric(as.character(ID))) %>% 
+  group_by(ID, block) %>% 
+  summarise(ID_block = paste0(ID[1],"_",block[1]),
+            block_keep = if_else(n() >= 5, 1, 0)) %>%
+  ungroup() %>% 
+  filter(block_keep == 1)
 
+# Restricting the dataset
+mammal <- mam %>% 
+  group_by(ID) %>%
+  mutate(block = cumsum(c(1, diff(year) != 1)),
+         ID_block = paste0(ID[1],"_",block)) %>% 
+  ungroup() %>% 
+  filter(ID_block %in% ID_block_keep$ID_block == T) %>% 
+  select(1,21,22,2:9,11:20)
 
+# This leaves us with 844 records or 33% of the initial 2539 records, 
+# and 10,489 of the 20,379 raw observations, equating to about 51%
 
+# Summarising this in a nice table
+mam_datasum <- data.frame(Dataset = c("Raw data", "Study data"),
+                          Observations  = c(nrow(mam_raw), 
+                                            nrow(mammal)),
+                          Records = c(n_distinct(mam_raw$ID), 
+                                      n_distinct(mammal$ID)),
+                          Species = c(n_distinct(mam_raw$Binomial),
+                                      n_distinct(mammal$Binomial)))
 
+General_sum <- tableGrob(mam_datasum, rows = NULL, theme = ttheme_minimal(base_size = 16))
+ggsave(grid.arrange(General_sum), 
+       filename = "plots/annual_abundance/data_summary.jpeg",
+       width = 7, height = 3, units = "in",
+       dpi = 400)
 
+#____________________________________________________________
+## 5b. Saving the data
 
-
-
+save(mammal, file = "../rawdata/mammal_data.RData")
 
 
