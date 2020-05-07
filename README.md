@@ -1,4 +1,11 @@
-# Pilot study: Global weather and changes in vertebrate abundance
+---
+layout: post
+published-on: 24 April 2020
+title: Pilot study - Global weather and changes in vertebrate abundance
+---
+
+#### 2020-04-24
+#### John Jackson
 
 ---
 
