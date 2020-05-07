@@ -1,8 +1,4 @@
----
-layout: post
-published-on: 6 May 2020
-title: Detrending annual abundance change data
----
+# Detrending annual abundance change data
 
 #### 2020-05-06 
 #### John Jackson
