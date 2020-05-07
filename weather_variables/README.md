@@ -1,4 +1,8 @@
-# Developing annual weather variables
+---
+layout: post
+published-on: 1 May 2020
+title: Developing annual weather variables
+---
 
 #### 2020-05-01 
 #### John Jackson
