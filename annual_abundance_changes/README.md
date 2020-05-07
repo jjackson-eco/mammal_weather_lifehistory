@@ -1,5 +1,4 @@
 # Detrending annual abundance change data
-
 #### 2020-05-06 
 #### John Jackson
 
