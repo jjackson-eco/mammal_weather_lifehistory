@@ -214,7 +214,7 @@ ID_block_keep <- mam_blocks %>%
   filter(block_keep == 1)
 
 # Restricting the dataset
-mammal <- mam %>% 
+mam_IDblocks <- mam %>% 
   group_by(ID) %>%
   mutate(block = cumsum(c(1, diff(year) != 1)),
          ID_block = paste0(ID[1],"_",block)) %>% 
@@ -228,11 +228,11 @@ mammal <- mam %>%
 # Summarising this in a nice table
 mam_datasum <- data.frame(Dataset = c("Raw data", "Study data"),
                           Observations  = c(nrow(mam_raw), 
-                                            nrow(mammal)),
+                                            nrow(mam_IDblocks)),
                           Records = c(n_distinct(mam_raw$ID), 
-                                      n_distinct(mammal$ID)),
+                                      n_distinct(mam_IDblocks$ID)),
                           Species = c(n_distinct(mam_raw$Binomial),
-                                      n_distinct(mammal$Binomial)))
+                                      n_distinct(mam_IDblocks$Binomial)))
 
 General_sum <- tableGrob(mam_datasum, rows = NULL, theme = ttheme_minimal(base_size = 16))
 ggsave(grid.arrange(General_sum), 
@@ -243,6 +243,6 @@ ggsave(grid.arrange(General_sum),
 #____________________________________________________________
 ## 5b. Saving the data
 
-save(mammal, file = "../rawdata/mammal_data.RData")
+save(mam_IDblocks, file = "../rawdata/mam_IDblocks.RData")
 
 
