@@ -48,9 +48,9 @@ test <- filter(mam, ID == 25396)
 ggplot(test, aes(x = year, y = scaled_abundance)) + 
   geom_point(size = 2) +
   labs(x = "Year", y = "Scaled abundance") +
-  theme_bw(base_size = 12) +
+  theme_bw(base_size = 7) +
   ggsave("plots/annual_abundance/fossa_timeseries.jpeg",
-         width = 5, height = 3.5, units = "in", dpi = 400)
+         width = 3, height = 1.75, units = "in", dpi = 400)
 
 tyear <- test$year
 diff_tyear <- diff(tyear)
