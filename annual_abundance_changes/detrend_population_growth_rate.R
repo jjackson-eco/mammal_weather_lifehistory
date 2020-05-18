@@ -42,12 +42,21 @@ mam_detrend <- mam_IDblocks %>%
   group_modify(~{
     mod = lm(scaled_abundance ~ year, data = .) 
     
-    resid_ab = mod$residuals + 10 # Centre around 10 for sensible population growth rate calculations <<<<<===== CHECK IF IT STAYS THE SAME FOR +VE VALUES
+    resid_ab = mod$residuals + 10 # Centre around 10 for sensible population growth rate calculations
     
     mutate(., residual_abundance = resid_ab,
            coef = mod$coefficients[2])
   }) %>% 
   ungroup()
+
+# Centering around 10 changes the values <- HOW DO WE SORT THIS OUT??
+
+#test
+# set.seed(10)
+# dat <- tibble(year = 1991:2020, residab = rnorm(30)) %>% 
+#   mutate(residab2 = residab + 100) %>% 
+#   mutate(pgr  = c(.$residab[-1]/.$residab[-(length(.$residab))], NA),
+#          pgr2 = c(.$residab2[-1]/.$residab2[-(length(.$residab2))], NA))
 
 ##__________________________________________________________________________________________________
 #### 3. Rough look at coefficients of linear trend across taxa ####
@@ -80,8 +89,8 @@ mam_detrend %>%
 mammal <- mam_detrend %>% 
   group_by(ID_block) %>% 
   group_modify(~{
-    resid_t0 <- .$residual_abundance[-(length(.$residual_abundance))]
-    resid_t1 <- .$residual_abundance[-1]
+    resid_t0 = .$residual_abundance[-(length(.$residual_abundance))]
+    resid_t1 = .$residual_abundance[-1]
     
     mutate(., pop_growth_rate = c(resid_t1/resid_t0,NA))
   }) %>% 
