@@ -6,7 +6,7 @@
 
 This mardown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of detrending annual abundance data from the Living Planet Database for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
-There are * main sections and scripts:
+There are 2 main sections and scripts:
 
 ## 1. Exploring and accounting for gaps in the abundance timeseries
 <details>
@@ -30,7 +30,7 @@ mam <- mam %>%
 
 Now we present the example of a population timeseries with 5 observations of population density from the Fossa (Cryptoprocta ferox), which is endemic to Madagascar. There are 5 observations between 2008 and 2013.
 
-![](../plots/annual_abundance/fossa_timeseries.jpeg)
+<img src="../plots/annual_abundance/fossa_timeseries.jpeg" width="600"/>
 
 However, we have a gap in the data in 2009. We could interpolate this value when we detrend the timeseries, but since we are investigating changes in annual abundance, we are actually interested in annual deviation in abundance. Therefore, a better strategy is to map these gaps across all of our records and investigate if there is a way of splitting the timeseries up when we investigate the effect of weather.
 
@@ -68,19 +68,19 @@ mam_blocks <- mam %>%
 
 Encouragingly, the majority of the data is occuring in continuous blocks with 1-year transitions. Here we have the distribution of the proportion of each record that is occuring in 1-year transitions. We can see that the majority have all their data as 1-year transitions. Furthermore >76% (870) of the records have more than 2 thirds of their data in 1-year transitions.
 
-![](../plots/annual_abundance/Proportion_1year_transitions.jpeg)
+<img src="../plots/annual_abundance/Proportion_1year_transitions.jpeg" width="700" />
 
 However, this doesn't quite give us the full picture because we also need to know how many blocks each timeseries occurs in. Here we plot the number of blocks that each record occurs in against the number of years in its longest block. The colour denotes the proportion of the timeseries occuring in 1-year transitions.
 
-![](../plots/annual_abundance/Consecutive_blocks.jpeg)
+<img src="../plots/annual_abundance/Consecutive_blocks.jpeg" width="700" />
 
 So it does appear that there are some records that are primarily in timeseries with 1-year transitions (lighter colours), but do occur over quite a few blocks of observations. We can also plot these blocks of observations as timelines, where we see the years of data for each record ID. I have split these up based on the number of blocks that the timeseries occurs in for ease. Here first you have the records that are just occuring in 1 consecutive block. Points and lines indicate where there is data for each record ID (row).
 
-![](../plots/annual_abundance/record_timelines/1_consecutive_block_timeline.jpeg)
+<img src="../plots/annual_abundance/record_timelines/1_consecutive_block_timeline.jpeg" width="700" />
 
 These are the 'gold standard' records that occur solely in one consecutive chain of annual observations (with more than 5 years of data). However, the picture becomes a little bit more complex when we look at records that occur in a greater number of blocks. Here you can see the records that occur in 5 blocks.
 
-![](../plots/annual_abundance/record_timelines/5_consecutive_block_timeline.jpeg)
+<img src="../plots/annual_abundance/record_timelines/5_consecutive_block_timeline.jpeg" width="700" />
 
 We can see here that there are scenarios where there are longer consecutive blocks of observations, with smaller satellite blocks that have fewer observations. Furthermore, we can see in records with more blocks, there are situations where there are several separate blocks of 1-year transitions, but that many blocks have less than 5 observations.
 
@@ -89,7 +89,7 @@ We can see here that there are scenarios where there are longer consecutive bloc
 We are selecting data based on the sizes of the blocks for each record - We only want to retain blocks within a record that have 5 or more consecutive annual observations.
 
 ```
-# IDs and blocks that we want to keep
+# IDs and blocks that we want to keep - 901 out of 2756 ID-block combinations
 ID_block_keep <- mam_blocks %>% 
   mutate(ID = as.numeric(as.character(ID))) %>% 
   group_by(ID, block) %>% 
@@ -99,7 +99,7 @@ ID_block_keep <- mam_blocks %>%
   filter(block_keep == 1)
 
 # Restricting the dataset
-mammal <- mam %>% 
+mam_IDblocks <- mam %>% 
   group_by(ID) %>%
   mutate(block = cumsum(c(1, diff(year) != 1)),
          ID_block = paste0(ID[1],"_",block)) %>% 
@@ -119,6 +119,37 @@ This equates to ~51% of the initial observations, 33% of the initial records, an
 
 
 ---
+
+## 2. Detrending abundance timseries and calculating population growth rates
+<details>
+  <summary>Click here to expand</summary>
+
+### `detrend_population_growth_rate.R`
+
+In this section, using the abundance data that has been split in to consecutive blocks, we will detrend each consecutive block to extract the residual abundance, and then calculate per-captita population growth rates from these detrended abundances. The rationale for detrending the raw abundance data was to focus on annual population changes that were not as influenced by underlying trends driving population dynamics such as habitat loss or other human disturbances. By detrending, we are focussing on residual annual population changes, which we expect can be driven by changes in weather.
+
+Here we perform a simple linear, vertical detrend of the scaled abundance data. This is visualised (and compared to orthogonal detrending) in `testing_detrending.R`. If we simulate a timeseries with observations of abundance (y) at different timepoints (x), providing it is justified to use a linear model to capture the timeseries trend, which we assume here, we can fit a linear trend to the data (left). Then, to detrend here we take the vertical deviations from the fitted line, or the residuals from the linear model. Vertical residuals are justified here because there isn't error in our independent variable (year), or at least far far less than there is in abundance. You can see an example of this below, with a simulated timeseries and then green dashed line segments to visualise the vertical residuals used here (right).
+
+<img src="../plots/annual_abundance/detrending_linear.jpeg" width="700" />
+
+We are repeating this detrending for all consecutive blocks of each record ID separately. This is step 2 from `detrend_population_growth_rate.R`, detrending for each block_ID in `mam_IDblocks`. Importantly however for population growth rate calculations, we are then scaling the residual abundances calculated to be centered around 10 <- IS THIS JUSTIFIED?????
+
+```
+# extracting the residuals after fitting a linear trend to each timeseries
+mam_detrend <- mam_IDblocks %>% 
+  group_by(ID_block) %>% 
+  group_modify(~{
+    mod = lm(scaled_abundance ~ year, data = .) 
+    
+    resid_ab = mod$residuals + 10 # Centre around 10 for sensible population growth rate calculations
+    
+    mutate(., residual_abundance = resid_ab,
+           coef = mod$coefficients[2])
+  }) %>% 
+  ungroup()
+```
+
+</details>
 
 
 
