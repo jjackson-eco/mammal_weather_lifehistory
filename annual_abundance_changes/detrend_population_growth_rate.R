@@ -81,7 +81,6 @@ mam_detrend %>%
   ggsave("plots/annual_abundance/linear_abundance_coefficients.jpeg",
          width = 9, height = 13, units = "in", dpi = 400)
 
-
 ##__________________________________________________________________________________________________
 #### 4. Calculate per-capita residual growth rate between time t and t+1 ####
 
@@ -144,7 +143,6 @@ mammal %>%
   theme_bw(base_size = 15) +
   ggsave("plots/annual_abundance/record_length.jpeg",
          width = 6, height = 5, units = "in", dpi = 400)
-
 
 ##__________________________________________________________________________________________________
 #### 6. Saving data ####
