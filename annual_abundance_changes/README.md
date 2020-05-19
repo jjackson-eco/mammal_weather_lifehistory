@@ -126,13 +126,17 @@ This equates to ~51% of the initial observations, 33% of the initial records, an
 
 ### `detrend_population_growth_rate.R`
 
-In this section, using the abundance data that has been split in to consecutive blocks, we will detrend each consecutive block to extract the residual abundance, and then calculate per-captita population growth rates from these detrended abundances. The rationale for detrending the raw abundance data was to focus on annual population changes that were not as influenced by underlying trends driving population dynamics such as habitat loss or other human disturbances. By detrending, we are focussing on residual annual population changes, which we expect can be driven by changes in weather.
+In this section, using the abundance data that has been split in to consecutive blocks, we will detrend each consecutive block to extract the residual abundance, and then calculate per-captita population growth rates from these detrended abundances. 
+
+### Detrending
+
+The rationale for detrending the raw abundance data was to focus on annual population changes that were not as influenced by underlying trends driving population dynamics such as habitat loss or other human disturbances. By detrending, we are focussing on residual annual population changes, which we expect can be driven by changes in weather.
 
 Here we perform a simple linear, vertical detrend of the scaled abundance data. This is visualised (and compared to orthogonal detrending) in `testing_detrending.R`. If we simulate a timeseries with observations of abundance (y) at different timepoints (x), providing it is justified to use a linear model to capture the timeseries trend, which we assume here, we can fit a linear trend to the data (left). Then, to detrend here we take the vertical deviations from the fitted line, or the residuals from the linear model. Vertical residuals are justified here because there isn't error in our independent variable (year), or at least far far less than there is in abundance. You can see an example of this below, with a simulated timeseries and then green dashed line segments to visualise the vertical residuals used here (right).
 
 <img src="../plots/annual_abundance/detrending_linear.jpeg" width="700" />
 
-We are repeating this detrending for all consecutive blocks of each record ID separately. This is step 2 from `detrend_population_growth_rate.R`, detrending for each block_ID in `mam_IDblocks`. Importantly however for population growth rate calculations, we are then scaling the residual abundances calculated to be centered around 10 <- IS THIS JUSTIFIED?????
+We are repeating this detrending for all consecutive blocks of each record ID separately. This is step 2 from `detrend_population_growth_rate.R`, detrending for each block_ID in `mam_IDblocks`. Importantly however for population growth rate calculations, we are then scaling the residual abundances calculated to be centered around 10. **This is only for now and will most likely change.**
 
 ```
 # extracting the residuals after fitting a linear trend to each timeseries
@@ -148,6 +152,30 @@ mam_detrend <- mam_IDblocks %>%
   }) %>% 
   ungroup()
 ```
+
+This detrending also gives us the linear coefficient of the abundance trend for each consecutive block of each record. This gives us an overall idea of how terrestrial mammal populations have changed between 1970-2013. Below, we summarise the mean and standard error of abundance trend coefficients for each mammal family. There seems to be a relatively even proportion of +ve and -ve coefficients across mammal families.
+
+<img src="../plots/annual_abundance/linear_abundance_coefficients.jpeg" width="700" />
+
+### Annual population growth rates
+
+Now we calculate the per-capita population growth rates of the scaled residual abundances, which is caclulated as R = N~t+1~/N~t~, Where N is the scaled residual abundance in year t.
+
+```
+# This removes one year from each ID_block - Minimum of 4 years
+mammal <- mam_detrend %>% 
+  group_by(ID_block) %>% 
+  group_modify(~{
+    resid_t0 = .$residual_abundance[-(length(.$residual_abundance))]
+    resid_t1 = .$residual_abundance[-1]
+    
+    mutate(., pop_growth_rate = c(resid_t1/resid_t0,NA))
+  }) %>% 
+  ungroup() %>% 
+  filter(is.na(pop_growth_rate) == F)
+```
+
+This per-capita growth rate gives us a response variable scaled residual abundance 
 
 </details>
 
