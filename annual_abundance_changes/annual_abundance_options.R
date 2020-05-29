@@ -13,6 +13,7 @@ options(width = 100)
 library(tidyverse)
 library(grid)
 library(gridExtra)
+library(psych)
 
 # For the maps
 library(rnaturalearth)
@@ -82,16 +83,16 @@ resid_ab <- ggplot(wtd_residab, aes(x = year, y = ln_abundance)) +
   theme_bw(base_size = 12)
 
 # re-centered residual abundance + per-capita growth rate 
-pgr_1989 <- tibble(x = 1989, xend = 1990, 
+pgr_1989_resid10 <- tibble(x = 1989, xend = 1990, 
                    y = wtd_residab[wtd_residab$year == 1989,]$resid_ab_10,
                    yend = wtd_residab[wtd_residab$year == 1990,]$resid_ab_10) %>% 
   mutate(pgr = yend/y)
-pgr_1989
+pgr_1989_resid10
 
 resid_ab_recenter <- ggplot(wtd_residab, aes(x = year, y = resid_ab_10)) +
   geom_hline(yintercept = 10, linetype = "dashed") +
   geom_point(size = 3) +
-  geom_segment(data = pgr_1989, aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_segment(data = pgr_1989_resid10, aes(x = x, y = y, xend = xend, yend = yend)) +
   annotate("text", x = 1990, y = 9.7,
            label = expression(paste(r[1989], " = ", frac(C[1990],C[1989]), 
                                     " = ", frac(9.76, 10.2), " = ",0.96))) +
@@ -100,7 +101,114 @@ resid_ab_recenter <- ggplot(wtd_residab, aes(x = year, y = resid_ab_10)) +
 
 ggsave(grid.arrange(resid_ab, resid_ab_recenter, ncol = 1),
        filename = "plots/annual_abundance/option1_center_resid_ab.jpeg",
-       width = 5, height = 10)
+       width = 7, height = 8, units = "in", dpi = 400)
+
+##__________________________________________________________________________________________________
+#### 2. Residual abundance and population change ####
+
+# Using population change instead of per-capita growth rate
+pgr_1989_resid <- tibble(x = 1989, xend = 1990, 
+                           y = wtd_residab[wtd_residab$year == 1989,]$resid_ab,
+                           yend = wtd_residab[wtd_residab$year == 1990,]$resid_ab) %>% 
+  mutate(pgr = yend - y)
+pgr_1989_resid
+
+resid_ab_popchange <- 
+
+ggsave(grid.arrange(resid_ab, resid_ab_popchange, ncol = 1),
+       filename = "plots/annual_abundance/option2_resid_ab_popchange.jpeg",
+       width = 7, height = 8, units = "in", dpi = 400)
+
+##__________________________________________________________________________________________________
+#### 3. ln Abundance and per-capita population growth rates ####
+
+pgr_1989 <- tibble(x = 1989, xend = 1990, 
+                   y = wtd_residab[wtd_residab$year == 1989,]$ln_abundance,
+                   yend = wtd_residab[wtd_residab$year == 1990,]$ln_abundance) %>% 
+  mutate(pgr = yend/y)
+pgr_1989
+
+# ln abundance plot
+ggplot(wtd_residab, aes(x = year, y = ln_abundance)) +
+  geom_segment(data = pgr_1989, aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_point(size = 3) + 
+  annotate("text", x = 1990, y = 11.25,
+           label = expression(paste(r[1989], " = ",frac(X[1990],X[1989]), 
+                                    " = ", frac(11.6, 12.1), " = ", 0.96))) +
+  labs(x = "Year (t)", y = "ln Number of Deer (X)") +
+  theme_bw(base_size = 12) +
+  ggsave(filename = "plots/annual_abundance/option3_ln_ab.jpeg",
+         width = 7, height = 5, units = "in", dpi = 400)
+
+##__________________________________________________________________________________________________
+#### 4. Multivariate time-series analysis ####
+
+# residual abundance timeseries style
+ggplot(wtd_residab, aes(x = year, y = resid_ab)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_line(size = 1) +
+  labs(x = "Year (t)", y = "Stationary abundance (y)") +
+  theme_bw(base_size = 12) +
+  ggsave("plots/annual_abundance/option4_timeseries.jpeg",
+         width = 7, height = 5, units = "in", dpi = 400)
+
+##__________________________________________________________________________________________________
+#### 5. Calculating 1-3 for all records ####
+
+mam_pgr <- mam_IDblocks %>% 
+  mutate(ln_abundance = log(raw_abundance + 1),
+         ln_abundance = if_else(ln_abundance == 0, 0.1, ln_abundance)) %>% 
+  group_by(ID_block) %>% 
+  group_modify(~{
+    
+    # model for residuals
+    mod = lm(ln_abundance ~ year, data = .)
+    
+    # method 1 - centered residuals
+    resid_10 = residuals(mod) + 10
+    t1_res10 = resid_10[-1]
+    t0_res10 = resid_10[-(nrow(.))]
+    
+    pgr_res10 = t1_res10/t0_res10
+    
+    # method 2 - pop difference
+    resid_ab = residuals(mod)
+    t1_res = resid_ab[-1]
+    t0_res = resid_ab[-(nrow(.))]
+    
+    pgr_res = t1_res - t0_res
+    
+    # method 3 - ln abundance
+    t1 = .$ln_abundance[-1]
+    t0 = .$ln_abundance[-(nrow(.))]
+    
+    pgr = t1/t0
+    year = .$year[-(nrow(.))] # years with pop growth rates
+    
+    mutate(., option1 = c(pgr_res10,NA),
+           option2 = c(pgr_res, NA),
+           option3 = c(pgr, NA))
+  }) %>% 
+  ungroup() %>% 
+  filter(is.na(option3) == F & option3 < 2) 
+
+glimpse(mam_pgr)
+
+## Plotting
+jpeg(filename = "plots/annual_abundance/pop_growth_rate_correlations.jpeg",
+     width = 10, height = 10, units = "in",res = 400)
+pairs.panels(dplyr::select(mam_pgr, contains("option")),
+             smooth = FALSE, lm = TRUE,  ellipses = FALSE)
+dev.off()
+
+# looking at pgrs from option 3
+hist(mam_pgr$option3)
+
+
+
+
+
+
 
 
 
