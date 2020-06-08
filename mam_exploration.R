@@ -38,7 +38,7 @@ mam_IDsum <- mam %>%
             Specific_location = Specific_location[1],
             abundance_measure = abundance_measure[1],
             study_length = n(), middle_year = median(year),
-            delta_sa = last(scaled_abundance) - first(scaled_abundance))
+            delta_la = last(ln_abundance) - first(ln_abundance))
 
 mam_spsum <- mam %>% 
   group_by(Binomial) %>% 
@@ -133,12 +133,11 @@ ab_measure <- ggplot(mam, aes(x = abundance_measure)) +
 # Changes in Scaled abundance?
 mam_index <- dplyr::filter(mam, year >= 1970, year <= 2014)
 
-m_ind <- ggplot(mam_index, aes(x = year, y = scaled_abundance, 
+m_ind <- ggplot(mam_index, aes(x = year, y = ln_abundance, 
                                group = Order, colour = Order, 
                                fill = Order)) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
   geom_smooth(method = "lm", alpha = 0.05) +
-  labs(x = "Year", y = "Scaled abundance") +
+  labs(x = "Year", y = "ln abundance") +
   theme_bw(base_size = 16) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -174,5 +173,5 @@ ggsave(grid.arrange(studl_spp, rec_sp, cl_obs,
 
 # 5. scaled abundance
 ggsave(grid.arrange(ab_measure,m_ind, ncol = 1),
-       filename = "plots/mam_raw/mam_scaled_abundance.jpeg",
+       filename = "plots/mam_raw/mam_ln_abundance.jpeg",
        width = 11, height = 12, units = "in", dpi = 400)
