@@ -70,10 +70,10 @@ As can be seen in the colours of the points in the map above, there is also lots
 
 ![](./plots/mam_raw/mam_sp.jpeg)
 
-The key feature of the Living Planet Database is the monitoring of annual abundance. Abundance here is characterised in several ways. To name a few examples, there can be estimates of density, monitoring per unit effort, indices or full population counts. In the first plot below you can see the number of observatiosn for these broad categories of abundance measure. We will explore the differences in these different measures of abundance later in the study. 
+The key feature of the Living Planet Database is the monitoring of annual abundance. Abundance here is characterised in several ways. To name a few examples, there can be estimates of density, monitoring per unit effort, indices or full population counts. In the first plot below you can see the number of observations for these broad categories of abundance measure. We will explore the differences in these different measures of abundance later in the study. 
 
-To make studies comparable, we have z-transformed the abundance for each of the records. The second plot just presents overall smoothed changes in relative abundance for each order. Drawing conclusions from these patterns is is ofcourse unadvisable, but instead just a way of visualising what the data looks like.
+To make studies comparable, we have ln transformed the abundance for each of the records. The second plot just presents overall smoothed changes in abundance on the log scale for each order. Drawing conclusions from these patterns is is ofcourse unadvisable, but instead just a way of visualising what the data looks like.
 
-![](./plots/mam_raw/mam_scaled_abundance.jpeg)
+![](./plots/mam_raw/mam_ln_abundance.jpeg)
 
 ---
