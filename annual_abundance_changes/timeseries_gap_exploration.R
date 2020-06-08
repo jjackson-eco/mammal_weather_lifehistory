@@ -88,7 +88,7 @@ mam_blocks <- mam %>%
   mutate(block = cumsum(c(1, diff(year) != 1)),
          max_block = max(block)) %>% 
   ungroup() %>% 
-  dplyr::select(ID, Binomial, Order, scaled_abundance, 
+  dplyr::select(ID, Binomial, Order, ln_abundance, 
                 year, block, max_block) %>% 
   left_join(x = ., y = dplyr::select(mam_gaps, -c(Binomial, no_consecutive_blocks)),
             by = "ID") %>% 
@@ -202,14 +202,14 @@ for(i in 1:10){
 
 #____________________________________________________________
 ## 5a. Restricting by the blocks
-# Want only blocks from records that have 5 or more observations
+# Want only blocks from records that have 10 or more observations
 
-# IDs and blocks that we want to keep - 901 out of 2756 ID-block combinations
+# IDs and blocks that we want to keep - 502 out of 2756 ID-block combinations
 ID_block_keep <- mam_blocks %>% 
   mutate(ID = as.numeric(as.character(ID))) %>% 
   group_by(ID, block) %>% 
   summarise(ID_block = paste0(ID[1],"_",block[1]),
-            block_keep = if_else(n() >= 5, 1, 0)) %>%
+            block_keep = if_else(n() >= 10, 1, 0)) %>%
   ungroup() %>% 
   filter(block_keep == 1)
 
@@ -220,10 +220,10 @@ mam_IDblocks <- mam %>%
          ID_block = paste0(ID[1],"_",block)) %>% 
   ungroup() %>% 
   filter(ID_block %in% ID_block_keep$ID_block == T) %>% 
-  select(1,21,22,2:9,11:20)
+  dplyr::select(1,21,22,2:9,11:20)
 
-# This leaves us with 844 records or 33% of the initial 2539 records, 
-# and 10,489 of the 20,379 raw observations, equating to about 51%
+# This leaves us with 501 records or 20% of the initial 2539 records, 
+# and 7,922 of the 20,379 raw observations, equating to about 38%
 
 # Summarising this in a nice table
 mam_datasum <- data.frame(Dataset = c("Raw data", "Study data"),
