@@ -45,9 +45,9 @@ n_distinct(mam$ID) # Initial number of records
 
 test <- filter(mam, ID == 25396)
 
-ggplot(test, aes(x = year, y = scaled_abundance)) + 
+ggplot(test, aes(x = year, y = ln_abundance)) + 
   geom_point(size = 2) +
-  labs(x = "Year", y = "Scaled abundance") +
+  labs(x = "Year", y = "ln Abundance") +
   theme_bw(base_size = 7) +
   ggsave("plots/annual_abundance/fossa_timeseries.jpeg",
          width = 3, height = 1.75, units = "in", dpi = 400)
