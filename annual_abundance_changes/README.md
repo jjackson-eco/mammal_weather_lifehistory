@@ -4,7 +4,7 @@
 
 ---
 
-This mardown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of detrending annual abundance data from the Living Planet Database for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
+This mardown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of detrending annual abundance data from the Living Planet Database for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section. We initially planned to use a detrending method to account for temporal trends in the abundance time series, but instead now focus on a single model with temporal effects included. Therefore, there are several unused scripts in this directory exploring these different approaches.
 
 There are 2 main sections and scripts:
 
@@ -16,7 +16,7 @@ There are 2 main sections and scripts:
 
 For our record question of how weather influencs annual population changes in vertebrates, one potential problem with the vertebrate abundance data from the Living Planet Database is that there are gaps in the timeseries. The number of these gaps and the way we deal with them is important. This first section is intended to explore the pervasiveness of these gaps across our records, and deal with them in an appropriate way for further analysis.
 
-We first have to restrict the data to only include records that have sufficient data with which to explore annual changes abundance in relation to CHELSA weather data. We only include observations that overlap with the CHELSA data i.e. between 1979-2013, and those that have 5 or more years of abundance data:
+We first have to restrict the data to only include records that have sufficient data with which to explore annual changes abundance in relation to CHELSA weather data. We only include observations that overlap with the CHELSA data i.e. between 1979-2013, and those that have 5 or more years (first pass) of abundance data:
 
 ```
 mam <- mam %>% 
@@ -78,7 +78,7 @@ So it does appear that there are some records that are primarily in timeseries w
 
 <img src="../plots/annual_abundance/record_timelines/1_consecutive_block_timeline.jpeg" width="700" />
 
-These are the 'gold standard' records that occur solely in one consecutive chain of annual observations (with more than 5 years of data). However, the picture becomes a little bit more complex when we look at records that occur in a greater number of blocks. Here you can see the records that occur in 5 blocks.
+These are the 'gold standard' records that occur solely in one consecutive chain of annual observations (with more than 10 years of data). However, the picture becomes a little bit more complex when we look at records that occur in a greater number of blocks. Here you can see the records that occur in 5 blocks.
 
 <img src="../plots/annual_abundance/record_timelines/5_consecutive_block_timeline.jpeg" width="700" />
 
@@ -86,15 +86,15 @@ We can see here that there are scenarios where there are longer consecutive bloc
 
 ### Data selection
 
-We are selecting data based on the sizes of the blocks for each record - We only want to retain blocks within a record that have 5 or more consecutive annual observations.
+We are selecting data based on the sizes of the blocks for each record - We only want to retain blocks within a record that have 10 or more consecutive annual observations.
 
 ```
-# IDs and blocks that we want to keep - 901 out of 2756 ID-block combinations
+# IDs and blocks that we want to keep - 502 out of 2756 ID-block combinations
 ID_block_keep <- mam_blocks %>% 
   mutate(ID = as.numeric(as.character(ID))) %>% 
   group_by(ID, block) %>% 
   summarise(ID_block = paste0(ID[1],"_",block[1]),
-            block_keep = if_else(n() >= 5, 1, 0)) %>%
+            block_keep = if_else(n() >= 10, 1, 0)) %>%
   ungroup() %>% 
   filter(block_keep == 1)
 
@@ -109,73 +109,47 @@ mam_IDblocks <- mam %>%
 
 ```
 
-This gives us a final dataset with which to assess how weather affects changes in abundance, stored in `mammal`. Each Study has atleast 5 years of raw data, and consecutive blocks within the study with at least five years of data within them. Here is a comparison to the initial raw data:
+This gives us a final dataset with which to assess how weather affects changes in abundance, stored in `mammal`. Each Study has consecutive blocks within the study with at least ten years of data within them. Here is a comparison to the initial raw data:
 
 ![](../plots/annual_abundance/data_summary.jpeg)
 
-This equates to ~51% of the initial observations, 33% of the initial records, and 48% of the species.
+This equates to 38% of the initial observations, 20% of the initial records, and 31% of the species.
 
 </details>
 
 
 ---
 
-## 2. Detrending abundance timseries and calculating population growth rates
+## 2. Calculating annual population growth rates
 <details>
   <summary>Click here to expand</summary>
 
-### `detrend_population_growth_rate.R`
+### `annual_population_growth_rate.R`
 
-In this section, using the abundance data that has been split in to consecutive blocks, we will detrend each consecutive block to extract the residual abundance, and then calculate per-captita population growth rates from these detrended abundances. 
-
-### Detrending
-
-The rationale for detrending the raw abundance data was to focus on annual population changes that were not as influenced by underlying trends driving population dynamics such as habitat loss or other human disturbances. By detrending, we are focussing on residual annual population changes, which we expect can be driven by changes in weather.
-
-Here we perform a simple linear, vertical detrend of the scaled abundance data. This is visualised (and compared to orthogonal detrending) in `testing_detrending.R`. If we simulate a timeseries with observations of abundance (y) at different timepoints (x), providing it is justified to use a linear model to capture the timeseries trend, which we assume here, we can fit a linear trend to the data (left). Then, to detrend here we take the vertical deviations from the fitted line, or the residuals from the linear model. Vertical residuals are justified here because there isn't error in our independent variable (year), or at least far far less than there is in abundance. You can see an example of this below, with a simulated timeseries and then green dashed line segments to visualise the vertical residuals used here (right).
-
-<img src="../plots/annual_abundance/detrending_linear.jpeg" width="700" />
-
-We are repeating this detrending for all consecutive blocks of each record ID separately. This is step 2 from `detrend_population_growth_rate.R`, detrending for each block_ID in `mam_IDblocks`. Importantly however for population growth rate calculations, we are then scaling the residual abundances calculated to be centered around 10. **This is only for now and will most likely change.**
+In this short section, using the abundance data that has been split in to consecutive blocks, we will calculate per-capita annual population growth rates, which we will then relate to annual weather data. This is calculated as r = N~t+1~/N~t~ , where N is the abundance on the ln scale at time t. We store the results in the `mammal` dataframe for future reference.
 
 ```
-# extracting the residuals after fitting a linear trend to each timeseries
-mam_detrend <- mam_IDblocks %>% 
+mammal <- mam_IDblocks %>% 
   group_by(ID_block) %>% 
   group_modify(~{
-    mod = lm(scaled_abundance ~ year, data = .) 
+    t0 <- .$ln_abundance[-(length(.$ln_abundance))]
+    t1 <- .$ln_abundance[-1]
     
-    resid_ab = mod$residuals + 10 # Centre around 10 for sensible population growth rate calculations
-    
-    mutate(., residual_abundance = resid_ab,
-           coef = mod$coefficients[2])
-  }) %>% 
-  ungroup()
-```
-
-This detrending also gives us the linear coefficient of the abundance trend for each consecutive block of each record. This gives us an overall idea of how terrestrial mammal populations have changed between 1970-2013. Below, we summarise the mean and standard error of abundance trend coefficients for each mammal family. There seems to be a relatively even proportion of +ve and -ve coefficients across mammal families.
-
-<img src="../plots/annual_abundance/linear_abundance_coefficients.jpeg" width="700" />
-
-### Annual population growth rates
-
-Now we calculate the per-capita population growth rates of the scaled residual abundances, which is caclulated as R = N~t+1~/N~t~, Where N is the scaled residual abundance in year t.
-
-```
-# This removes one year from each ID_block - Minimum of 4 years
-mammal <- mam_detrend %>% 
-  group_by(ID_block) %>% 
-  group_modify(~{
-    resid_t0 = .$residual_abundance[-(length(.$residual_abundance))]
-    resid_t1 = .$residual_abundance[-1]
-    
-    mutate(., pop_growth_rate = c(resid_t1/resid_t0,NA))
+    mutate(., pop_growth_rate = c(t1/t0,NA))
   }) %>% 
   ungroup() %>% 
   filter(is.na(pop_growth_rate) == F)
 ```
 
-This per-capita growth rate gives us a response variable scaled residual abundance 
+This per-capita growth rate gives us a response variable with which to explore weather effects. The per-capita growth rates are distributed as follows:
+
+<img src="../plots/annual_abundance/pop_growth_rate_histogram.jpeg" width="600"/>
+
+We can also explore the relationship between population growth rate and abundance, which gives us an indication of how density dependence may be acting across our abundance timeseries. Each point here is one year (t) of each record.
+
+<img src="../plots/annual_abundance/density_dependence_mam.jpeg" width="700"/>
+
+We can see evidence of a slight negative trend between abudance and population growth, indicative of negative density dependence.
 
 </details>
 
