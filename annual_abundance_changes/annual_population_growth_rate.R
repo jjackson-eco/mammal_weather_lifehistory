@@ -62,4 +62,8 @@ ggplot(mammal, aes(x = ln_abundance, y = pop_growth_rate)) +
   ggsave(filename = "plots/annual_abundance/density_dependence_mam.jpeg",
          width = 7, height = 7, units = "in", dpi = 400)
 
+##__________________________________________________________________________________________________
+#### 4. Save ####
+
+save(mammal, file = "../rawdata/mammal.RData")
 
