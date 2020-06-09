@@ -18,10 +18,6 @@ library(gridExtra)
 #### 1. Load data ####
 
 load("../rawdata/mam_IDblocks.RData")
-
-# Adding in log (abundance + 1)
-mam_IDblocks <- mam_IDblocks %>% 
-  mutate(log_abundance = log(raw_abundance + 1))
 glimpse(mam_IDblocks)
 
 ##__________________________________________________________________________________________________
@@ -31,7 +27,7 @@ glimpse(mam_IDblocks)
 mam_acf <- mam_IDblocks %>% 
   group_by(ID_block) %>% 
   group_modify(~{
-    cab = .$log_abundance
+    cab = .$ln_abundance
     
     cacf = acf(cab, lag.max = 4, plot = F)
     
@@ -41,7 +37,7 @@ mam_acf <- mam_IDblocks %>%
            n_obs = length(cab))
   }) 
 
-ci_median <- qnorm(0.975)/sqrt(10) # confidence limit for the median record with 10 obs
+ci_median <- qnorm(0.975)/sqrt(14) # confidence limit for the median record with 10 obs
 
 # Having a look across studies
 acf_plot <- ggplot(mam_acf, aes(x = lag, y = abs(cor), group = ID_block, colour = n_obs)) +
@@ -79,7 +75,7 @@ mam_ARmodels <- mam_IDblocks %>%
   group_by(ID_block) %>% 
   group_modify(~{
     #convert abundance to a timeseries
-    cts = ts(.$log_abundance)
+    cts = ts(.$ln_abundance)
     
     # fit autoregressive model and NULL model of white noise
     mod_AR = arima(cts, order = c(1,0,0), method = "ML")
@@ -99,7 +95,7 @@ for(i in unique(mam_IDblocks$ID_block)){
   print(i)
   if(i != "11175_1" & i != "10734_1" & i != "4803_1"){
   cdat = filter(mam_IDblocks, ID_block == i)
-  cts = ts(cdat$log_abundance)
+  cts = ts(cdat$ln_abundance)
   mod_AR = arima(cts, order = c(1,0,0), method = "ML")}
 }
 
@@ -120,7 +116,7 @@ ggplot(mam_ARmodels, aes(y = dAIC, x = factor(n_gr),
          width = 8, height = 5, units = "in",
          dpi = 400)
 
-# 30% of studies have support from the predictive performance of an AR(1) model
+# 50% of studies have support from the predictive performance of an AR(1) model
 length(which(mam_ARmodels$dAIC <= -2))/nrow(mam_ARmodels)
 
 
