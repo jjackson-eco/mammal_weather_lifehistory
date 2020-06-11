@@ -175,7 +175,7 @@ pgr_weather_res <- pgr_weather_res %>%
          weather_var_lab = gsub("recip", "recipitation", weather_var_lab))
 ```
 
-This gives us weather coefficients for each variable and scale of our 502 records. Assuming first that all spatial scales are ~identical in their effect size, here we plot the density of the weather coefficient for each of the weather variables.
+This gives us weather coefficients for each variable and scale of our 502 records. Assuming first that all spatial scales are ~identical in their effect size, here we plot the density of the weather coefficient for each of the weather variables. We can see this at two scales of coefficient values, one between -0.05-0.05 and one between -5-5. This shows that coefficients of weather effects are largely very small across records. However, there are some cases with large weather coefficients.
 
 <img src="../plots/weather_pop_growth/coef_weather_vars.jpeg" width="800" />
 
