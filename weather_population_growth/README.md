@@ -81,7 +81,7 @@ pgr_weather <- mammal_weather %>%
 
 Note that we extract coefficients for the abundance and the year for both temperature and precipitation. These are largely very similar, but vary based on the differences in the weather effect.
 
-Now we have model coefficients for each of the 501 10> year records for the terrestrial mammals. We can now look at comparative patterns in these coefficients. First, the overall density distributions of each of the coefficients across the records
+Now we have model coefficients for each of the 502 10> year records for the terrestrial mammals. We can now look at comparative patterns in these coefficients. First, the overall density distributions of each of the coefficients across the records
 
 <img src="../plots/weather_pop_growth/overall_coefficients_mnanom_5km.jpeg" width="700" />
 
@@ -97,8 +97,86 @@ These coefficients or effects sizes form the basis of our meta-regression approa
 
 </details>
 
-## 2. Other annual weather variables
+## 2. Other annual weather variables and scales
 <details>
   <summary>Click here to expand</summary>
+
+### `annual_weather_variables.R`
+
+Now we want to repeat the same linear modelling framework but expand to calculate coefficients for all of our annual weather variables and spatial scales. We begin in very much the same way, but don't exclude any of the spatial scales or weather variables.
+
+```
+##__________________________________________________________________________________________________
+#### 1. Load data ####
+
+# mammal data
+load("../rawdata/mammal.RData")
+glimpse(mammal)
+
+# annual weather anomaly - focus on just the mean anomaly in this script at a 5km range
+mam_chelsa_annual <- readRDS("data/mam_chelsa_annual.RDS") %>% 
+  dplyr::select(-c(4:6))
+glimpse(mam_chelsa_annual)
+
+##__________________________________________________________________________________________________
+#### 2. Joining data ####
+
+mammal_weather <- mammal %>% 
+  left_join(., y = mam_chelsa_annual, by = c("ID", "year"))
+
+```
+
+To estimate weather effects for each record, we iterate through weather variables and spatial scales for each, fit a linear model that also incorporates density dependence and trend effects (as above), and extract the weather effects. 
+
+```
+##__________________________________________________________________________________________________
+#### 3. Linear models for each variable and scale for each record ####
+
+# 3a. set up iteration data
+# Ignoring number of odd days vars for now - they follow a zero inflated pattern
+iter_dat <- expand_grid(ID_block = unique(mammal_weather$ID_block),
+                               scale = unique(mammal_weather$scale),
+                               weather_var = colnames(mammal_weather)[24:39])
+
+# 3b. weather coefficients for each variable
+pgr_weather_res <- bind_rows(lapply(X = 1:nrow(iter_dat), function(x){
+  
+  crow = iter_dat[x,]
+  
+  # current data
+  cdat = mammal_weather %>% 
+    filter(ID_block == crow$ID_block, scale == crow$scale) %>% 
+    dplyr::select(ID_block, year, ln_abundance,
+                  weather_val = crow$weather_var,
+                  pop_growth_rate)
+  
+  # record info
+  rec_info = mammal_weather %>% 
+    filter(ID_block == crow$ID_block, scale == crow$scale) %>% 
+    dplyr::select(2:17) %>% 
+    slice(1)
+  
+  # model
+  if(length(which(is.na(cdat$weather_val) == T)) > 0){modcoef = rep(NA,4)}
+  else{mod_weather = lm(pop_growth_rate ~ weather_val + ln_abundance + year, data = cdat)
+       modcoef = coefficients(mod_weather)}
+  
+  # returning data
+  cat('\r',"Your Job is",round((x/nrow(iter_dat))*100, 0),"% Complete       ")
+  return(tibble(crow, coef_weather = modcoef[2], 
+                coef_abun = modcoef[3], coef_trend = modcoef[4],
+                rec_info))
+}))
+  
+# 3c. Adding in weather variable labels
+pgr_weather_res <- pgr_weather_res %>% 
+  mutate(weather_var_lab = stringr::str_to_sentence(gsub("_", " ", weather_var))) %>% 
+  mutate(weather_var_lab = gsub("emp", "emperature", weather_var_lab),
+         weather_var_lab = gsub("recip", "recipitation", weather_var_lab))
+```
+
+This gives us weather coefficients for each variable and scale of our 502 records. Assuming first that all spatial scales are ~identical in their effect size, here we plot the density of the weather coefficient for each of the weather variables.
+
+<img src="../plots/weather_pop_growth/coef_weather_vars.jpeg" width="800" />
 
 </details>
