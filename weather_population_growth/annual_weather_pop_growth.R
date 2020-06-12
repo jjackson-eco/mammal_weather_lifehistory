@@ -15,6 +15,7 @@ library(ggridges)
 library(viridis)
 library(grid)
 library(gridExtra)
+library(psych)
 
 ##__________________________________________________________________________________________________
 #### 1. Load data ####
@@ -82,6 +83,8 @@ pgr_weather_res <- pgr_weather_res %>%
 ##__________________________________________________________________________________________________
 #### 4. Density rigge plots for the weather variables ####
 
+#pgr_weather_res <- readRDS("data/pgr_weather/pgr_weather_res.RDS")
+
 # removing very large coefficients
 pgr_plotdat_sm <- pgr_weather_res %>% 
   filter(coef_weather >= -0.05 & coef_weather < 0.05)
@@ -104,12 +107,74 @@ pgr_weath_lg <- ggplot(pgr_plotdat_lg, aes(x = coef_weather, y = weather_var_lab
   theme_ridges(center_axis_labels = TRUE, font_size = 20, grid = F) +
   theme(axis.text.y = element_blank())
 
-ggsave(grid.arrange(pgr_weath_sm, pgr_weath_lg, ncol = 2, widths = c(6,4)),
+ggsave(pgr_weath_sm,
        filename = "plots/weather_pop_growth/coef_weather_vars.jpeg",
-       width = 15, height = 11, units = "in", dpi = 400)
+       width = 8, height = 11, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
-#### 5. Save data ####
+#### 5. Spatial scales + Abundance and trend coefficients ####
+
+# 5a. Spatial scales consistent?
+sp_res <- pgr_weather_res %>% 
+  dplyr::select(ID_block, scale, coef_weather, weather_var) %>% 
+  pivot_wider(names_from = scale, values_from = coef_weather) %>% 
+  dplyr::select(starts_with("scale"))
+
+jpeg(filename = "plots/weather_pop_growth/scale_weather_coef.jpeg",
+     width = 7, height = 7, units = "in",res = 400)
+pairs.panels(sp_res, smooth = FALSE, lm = TRUE,  ellipses = FALSE)
+dev.off()
+
+# 5b. Other coefficients
+abun_coef <- pgr_weather_res %>% 
+  dplyr::select(ID_block, scale, coef_abun, weather_var) %>% 
+  pivot_wider(names_from = weather_var, values_from = coef_abun) %>% 
+  dplyr::select(-c(1:2))
+
+abun_cormat <- cor(abun_coef, use = "pairwise.complete.obs") %>% 
+  as.data.frame() %>% mutate(Var1 = rownames(.)) %>% 
+  pivot_longer(-Var1, names_to = "Var2") %>% 
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() + 
+  labs(x = NULL, y = NULL, title = "Abundance") +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_fill_viridis_c(option = "C", begin = 0, end = 0.9,
+                       limits = c(0.5,1), breaks = seq(0,1,0.2),
+                       name = "Correlation\ncoefficient",
+                       guide = FALSE) +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 90, size = 9),
+        axis.text.y = element_text(size = 9)) 
+
+trend_coef <- pgr_weather_res %>% 
+  dplyr::select(ID_block, scale, coef_trend, weather_var) %>% 
+  pivot_wider(names_from = weather_var, values_from = coef_trend) %>% 
+  dplyr::select(-c(1:2))
+
+trend_cormat <- cor(trend_coef, use = "pairwise.complete.obs") %>% 
+  as.data.frame() %>% mutate(Var1 = rownames(.)) %>% 
+  pivot_longer(-Var1, names_to = "Var2") %>% 
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() + 
+  labs(x = NULL, y = NULL, title = "Trend") +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_fill_viridis_c(option = "C", begin = 0, end = 0.9,
+                       limits = c(0.5,1), breaks = seq(0,1,0.2),
+                       name = "Correlation\ncoefficient",
+                       guide = guide_colorbar(barwidth = 2, 
+                                              barheight = 10)) +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 90, size = 9),
+        axis.text.y = element_text(size = 9)) 
+
+ggsave(grid.arrange(abun_cormat, trend_cormat, ncol = 2, widths = c(6,7)),
+       filename = "plots/weather_pop_growth/abundance_trend_cormat.jpeg",
+       width = 14, height = 6, units = "in", dpi = 400)
+
+##__________________________________________________________________________________________________
+#### 6. Save data ####
 
 saveRDS(pgr_weather_res, file = "data/pgr_weather/pgr_weather_res.RDS")
 
