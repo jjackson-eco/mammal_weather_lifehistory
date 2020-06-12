@@ -157,7 +157,7 @@ coef_ovrdat <- pgr_weather %>%
 ggplot(coef_ovrdat, aes(x = value, y = label, fill = model)) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1, size = 0.3) +
-  coord_cartesian(xlim = c(-3,3)) +
+  coord_cartesian(xlim = c(-1,1)) +
   scale_fill_manual(guide = F, values = c("darkblue", "firebrick")) +
   labs(x = "Model coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 16) +
@@ -169,7 +169,7 @@ temp_sp <- ggplot(pgr_weather, aes(x = coef_temp, y = Order,
                         fill = Order, height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-2,2)) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
   scale_fill_viridis_d(guide = F, option = "C") +
   labs(x = "Temperature anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
@@ -178,7 +178,7 @@ precip_sp <- ggplot(pgr_weather, aes(x = coef_precip, y = Order,
                         fill = Order, height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-2,2)) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
   scale_fill_viridis_d(guide = F, option = "D") +
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) +
@@ -189,19 +189,21 @@ ggsave(grid.arrange(temp_sp, precip_sp, ncol = 2, widths = c(6,4)),
        width = 15, height = 13, units = "in", dpi = 400)
 
 ## 5c. Weather coefficients by realm
-temp_realm <- ggplot(pgr_weather, aes(x = coef_temp, y = realm, 
+temp_realm <- ggplot(pgr_weather, aes(x = coef_temp, y = realm, fill = realm,
                                    height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-2,2)) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "C") +
   labs(x = "Temperature anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
 
-precip_realm <- ggplot(pgr_weather, aes(x = coef_precip, y = realm, 
+precip_realm <- ggplot(pgr_weather, aes(x = coef_precip, y = realm, fill = realm,
                                    height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-2,2)) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "D") +
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) +
   theme(axis.text.y = element_blank())
@@ -215,20 +217,20 @@ pgr_lat <- pgr_weather %>%
   mutate(lat = abs(Latitude) - (abs(Latitude) %% 22.5))
 
 temp_lat <- ggplot(pgr_lat, aes(x = coef_temp, y = factor(lat), 
-                                    fill = lat, height = stat(density))) +
+                                    fill = factor(lat), height = stat(density))) +
   geom_vline(xintercept = 0) +
   stat_density_ridges(quantile_lines = T, quantiles = 2, alpha = 0.7, scale = 1.1) +
-  coord_cartesian(xlim = c(-4,4)) +
-  scale_fill_gradient(low = "blue", high = "white", guide = F) + 
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "C", begin = 0.1, end = 0.9) + 
   labs(x = "Temperature anomaly coefficient", y = "Absolute latitude") +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
 
 precip_lat <- ggplot(pgr_lat, aes(x = coef_precip, y = factor(lat), 
-                                fill = lat, height = stat(density))) +
+                                fill = factor(lat), height = stat(density))) +
   geom_vline(xintercept = 0) +
   stat_density_ridges(quantile_lines = T, quantiles = 2, alpha = 0.7, scale = 1.1) +
-  coord_cartesian(xlim = c(-4,4)) +
-  scale_fill_gradient(low = "blue", high = "white", guide = F) + 
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "D", begin = 0.2, end = 0.8) + 
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
 
