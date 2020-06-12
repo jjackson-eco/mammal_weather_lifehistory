@@ -81,7 +81,7 @@ pgr_weather <- mammal_weather %>%
 
 Note that we extract coefficients for the abundance and the year for both temperature and precipitation. These are largely very similar, but vary based on the differences in the weather effect.
 
-Now we have model coefficients for each of the 502 10> year records for the terrestrial mammals. We can now look at comparative patterns in these coefficients. First, the overall density distributions of each of the coefficients across the records
+Now we have model coefficients for each of the 502 10> year records for the terrestrial mammals. We can now look at comparative patterns in these coefficients. First, the overall density distributions of each of the coefficients across the records. Here you can see ridge density plots for each of the coefficient, with coefficients between -1 and 1 shown here. **It is important to note that coefficients can be much larger, and this restriction is to better display the density distribution**.
 
 <img src="../plots/weather_pop_growth/overall_coefficients_mnanom_5km.jpeg" width="700" />
 
@@ -175,8 +175,16 @@ pgr_weather_res <- pgr_weather_res %>%
          weather_var_lab = gsub("recip", "recipitation", weather_var_lab))
 ```
 
-This gives us weather coefficients for each variable and scale of our 502 records. Assuming first that all spatial scales are ~identical in their effect size, here we plot the density of the weather coefficient for each of the weather variables. We can see this at two scales of coefficient values, one between -0.05-0.05 and one between -5-5. This shows that coefficients of weather effects are largely very small across records. However, there are some cases with large weather coefficients.
+This gives us weather coefficients for each variable and scale of our 502 records. Assuming first that all spatial scales are ~identical in their effect size, here we plot the density of the weather coefficient for each of the weather variables. This shows that coefficients of weather effects are largely very small across records. However, there are some cases with large weather coefficients and some distributions that suggest there may be patterns.
 
-<img src="../plots/weather_pop_growth/coef_weather_vars.jpeg" width="800" />
+<img src="../plots/weather_pop_growth/coef_weather_vars.jpeg" width="600" />
+
+We can also have a look at how the weather coefficients we obtained are different based on the buffer radius or spatial scale that was chosen. Below we can see a pairs.panel plot that displays the correlations in all weather coefficients between the scales. You can see that they are virtually identical.
+
+<img src="../plots/weather_pop_growth/scale_weather_coef.jpeg" width="600" />
+
+Finally, we want to look at whether the abundance and trend coefficients calculated when each weather variable was in the model are consistent across the weather variables. Here we have a correlation matrix for the abundance (left) and trend (right) coefficients for all 16 weather variables. You can see that they are very highly correlated across weather variables.
+
+<img src="../plots/weather_pop_growth/abundance_trend_cormat.jpeg" width="1000" />
 
 </details>
