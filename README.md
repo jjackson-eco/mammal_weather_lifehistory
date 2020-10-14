@@ -1,22 +1,23 @@
-# Pilot study: Global weather and changes in vertebrate abundance
+# Global weather and changes in abundance for the terrestrial mammals
 
 #### 2020-04-24
 #### John Jackson
 
 ---
 
-Pilot study on terrestrial mammals to investigate how weather influences annual changes in abundance.
+Study on terrestrial mammals to investigate how weather influences annual changes in abundance.
 
 Here we are making use of:
 
-1. The Living Planet Database of vertebrate abundance timeseries, which can be found at https://livingplanetindex.org/home/index.
-2. The CHELSA Climatologies at high resolution for the earth’s land surface areas 1979-2013, which is from [Karger et al. (2017)](https://www.nature.com/articles/sdata2017122).
+1. The Living Planet Database of vertebrate abundance timeseries, which can be downloaded at [The Living Planet Index website](https://livingplanetindex.org/home/index).
+2. The CHELSA Climatologies at high resolution for the earth’s land surface areas 1979-2013, which can be downloaded from [Karger et al. (2017)](https://www.nature.com/articles/sdata2017122).
+3. The recently updated phylogenetic tree for the mammals, which can be downloaded from [Upham et al. 2019](https://doi.org/10.1371/journal.pbio.3000494)
 
 ---
 
 The analysis is split into the following sections:
 
-1. Exploring raw data from CHELSA and the Living Planet Database.
+1. Exploring raw data from CHELSA, the Living Planet Database and the mammal phylogeny.
 2. Extracting salient weather data from CHELSA for the localities of the Living Planet studies.
 3. Detrending annual abundance data to focus on annual changes excluding underlying trends.
 4. ...
@@ -40,7 +41,7 @@ wget https://www.wsl.ch/lud/chelsa/data/timeseries/prec/CHELSA_prec_1979_01_V1.2
 Full bash scripts can be accessed from https://github.com/jonesor/compadre-climate. Below is an example of the mean temperature and total precipitation in August 1993 for each of the 30 arc sec grid cells.
 
 ![](./plots/chelsa_raw/temp_aug93.jpeg)
-![](./plots/chelsa_raw/precip_aug93.jpeg)
+![](./plots/chelsa_raw/precip_aug93.jpeg) 
 
 ---
 
@@ -77,3 +78,34 @@ To make studies comparable, we have ln transformed the abundance for each of the
 ![](./plots/mam_raw/mam_ln_abundance.jpeg)
 
 ---
+
+### The mammal phylogeny
+
+The mammal phylogeny used in the current study is from the following paper:
+
+Upham, N. S., J. A. Esselstyn, and W. Jetz. 2019. Inferring the mammal tree: species-level sets of phylogenies for questions in ecology, evolution, and conservation. PLOS Biology. [https://doi.org/10.1371/journal.pbio.3000494](https://doi.org/10.1371/journal.pbio.3000494)
+
+Here, the authors apply a 'backbone-and-patch' approach to a newly assembled 31-gene supermatrix and Bayesian inference to give credible sets of phylogenetic trees. Here we use the **maximum clade credibility tree**, which can be downloaded directly from [here](https://doi.org/10.5061/dryad.tb03d03). The maximum clade credibility tree used in this study is in the following data file:
+
+> `MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre`
+
+Species names were first matched against the species names from the [Catalogue of Life](http://www.catalogueoflife.org/) and the mammal tree pruned to include only species present in the Living Planet Database. This left **538** species from the original mammal phylogeny. This phylogenetic tree was used in all subsequent phylogenetic regressions, and is presented below
+
+![](./plots/mam_LPD_tree.jpeg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
