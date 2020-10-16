@@ -18,6 +18,7 @@ library(tidyverse)
 library(ape)
 library(brms)
 library(rethinking)
+library(nlme)
 library(patchwork)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -68,6 +69,12 @@ mamMCC_precip <- keep.tip(mamMCC_pruned, mam_precip$spp)
 # Covariance matrix - Brownian motion model
 A_temp <- ape::vcv.phylo(mamMCC_temp)
 A_precip <- ape::vcv.phylo(mamMCC_precip)
+
+# Phylogenetic distance matrix
+Dmat <- cophenetic(mamMCC_temp)
+
+# implied covariance - quite unrealistic?
+plot(Dmat, A_temp, type = "b", xlab = "Phylogenetic distance", ylab = "Brownian covariance")
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 4. Prior predictive simulation ####
@@ -211,7 +218,7 @@ temp_OU_model <- ulam(alist(
 
 # Look at the decay
 post <- extract.samples(temp_OU_model)
-plot(NULL, xlim = c(0, max(temp_list$Dmat)), ylim = c(0,3))
+plot(NULL, xlim = c(0, max(temp_list$Dmat)), ylim = c(0,5))
 
 # posterior
 for(i in 1:50){
@@ -225,6 +232,17 @@ d_seq <- seq(0,1,length.out = 50)
 K <- sapply(d_seq, function(x) eta*exp(-rho*x))
 
 lines(d_seq, colMeans(K), lwd = 2)
+
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### 9. Simple PGLS for Temperature ####
+
+
+tempsimple_gls <- gls(coef_temp ~ 1, 
+                       data = mam_temp, 
+                       correlation = corPagel(1,mamMCC_temp))
+summary(tempsimple_gls)
+
+
 
 
 
