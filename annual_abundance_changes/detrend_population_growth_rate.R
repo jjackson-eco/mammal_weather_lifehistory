@@ -40,7 +40,7 @@ n_distinct(mam_IDblocks$ID_block) # Seem to match up ok
 mam_detrend <- mam_IDblocks %>% 
   group_by(ID_block) %>% 
   group_modify(~{
-    mod = lm(scaled_abundance ~ year, data = .) 
+    mod = lm(ln_abundance ~ year, data = .) 
     
     resid_ab = mod$residuals + 10 # Centre around 10 for sensible population growth rate calculations
     
@@ -144,12 +144,12 @@ mammal %>%
   ggsave("plots/annual_abundance/record_length.jpeg",
          width = 6, height = 5, units = "in", dpi = 400)
 
-##__________________________________________________________________________________________________
-#### 6. Saving data ####
-
-mammal <- dplyr::select(mammal, -c(raw_abundance,scaled_abundance))
-
-save(mammal, file = "data/mammal.RData")
+# ##__________________________________________________________________________________________________
+# #### 6. Saving data ####
+# 
+# mammal <- dplyr::select(mammal, -c(raw_abundance,scaled_abundance))
+# 
+# save(mammal, file = "data/mammal.RData")
 
 
 
