@@ -11,41 +11,23 @@ Here we are making use of:
 
 1. The Living Planet Database of vertebrate abundance timeseries, which can be downloaded at [The Living Planet Index website](https://livingplanetindex.org/home/index).
 2. The CHELSA Climatologies at high resolution for the earth’s land surface areas 1979-2013, which can be downloaded from [Karger et al. (2017)](https://www.nature.com/articles/sdata2017122).
-3. The recently updated phylogenetic tree for the mammals, which can be downloaded from [Upham et al. 2019](https://doi.org/10.1371/journal.pbio.3000494)
+3. The recently updated phylogenetic tree for the mammals, which can be downloaded from [Upham et al. 2019](https://doi.org/10.1371/journal.pbio.3000494).
+4. Life-history information from the Demographic Species Knowledge Index compendium from [Conde et al. 2019](https://doi.org/10.1073/pnas.1816367116).
 
 ---
 
 The analysis is split into the following sections:
 
-1. Exploring raw data from CHELSA, the Living Planet Database and the mammal phylogeny.
+1. Exploring raw data from CHELSA, the Living Planet Database, the mammal phylogeny, and comparative life-history data.
 2. Extracting salient weather data from CHELSA for the localities of the Living Planet studies.
 3. Detrending annual abundance data to focus on annual changes excluding underlying trends.
 4. ...
 
-Here, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R` and `mam_exploration.R`. The rest of the sections can be found in separate directories.
+Here, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R`, `mam_exploration.R`, `phylo_exploration.R` and `dski_exploration`. The rest of the sections can be found in separate directories with additional README files.
 
 ---
 
-### CHELSA
-
-The data from CHELSA is in the form of raster files (`.tif`), which can be downloaded from [here](http://chelsa-climate.org/downloads/). The rasters are at a spatial resolution of 30 arc sec, which is approximately 1 kilometer squared, and records are between 1979-2013. Thus, there is data for over 900 million raster cells. There are several monthly/annual timeseries measures of temperature and precipitation. Here we focus on monthly mean temperature and total precipitation from CHELSA `version 1.2.1`.
-
-The CHELSA raster files for mean monthly temperature and total precipitation were accessed with bash scripts that took the general form:
-
-```
-#!/usr/bin/env bash 
-wget https://www.wsl.ch/lud/chelsa/data/timeseries/tmean/CHELSA_tmean_1979_01_V1.2.1.tif
-wget https://www.wsl.ch/lud/chelsa/data/timeseries/prec/CHELSA_prec_1979_01_V1.2.1.tif
-```
-
-Full bash scripts can be accessed from https://github.com/jonesor/compadre-climate. Below is an example of the mean temperature and total precipitation in August 1993 for each of the 30 arc sec grid cells.
-
-![](./plots/chelsa_raw/temp_aug93.jpeg)
-![](./plots/chelsa_raw/precip_aug93.jpeg) 
-
----
-
-### Living Planet Database for terrestrial mammals `mam`
+## 1. Living Planet Database for terrestrial mammals `mam`
 
 The Living Planet Index is a key indicator of the state of global biodiversity, monitoring trends in vertebrate popualtions over many decades. Developed by the Zoological Society of London (ZSL) and the World Wildlife Fund (WWF), this index has been a crucial indicator for international policy on conservation. Here, we are using the data that underpins the LPI, which is also maintained by ZSL and the WWF. We are restricting to only include data from the terrestrial mammals for ease of processing and interpretation at this stage. According to the Living Planet Index website: 
 
@@ -79,11 +61,30 @@ To make studies comparable, we have ln transformed the abundance for each of the
 
 ---
 
-### The mammal phylogeny
+## 2. CHELSA
+
+The data from CHELSA is in the form of raster files (`.tif`), which can be downloaded from [here](http://chelsa-climate.org/downloads/). The rasters are at a spatial resolution of 30 arc sec, which is approximately 1 kilometer squared, and records are between 1979-2013. Thus, there is data for over 900 million raster cells. There are several monthly/annual timeseries measures of temperature and precipitation. Here we focus on monthly mean temperature and total precipitation from CHELSA `version 1.2.1`.
+
+The CHELSA raster files for mean monthly temperature and total precipitation were accessed with bash scripts that took the general form:
+
+```
+#!/usr/bin/env bash 
+wget https://www.wsl.ch/lud/chelsa/data/timeseries/tmean/CHELSA_tmean_1979_01_V1.2.1.tif
+wget https://www.wsl.ch/lud/chelsa/data/timeseries/prec/CHELSA_prec_1979_01_V1.2.1.tif
+```
+
+Full bash scripts can be accessed from https://github.com/jonesor/compadre-climate. Below is an example of the mean temperature and total precipitation in August 1993 for each of the 30 arc sec grid cells.
+
+![](./plots/chelsa_raw/temp_aug93.jpeg)
+![](./plots/chelsa_raw/precip_aug93.jpeg) 
+
+---
+
+## 3. The mammal phylogeny
 
 The mammal phylogeny used in the current study is from the following paper:
 
-Upham, N. S., J. A. Esselstyn, and W. Jetz. 2019. Inferring the mammal tree: species-level sets of phylogenies for questions in ecology, evolution, and conservation. PLOS Biology. [https://doi.org/10.1371/journal.pbio.3000494](https://doi.org/10.1371/journal.pbio.3000494)
+Upham, N. S., Esselstyn, J. A., and Jetz, W. 2019. Inferring the mammal tree: species-level sets of phylogenies for questions in ecology, evolution, and conservation. PLOS Biology. [https://doi.org/10.1371/journal.pbio.3000494](https://doi.org/10.1371/journal.pbio.3000494)
 
 Here, the authors apply a 'backbone-and-patch' approach to a newly assembled 31-gene supermatrix and Bayesian inference to give credible sets of phylogenetic trees. Here we use the **maximum clade credibility tree**, which can be downloaded directly from [here](https://doi.org/10.5061/dryad.tb03d03). The maximum clade credibility tree used in this study is in the following data file:
 
@@ -93,19 +94,33 @@ Species names were first matched against the species names from the [Catalogue o
 
 ![](./plots/mam_LPD_tree.jpeg)
 
+---
 
+## 4. Life-history data
 
+Here we are using species-level life-history data as predictors of responses to the weather. The data used in this study is from the following publication:
 
+Conde, D. A., Staerk, J., Colchero, F., da Silva, R., Schöley, J., Baden, H. M., *et al.* 2019. Data gaps and opportunities for comparative and conservation biology. Proceedings of the National Academy of Sciences. [https://doi.org/10.1073/pnas.1816367116](https://doi.org/10.1073/pnas.1816367116)
 
+Here, the authors classify the availability of demographic information for >31,000 (97%) extant tetrapod species. This is the Demographic Species Knowlege Index (referred to as `dski` here). This study involved aggregating and centralising life-history information for all species possible, spanning data from 22 available data repositories. The full aggregated dataset can be found on [Dryad](https://doi.org/10.5061/dryad.nq02fm3).
 
+For the purpose of this study, we are interested in how key characteristics of the life-history of a species may influence their ability to withstand local changes in the weather. Generally, longer lived species with 'slow' life-history characteristics are expected to display weaker responses to changes in their environment. Here we use two commonly available demographic traits that generally typify life-history: longevity and litter size. 
 
+We use comparable metrics of these two demographic traits in subsequent analysis from several data repositories. However, the primary source for this information is the [Amniote Life-History Database](https://datarepository.wolframcloud.com/resources/Amniote-Life-History-Database), which we present species-level data from below and in `dski_exploration.R`, which includes **Maximum Longevity** and **Litter Size**.
 
+Across the mammals, there is an interesting pattern between maximum longevity and litter size, with the apparent presence of an upper limit or trade-off between the size of the litter size and maximum longevity:
 
+<img src="./plots/dski_raw/max_longevity_litter.jpeg" width="650" />
 
+We can also see this for different orders of the mammals, here presented for any order with over 40 species represented with data. The majority of data is from the rodents for example, where the same triangular pattern can be observed.
 
+![](./plots/dski_raw/max_longevity_litter_order.jpeg)
 
+Also stored in the Demographic Species Knowledge Index is species-level information on conservation status from the IUCN redlist. Here we have the threat status of all species in the data-set. This threat status can be an indication of recent and rapid population decline, and thus we also expect that there may be patterns between life-history traits and threat status. Here we can see the distribution of maximum longevity and litter size based on the IUCN redlist status:
 
+![](./plots/dski_raw/IUCN_lonlit.jpeg)
 
+There are some slight indications that longer living species that produce fewer offspring tend to be a higher threat status. Now, in the current study, we want to relate these demographic traits to observed population responses to the weather.
 
 
 
