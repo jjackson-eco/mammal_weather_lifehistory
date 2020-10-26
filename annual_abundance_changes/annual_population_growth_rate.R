@@ -34,8 +34,8 @@ load("../rawdata/mam.RData", verbose = T)
 mammal <- mam_IDblocks %>% 
   group_by(ID_block) %>% 
   group_modify(~{
-    t0 <- .$ln_abundance[-(length(.$ln_abundance))]
-    t1 <- .$ln_abundance[-1]
+    t0 <- .$ln_abundance[-(length(.$ln_abundance))] # get rid the last obs
+    t1 <- .$ln_abundance[-1]                        # get rid of the first obs
     
     mutate(., pop_growth_rate = c(t1/t0,NA))
   }) %>% 
@@ -114,12 +114,18 @@ ggplot(unusual_dat, aes(x = year, y = ln_abundance, group = ID_block)) +
 # Any time-series with a raw 0 in it
 raw0s <- mam_IDblocks %>% 
   group_by(ID_block) %>% 
-  mutate(raw0 = any(raw_abundance == 0)) %>%
+  mutate(raw0 = any(raw_abundance == 0),
+         prop_0 = length(which(raw_abundance == 0)) / n()) %>% # proportion of record that is 0
   ungroup() %>% 
   filter(raw0 == TRUE)
 
+# only the 0 rows
 only0s <- filter(raw0s, raw_abundance == 0)
 
+# unique IDs
+raw0_ID <- unique(raw0s$ID)
+
+# time-series plot
 ggplot(raw0s, aes(x = year, y = raw_abundance)) +
   geom_line() +
   geom_point(size = 0.6) +
@@ -132,14 +138,59 @@ ggplot(raw0s, aes(x = year, y = raw_abundance)) +
   ggsave("plots/annual_abundance/raw0_abundance.pdf",
          width = 450, height = 210, units = "mm")
 
-raw0_ID <- unique(raw0s$ID)
+# summary proportions
+raw0s %>% 
+  group_by(ID_block) %>% 
+  summarise(prop_0 = prop_0[1]) %>% 
+  summary(.)
 
+raw0s %>% 
+  group_by(ID_block) %>% 
+  summarise(prop_0 = prop_0[1]) %>% 
+  ggplot(aes(x = ID_block, y = prop_0)) +
+  geom_hline(yintercept = 0.32) + 
+  geom_text(aes(x = "4835_1", y = 0.37,label = "75% quantile"),) +
+  geom_col(fill = "lightsteelblue") +
+  labs(x = "Study ID and block", y = "Proportion of 0s in the raw abundance data") +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  ggsave("plots/annual_abundance/raw0_proportion.jpeg",
+         width = 200, height = 150, units = "mm")
+
+# Meta-data: Nothing obvious to distinguish unreliable studies
 meta_raw0 <- filter(mam_meta, ID %in% raw0_ID) %>% 
   dplyr::select(ID, Binomial, Common_name, Reference, Units, Method)
-View(meta_raw0)
+#View(meta_raw0)
+
+##_________________________________________________________________________________________________________________________________________________________________
+#### 5. Removing unreliable raw 0 data ####
+
+# Removed based on two things:
+#   1) Large proportion of data have 0 in abundance, guidance of 0.32, which is the 75% quantile.
+#   2) Continuous uninterrupted periods with 0s in the raw abundance data.
+
+# Full Record Unreliable
+full_unreliable <- c("10096_1", "17787_1", "23155_2", "23156_2", 
+                     "5835_1", "8103_1", "9863_1", "9888_1")
+
+# double check these - All good
+# mam_IDblocks %>% 
+#   filter(ID_block %in% full_unreliable) %>% 
+#   ggplot(aes(x = year, y = raw_abundance)) +
+#   geom_line() + geom_point(size = 0.4) +
+#   facet_wrap(~ID_block, nrow = 2, scales = "free_y")
+
+# Part of record unreliable - early part of record 9887_1
+years_unreliable_9887_1 <- (mam_IDblocks %>% filter(ID_block == "9887_1" 
+                                                    & raw_abundance == 0))$year
+
+## Restrict population growth data 
+mammal <- mammal %>% 
+  filter(!((ID_block %in% full_unreliable == TRUE) |
+           (ID_block == "9887_1" & year %in% years_unreliable_9887_1 == TRUE)))
 
 ##__________________________________________________________________________________________________
-#### 5. Save ####
+#### 6. Save ####
 
 save(mammal, file = "../rawdata/mammal.RData")
 
