@@ -270,3 +270,9 @@ tibble(biome_post, sim = 1:nrow(biome_post)) %>%
   ggsave(filename = "plots/phylogenetic_regression/repeated_obs_spatial/biome_effects.jpeg",
          width = 7, height = 10, units = "in", dpi = 500)
 
+### Temp base plot
+jpeg(filename = 'plots/phylogenetic_regression/repeated_obs_spatial/temp_base_posterior.jpeg',
+     width = 16, height = 13, units = "cm",res = 500)
+plot(temp_base)
+dev.off()
+
