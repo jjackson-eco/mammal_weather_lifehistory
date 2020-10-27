@@ -28,7 +28,7 @@ glimpse(mam_IDblocks)
 load("../rawdata/mam.RData", verbose = T)
 
 ##__________________________________________________________________________________________________
-#### 2. Calculate per-capita residual growth rate between time t and t+1 ####
+#### 2. Calculate per-capita growth rate between time t and t+1 ####
 
 # This will remove one year from each ID_block - Does this matter?
 mammal <- mam_IDblocks %>% 
@@ -51,7 +51,7 @@ ggplot(mammal, aes(x = pop_growth_rate)) +
   labs(x = "Per-capita population growth rate", 
        y = "Frequency") +
   theme_bw(base_size = 12) +
-  ggsave(filename = "plots/annual_abundance/pop_growth_rate_histogram.jpeg",
+  ggsave(filename = "plots/annual_abundance/annual_population_growth_rates/pop_growth_rate_histogram.jpeg",
          width = 6, height = 4, units = "in", dpi = 400)
 
 # 3b. Density dependence
@@ -64,7 +64,7 @@ ggplot(mammal, aes(x = ln_abundance, y = pop_growth_rate)) +
   theme_bw(base_size = 18) + 
   # theme(panel.grid.major = element_blank(),
   #       panel.grid.minor = element_blank()) +
-  ggsave(filename = "plots/annual_abundance/density_dependence_mam.jpeg",
+  ggsave(filename = "plots/annual_abundance/annual_population_growth_rates/density_dependence_mam.jpeg",
          width = 7, height = 7, units = "in", dpi = 400)
 
 # 3c. Abundance change distribution
@@ -77,13 +77,13 @@ ggplot(mammal, aes(x = 1, y = pop_growth_rate)) +
   geom_hline(data = mamquant, aes(yintercept = quant), linetype = "dashed") +
   scale_y_continuous(breaks = seq(0,8,by = 0.5)) +
   scale_color_viridis_c() +
-  labs(x = NULL, y = "Annual abundance change") +
+  labs(x = NULL, y = "Per-capita population growth rate") +
   theme_bw(base_size = 14) +
   theme(panel.grid = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  ggsave("plots/annual_abundance/annual_abundance_change_distribution.jpeg",
-         width = 12, height = 15, units = "cm",dpi = 500)
+  ggsave("plots/annual_abundance/annual_population_growth_rates/population_growth_rate_distribution.jpeg",
+         width = 12, height = 15, units = "cm", dpi = 500)
 
 ##__________________________________________________________________________________________________
 #### 4. Unusual Abundance changes ####
@@ -108,8 +108,8 @@ ggplot(unusual_dat, aes(x = year, y = ln_abundance, group = ID_block)) +
   theme_bw(base_size = 15) +
   theme(strip.background = element_blank(),
         panel.grid = element_blank()) +
-  ggsave("plots/annual_abundance/unusual_abundance_changes.pdf",
-         width = 300, height = 297, units = "mm")
+  ggsave("plots/annual_abundance/annual_population_growth_rates/unusual_abundance_changes.jpeg",
+         width = 300, height = 297, units = "mm", dpi = 500)
 
 # Any time-series with a raw 0 in it
 raw0s <- mam_IDblocks %>% 
@@ -135,8 +135,8 @@ ggplot(raw0s, aes(x = year, y = raw_abundance)) +
   theme_bw(base_size = 12) +
   theme(strip.background = element_blank(),
         panel.grid = element_blank()) +
-  ggsave("plots/annual_abundance/raw0_abundance.pdf",
-         width = 450, height = 210, units = "mm")
+  ggsave("plots/annual_abundance/annual_population_growth_rates/raw0_abundance.jpeg",
+         width = 450, height = 210, units = "mm", dpi = 500)
 
 # summary proportions
 raw0s %>% 
@@ -149,12 +149,12 @@ raw0s %>%
   summarise(prop_0 = prop_0[1]) %>% 
   ggplot(aes(x = ID_block, y = prop_0)) +
   geom_hline(yintercept = 0.32) + 
-  geom_text(aes(x = "4835_1", y = 0.37,label = "75% quantile"),) +
+  geom_text(aes(x = "4835_1", y = 0.40,label = "75% quantile"),) +
   geom_col(fill = "lightsteelblue") +
   labs(x = "Study ID and block", y = "Proportion of 0s in the raw abundance data") +
   coord_flip() +
   theme_bw(base_size = 14) +
-  ggsave("plots/annual_abundance/raw0_proportion.jpeg",
+  ggsave("plots/annual_abundance/annual_population_growth_rates/raw0_proportion.jpeg",
          width = 200, height = 150, units = "mm")
 
 # Meta-data: Nothing obvious to distinguish unreliable studies

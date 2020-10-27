@@ -62,7 +62,7 @@ propsig_plot <- mam_acf %>%
   theme_bw(base_size = 13)
 
 ggsave(grid.arrange(acf_plot, propsig_plot, ncol = 1),
-       filename = "plots/annual_abundance/temporal_autocorrelation.jpeg",
+       filename = "plots/annual_abundance/timeseries_model_testing/temporal_autocorrelation.jpeg",
        width = 10, height = 11, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
@@ -112,7 +112,7 @@ ggplot(mam_ARmodels, aes(y = dAIC, x = factor(n_gr),
            label = paste(round(length(which(mam_ARmodels$dAIC <= -2))/nrow(mam_ARmodels) * 100, 1),
                          "% of timeseries records\nhave AIC difference <= -2")) +
   theme_bw(base_size = 12) +
-  ggsave("plots/annual_abundance/AIC_AR.jpeg",
+  ggsave("plots/annual_abundance/timeseries_model_testing/AIC_AR.jpeg",
          width = 8, height = 5, units = "in",
          dpi = 400)
 

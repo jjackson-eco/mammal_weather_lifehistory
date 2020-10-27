@@ -49,7 +49,7 @@ ggplot(test, aes(x = year, y = ln_abundance)) +
   geom_point(size = 2) +
   labs(x = "Year", y = "ln Abundance") +
   theme_bw(base_size = 7) +
-  ggsave("plots/annual_abundance/fossa_timeseries.jpeg",
+  ggsave("plots/annual_abundance/timeseries_gaps/fossa_timeseries.jpeg",
          width = 3, height = 1.75, units = "in", dpi = 400)
 
 tyear <- test$year
@@ -122,7 +122,7 @@ propbx <- ggplot(mam_gaps, aes(y = prop_1year_transitions)) +
         panel.grid.minor = element_blank())
 
 ggsave(grid.arrange(prophist, propbx, ncol = 2, widths = c(2,1)),
-       filename = "plots/annual_abundance/Proportion_1year_transitions.jpeg",
+       filename = "plots/annual_abundance/timeseries_gaps/Proportion_1year_transitions.jpeg",
         width = 6, height = 4, units = "in", dpi = 400)
 
 # 25th percentile is 0.66667 i.e. 2/3rds of the record in 1-year transitions
@@ -148,7 +148,7 @@ ggplot(mam_gaps, aes(x = no_consecutive_blocks, y = longest_block,
   guides(colour = guide_colorbar(barheight = 8, barwidth = 1.4)) +
   theme_bw(base_size = 11) +
   theme(panel.grid = element_blank()) +
-  ggsave(filename = "plots/annual_abundance/Consecutive_blocks.jpeg",
+  ggsave(filename = "plots/annual_abundance/timeseries_gaps/Consecutive_blocks.jpeg",
          width = 6, height = 4, units = "in", dpi = 400)
   
 ggplot(filter(mam_gaps, prop_1year_transitions >= 2/3), 
@@ -163,7 +163,7 @@ ggplot(filter(mam_gaps, prop_1year_transitions >= 2/3),
   guides(colour = guide_colorbar(barheight = 8, barwidth = 1.4)) +
   theme_bw(base_size = 11) +
   theme(panel.grid = element_blank()) +
-  ggsave(filename = "plots/annual_abundance/Consecutive_blocks_highproportion.jpeg",
+  ggsave(filename = "plots/annual_abundance/timeseries_gaps/Consecutive_blocks_highproportion.jpeg",
          width = 6, height = 4, units = "in", dpi = 400)
 
 #____________________________________________________________
@@ -192,7 +192,7 @@ for(i in 1:10){
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
           strip.background = element_blank()) +
-    ggsave(filename = paste0("plots/annual_abundance/record_timelines/", i,
+    ggsave(filename = paste0("plots/annual_abundance/timeseries_gaps/record_timelines/", i,
                              "_consecutive_block_timeline.jpeg"),
            width = 210, height = 297, units = "mm", dpi = 400)
 }

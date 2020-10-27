@@ -88,11 +88,11 @@ orth_resid <- ggplot(dat_proj, aes(x, y)) +
   theme_bw(base_size = 12)
 
 ggsave(grid.arrange(basic, vert_resid, orth_resid, ncol = 3),
-       filename = "plots/annual_abundance/detrending_test.jpeg",
+       filename = "plots/annual_abundance/linear_trend_and_detrending/detrending_test.jpeg",
        width = 12, height = 4, units = "in", dpi = 400)
 
 ggsave(grid.arrange(basic, vert_resid, ncol = 2),
-       filename = "plots/annual_abundance/detrending_linear.jpeg",
+       filename = "plots/annual_abundance/linear_trend_and_detrending/detrending_linear.jpeg",
        width = 8, height = 4, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________

@@ -78,7 +78,7 @@ mam_detrend %>%
   coord_flip() +
   theme_bw(base_size = 17) +
   theme(axis.text.y = element_text(size = 12)) +
-  ggsave("plots/annual_abundance/linear_abundance_coefficients.jpeg",
+  ggsave("plots/annual_abundance/linear_trend_and_detrending/linear_abundance_coefficients.jpeg",
          width = 9, height = 13, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
@@ -118,7 +118,7 @@ pop_growth <- ggplot(mammal, aes(x = pop_growth_rate)) +
   theme_bw(base_size = 22)
 
 ggsave(grid.arrange(resid_ab, pop_growth, ncol = 1),
-       filename = "plots/annual_abundance/abundance_histograms.jpeg",
+       filename = "plots/annual_abundance/linear_trend_and_detrending/abundance_histograms.jpeg",
        width = 17, height = 20, units = "in", dpi = 400)
 
 # 5b. Evidence for density dependence
@@ -130,7 +130,7 @@ ggplot(mammal, aes(x = residual_abundance, y = pop_growth_rate)) +
   theme_bw(base_size = 18) + 
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
-  ggsave(filename = "plots/annual_abundance/density_dependence_lpd.jpeg",
+  ggsave(filename = "plots/annual_abundance/linear_trend_and_detrending/density_dependence_lpd.jpeg",
          width = 7, height = 7, units = "in", dpi = 400)
 
 # 5c. Study length update

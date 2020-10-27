@@ -58,7 +58,7 @@ wtd_ts <- ggplot(wtd, aes(x = year, y = raw_abundance)) +
 ggdraw(wtd_ts) +
   draw_plot({wtd_map},x = 0.54, y = 0.59,
             width = 0.46, height = 0.46) +
-  ggsave(filename = "plots/annual_abundance/wtd_raw.jpeg",
+  ggsave(filename = "plots/annual_abundance/annual_abundance_options/wtd_raw.jpeg",
          width = 7, height = 5, units = "in", dpi = 400)
   
 ##__________________________________________________________________________________________________
@@ -100,7 +100,7 @@ resid_ab_recenter <- ggplot(wtd_residab, aes(x = year, y = resid_ab_10)) +
   theme_bw(base_size = 12)
 
 ggsave(grid.arrange(resid_ab, resid_ab_recenter, ncol = 1),
-       filename = "plots/annual_abundance/option1_center_resid_ab.jpeg",
+       filename = "plots/annual_abundance/annual_abundance_options/option1_center_resid_ab.jpeg",
        width = 7, height = 8, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
@@ -113,10 +113,18 @@ pgr_1989_resid <- tibble(x = 1989, xend = 1990,
   mutate(pgr = yend - y)
 pgr_1989_resid
 
-resid_ab_popchange <- 
+resid_ab_popchange <- ggplot(wtd_residab, aes(x = year, y = resid_ab)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point(size = 3) +
+  geom_segment(data = pgr_1989_resid, aes(x = x, y = y, xend = xend, yend = yend)) +
+  annotate("text", x = 1990, y = -0.31,
+           label = expression(paste(delta[1989], " = ", R[1990] - R[1989], 
+                                    " = ", -0.24 -0.19, " = ", -0.43))) +
+  labs(x = "Year (t)", y = "Residual abundance (R)") +
+  theme_bw(base_size = 12)
 
 ggsave(grid.arrange(resid_ab, resid_ab_popchange, ncol = 1),
-       filename = "plots/annual_abundance/option2_resid_ab_popchange.jpeg",
+       filename = "plots/annual_abundance/annual_abundance_options/option2_resid_ab_popchange.jpeg",
        width = 7, height = 8, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
@@ -137,7 +145,7 @@ ggplot(wtd_residab, aes(x = year, y = ln_abundance)) +
                                     " = ", frac(11.6, 12.1), " = ", 0.96))) +
   labs(x = "Year (t)", y = "ln Number of Deer (X)") +
   theme_bw(base_size = 12) +
-  ggsave(filename = "plots/annual_abundance/option3_ln_ab.jpeg",
+  ggsave(filename = "plots/annual_abundance/annual_abundance_options/option3_ln_ab.jpeg",
          width = 7, height = 5, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
@@ -149,7 +157,7 @@ ggplot(wtd_residab, aes(x = year, y = resid_ab)) +
   geom_line(size = 1) +
   labs(x = "Year (t)", y = "Stationary abundance (y)") +
   theme_bw(base_size = 12) +
-  ggsave("plots/annual_abundance/option4_timeseries.jpeg",
+  ggsave("plots/annual_abundance/annual_abundance_options/option4_timeseries.jpeg",
          width = 7, height = 5, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
@@ -195,7 +203,7 @@ mam_pgr <- mam_IDblocks %>%
 glimpse(mam_pgr)
 
 ## Plotting
-jpeg(filename = "plots/annual_abundance/pop_growth_rate_correlations.jpeg",
+jpeg(filename = "plots/annual_abundance/annual_abundance_options/pop_growth_rate_correlations.jpeg",
      width = 10, height = 10, units = "in",res = 400)
 pairs.panels(dplyr::select(mam_pgr, contains("option")),
              smooth = FALSE, lm = TRUE,  ellipses = FALSE)
