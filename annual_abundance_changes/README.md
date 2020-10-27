@@ -4,7 +4,7 @@
 
 ---
 
-This mardown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of detrending annual abundance data from the Living Planet Database for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section. We initially planned to use a detrending method to account for temporal trends in the abundance time series, but instead now focus on a single model with temporal effects included. Therefore, there are several unused scripts in this directory exploring these different approaches.
+This markdown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of detrending annual abundance data from the Living Planet Database for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section. We initially planned to use a detrending method to account for temporal trends in the abundance time series, but instead now focus on a single model with temporal effects included. Therefore, there are several unused scripts in this directory exploring these different approaches.
 
 There are 3 main sections and scripts:
 
@@ -14,7 +14,7 @@ There are 3 main sections and scripts:
 
 ### `timeseries_gap_exploration.R`
 
-For our record question of how weather influencs annual population changes in vertebrates, one potential problem with the vertebrate abundance data from the Living Planet Database is that there are gaps in the timeseries. The number of these gaps and the way we deal with them is important. This first section is intended to explore the pervasiveness of these gaps across our records, and deal with them in an appropriate way for further analysis.
+For our record question of how weather influences annual population changes in vertebrates, one potential problem with the vertebrate abundance data from the Living Planet Database is that there are gaps in the timeseries. The number of these gaps and the way we deal with them is important. This first section is intended to explore the pervasiveness of these gaps across our records, and deal with them in an appropriate way for further analysis.
 
 We first have to restrict the data to only include records that have sufficient data with which to explore annual changes abundance in relation to CHELSA weather data. We only include observations that overlap with the CHELSA data i.e. between 1979-2013, and those that have 5 or more years (first pass) of abundance data:
 
@@ -30,7 +30,7 @@ mam <- mam %>%
 
 Now we present the example of a population timeseries with 5 observations of population density from the Fossa (Cryptoprocta ferox), which is endemic to Madagascar. There are 5 observations between 2008 and 2013.
 
-<img src="../plots/annual_abundance/fossa_timeseries.jpeg" width="600"/>
+<img src="../plots/annual_abundance/timeseries_gaps/fossa_timeseries.jpeg" width="600"/>
 
 However, we have a gap in the data in 2009. We could interpolate this value when we detrend the timeseries, but since we are investigating changes in annual abundance, we are actually interested in annual deviation in abundance. Therefore, a better strategy is to map these gaps across all of our records and investigate if there is a way of splitting the timeseries up when we investigate the effect of weather.
 
@@ -66,21 +66,21 @@ mam_blocks <- mam %>%
 ```
 ### Time series gap summaries
 
-Encouragingly, the majority of the data is occuring in continuous blocks with 1-year transitions. Here we have the distribution of the proportion of each record that is occuring in 1-year transitions. We can see that the majority have all their data as 1-year transitions. Furthermore >76% (870) of the records have more than 2 thirds of their data in 1-year transitions.
+Encouragingly, the majority of the data is occurring in continuous blocks with 1-year transitions. Here we have the distribution of the proportion of each record that is occurring in 1-year transitions. We can see that the majority have all their data as 1-year transitions. Furthermore >76% (870) of the records have more than 2 thirds of their data in 1-year transitions.
 
-<img src="../plots/annual_abundance/Proportion_1year_transitions.jpeg" width="700" />
+<img src="../plots/annual_abundance/timeseries_gaps/Proportion_1year_transitions.jpeg" width="700" />
 
-However, this doesn't quite give us the full picture because we also need to know how many blocks each timeseries occurs in. Here we plot the number of blocks that each record occurs in against the number of years in its longest block. The colour denotes the proportion of the timeseries occuring in 1-year transitions.
+However, this doesn't quite give us the full picture because we also need to know how many blocks each timeseries occurs in. Here we plot the number of blocks that each record occurs in against the number of years in its longest block. The colour denotes the proportion of the timeseries occurring in 1-year transitions.
 
-<img src="../plots/annual_abundance/Consecutive_blocks.jpeg" width="700" />
+<img src="../plots/annual_abundance/timeseries_gaps/Consecutive_blocks.jpeg" width="700" />
 
-So it does appear that there are some records that are primarily in timeseries with 1-year transitions (lighter colours), but do occur over quite a few blocks of observations. We can also plot these blocks of observations as timelines, where we see the years of data for each record ID. I have split these up based on the number of blocks that the timeseries occurs in for ease. Here first you have the records that are just occuring in 1 consecutive block. Points and lines indicate where there is data for each record ID (row).
+So it does appear that there are some records that are primarily in timeseries with 1-year transitions (lighter colours), but do occur over quite a few blocks of observations. We can also plot these blocks of observations as timelines, where we see the years of data for each record ID. I have split these up based on the number of blocks that the timeseries occurs in for ease. Here first you have the records that are just occurring in 1 consecutive block. Points and lines indicate where there is data for each record ID (row).
 
-<img src="../plots/annual_abundance/record_timelines/1_consecutive_block_timeline.jpeg" width="700" />
+<img src="../plots/annual_abundance/timeseries_gaps/record_timelines/1_consecutive_block_timeline.jpeg" width="700" />
 
 These are the 'gold standard' records that occur solely in one consecutive chain of annual observations (with more than 10 years of data). However, the picture becomes a little bit more complex when we look at records that occur in a greater number of blocks. Here you can see the records that occur in 5 blocks.
 
-<img src="../plots/annual_abundance/record_timelines/5_consecutive_block_timeline.jpeg" width="700" />
+<img src="../plots/annual_abundance/timeseries_gaps/record_timelines/5_consecutive_block_timeline.jpeg" width="700" />
 
 We can see here that there are scenarios where there are longer consecutive blocks of observations, with smaller satellite blocks that have fewer observations. Furthermore, we can see in records with more blocks, there are situations where there are several separate blocks of 1-year transitions, but that many blocks have less than 5 observations.
 
@@ -149,7 +149,7 @@ ci_median <- qnorm(0.975)/sqrt(14) # confidence limit for the median record with
 
 We can then plot out the autocorrelation for each of the studies, and the proportion that are significant at each time lag. Here you have the absolute correlation coefficient at each lag for each record, and the dashed line is the significance confidence level for the median study length. Then you have the proportion of the studies at each lag that are significant based on their record length.
 
-<img src="../plots/annual_abundance/temporal_autocorrelation.jpeg" width="700"/>
+<img src="../plots/annual_abundance/timeseries_model_testing/temporal_autocorrelation.jpeg" width="700"/>
 
 So it seems like we have good evidence from a reasonable proportion of records (>25%) that there is temporal autocorrelation at a lag of one year. However, beyond a single year of lag, the absolute correlation and proportion of significant records drops substantially. This is most likely due to the fact we are dealing with annual data, and the restrictive sample size of each record.
 
@@ -178,9 +178,9 @@ mam_ARmodels <- mam_IDblocks %>%
          n_gr = n_obs - (n_obs %% 5))
 ```
 
-The AIC here gives us the predictive performance of the AR(1) and WN models for each record. Lower AIC values indiciate improved predictive performance, and we consider a difference of >=2 to indicate improved predictive performance. Here are the results across the studies, grouped by the length of the study in 5-year bins. You have the difference in AIC for each study (points) as well as a density violin across each bin. The black horizontal line is a difference of 2.
+The AIC here gives us the predictive performance of the AR(1) and WN models for each record. Lower AIC values indicate improved predictive performance, and we consider a difference of >=2 to indicate improved predictive performance. Here are the results across the studies, grouped by the length of the study in 5-year bins. You have the difference in AIC for each study (points) as well as a density violin across each bin. The black horizontal line is a difference of 2.
 
-<img src="../plots/annual_abundance/AIC_AR.jpeg" width="700"/>
+<img src="../plots/annual_abundance/timeseries_model_testing/AIC_AR.jpeg" width="700"/>
 
 We can see that just under 50% of the records have statistical support for an AR(1) model compared to white noise. This suggests that it is important to incorporate lag 1 autocorrelation in abundance when exploring annual weather effects.
 
@@ -194,7 +194,7 @@ We can see that just under 50% of the records have statistical support for an AR
 
 ### `annual_population_growth_rate.R`
 
-Using the abundance data that has been split in to consecutive blocks, we will calculate per-capita annual population growth rates, which we will then relate to annual weather data. This is calculated as r = N~t+1~/N~t~ , where N is the abundance on the ln scale at time t. We store the results in the `mammal` dataframe for future reference.
+Using the abundance data that has been split in to consecutive blocks, we will calculate per-capita annual population growth rates, which we will then relate to annual weather data. This is calculated as r = N~t+1~/N~t~ , where N is the abundance on the ln scale at time t. We store the results in the `mammal` data frame for future reference.
 
 ```
 mammal <- mam_IDblocks %>% 
@@ -211,13 +211,72 @@ mammal <- mam_IDblocks %>%
 
 This per-capita growth rate gives us a response variable with which to explore weather effects. The per-capita growth rates are distributed as follows:
 
-<img src="../plots/annual_abundance/pop_growth_rate_histogram.jpeg" width="600"/>
+<img src="../plots/annual_abundance/annual_population_growth_rates/pop_growth_rate_histogram.jpeg" width="600"/>
 
 We can also explore the relationship between population growth rate and abundance, which gives us an indication of how density dependence may be acting across our abundance timeseries. Each point here is one year (t) of each record.
 
-<img src="../plots/annual_abundance/density_dependence_mam.jpeg" width="700"/>
+<img src="../plots/annual_abundance/annual_population_growth_rates/density_dependence_mam.jpeg" width="700"/>
 
-We can see evidence of a slight negative trend between abudance and population growth, indicative of negative density dependence.
+We can see evidence of a slight negative trend between abundance and population growth, indicative of negative density dependence.
+
+### Odd population growth rates and 0's in the raw data
+
+On inspection of the histogram of our per-capita population growth rates, while the vast majority of the data falls within a reasonable range, we can see that there are a number of odd population growth rates, at both tails of the distribution. In order to explore this in a little bit more detail, lets have a look at the density of these per-capita population growth rates.
+
+<img src="../plots/annual_abundance/annual_population_growth_rates/population_growth_rate_distribution.jpeg" width="700"/>
+
+We can see that the vast vast majority of the data is centered around a population growth rate of 1 indicating no annual change. The dashed lines here are the 1% and 99% quantiles of the population growth rates, indicating that 98% of the data is occurring between a population growth rate of **0.54 and 1.9**. This makes sense - in a single year we perhaps do not expect that many timeseries observations display a change in abundance great than a factor of 2, which if true would indicate very very rapid population changes.
+
+We can see that there are a number of points outside of this range however, and also some annual population changes well outside of this range that deserve some exploration. So, we can pull out all of the timeseries observations where there these per-capita population growth rates lying outside of this range:
+
+```
+# The quantiles
+mamquant <- tibble(quant = quantile(mammal$pop_growth_rate, probs = c(0.01,0.99)))
+
+# Pull out the ID blocks below-above the 1%-99% quantiles 
+unusual_pop_growth <- mammal %>% 
+  filter(pop_growth_rate > mamquant$quant[2] | 
+           pop_growth_rate < mamquant$quant[1]) 
+
+# and the raw abundance changes
+unusual_dat <- mam_IDblocks %>% 
+  filter(ID_block %in% unusual_pop_growth$ID_block == TRUE)
+```
+
+And then we can have a look at the timeseries where there are these rapid population changes. Below is the timeseries of ln Abundance for all records that have at least one population growth rate outside of the normal range. Each panel is a record, and the black line is their full timeseries. The coloured points are the years with odd population growth rate observations, where the colour of the point is the population growth rate.
+
+<img src="../plots/annual_abundance/annual_population_growth_rates/unusual_abundance_changes.jpeg" width="900"/>
+
+For quite a few of these records, we can see that the rapid increases/decreases are real and for the populations, and probably just because of quite rapid fluctuations in the population from year to year. A good example of a record like this is **18740_1**. However, there are several suspicious examples. It seems there are some records where the ln abundance drops to 1, which indicates a **raw abundance of 0**. Here, because of the log transformation, this means there are huge huge jumps in the population when it drops to 0. Furthermore, we are unsure whether these are *true* 0s, or instead reflect sampling variation i.e. years where individuals were not recorded and should have missing data but have been recorded as 0 by accident. A good example of a key candidate for this is record **9888_1**, where there are biannual drops in the population to 0. This is highly unlikely, especially because this is a population of lions, for which abundance is expected to be more stable that 5-fold changes in abundance in a single year.
+
+The key seems to be in abundance timeseries where there are 0s. Indeed, when we restrict to look at only records with 0s in the raw abundance data, the very same populations come up. Here are the abundance timeseries for records with raw 0s:
+
+<img src="../plots/annual_abundance/annual_population_growth_rates/raw0_abundance.jpeg" width="1000"/>
+
+The 0 abundances map very well to the extreme population growth rates. Now we need to find a reliable way of removing suspicious records, because unfortunately detailed information about the sampling regime is not given in the meta data `mam_meta`. 
+
+The really extreme population growth rates seem to be coming from records that have a large proportion of 0s, and those with long continuous periods with raw 0s. Lets look at the proportion of raw abundance data that is 0 in all of these records, with the 75% quantile showed with the vertical line:
+
+<img src="../plots/annual_abundance/annual_population_growth_rates/raw0_proportion.jpeg" width="800"/>
+
+Similar suspects are present, including **9888_1**. So we will use this criteria to restrict the raw population growth data for our models. More specifically, **we removed raw 0s from records where there was >30% of the record with 0s**. So, we will remove any observations with a 0. But then, we need to retain our criteria of >10 years of population data for our analysis. This means that the majority of these suspect records need to be deleted, except for **9887_1**, for which the first half only needs to be deleted.
+
+```
+# Full Record Unreliable
+full_unreliable <- c("10096_1", "17787_1", "23155_2", "23156_2", 
+                     "5835_1", "8103_1", "9863_1", "9888_1")
+
+# Part of record unreliable - early part of record 9887_1
+years_unreliable_9887_1 <- (mam_IDblocks %>% filter(ID_block == "9887_1" 
+                                                    & raw_abundance == 0))$year
+
+## Restrict population growth data 
+mammal <- mammal %>% 
+  filter(!((ID_block %in% full_unreliable == TRUE) |
+           (ID_block == "9887_1" & year %in% years_unreliable_9887_1 == TRUE)))
+```
+
+This gives `mammal`, our prepared data for analysis with annual per-capita population growth rates from ln Abundance
 
 </details>
 
