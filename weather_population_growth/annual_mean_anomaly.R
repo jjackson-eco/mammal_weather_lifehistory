@@ -238,7 +238,6 @@ ggsave(grid.arrange(temp_lat, precip_lat, ncol = 2, widths = c(7,6)),
        filename = "plots/weather_pop_growth/coef_lat_mnanom_5km.jpeg",
        width = 15, height = 11, units = "in", dpi = 400)
 
-
 ##__________________________________________________________________________________________________
 #### 6. Save data ####
 
