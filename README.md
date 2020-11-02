@@ -98,29 +98,41 @@ Species names were first matched against the species names from the [Catalogue o
 
 ## 4. Life-history data
 
-Here we are using species-level life-history data as predictors of responses to the weather. The data used in this study is from the following publication:
+Here we are using species-level life-history data as predictors of responses to the weather. The data used in this study is from the following two publications:
 
 Conde, D. A., Staerk, J., Colchero, F., da Silva, R., Schöley, J., Baden, H. M., *et al.* 2019. Data gaps and opportunities for comparative and conservation biology. Proceedings of the National Academy of Sciences. [https://doi.org/10.1073/pnas.1816367116](https://doi.org/10.1073/pnas.1816367116)
 
-Here, the authors classify the availability of demographic information for >31,000 (97%) extant tetrapod species. This is the Demographic Species Knowlege Index (referred to as `dski` here). This study involved aggregating and centralising life-history information for all species possible, spanning data from 22 available data repositories. The full aggregated dataset can be found on [Dryad](https://doi.org/10.5061/dryad.nq02fm3).
+Myhrvold, N.P., Baldridge, E., Chan, B., Sivam, D., Freeman, D.L. and Ernest, S.M., 2015. An amniote life‐history database to perform comparative analyses with birds, mammals, and reptiles: Ecological Archives E096‐269. Ecology. [https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1890/15-0846R.1](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1890/15-0846R.1)
 
-For the purpose of this study, we are interested in how key characteristics of the life-history of a species may influence their ability to withstand local changes in the weather. Generally, longer lived species with 'slow' life-history characteristics are expected to display weaker responses to changes in their environment. Here we use two commonly available demographic traits that generally typify life-history: longevity and litter size. 
+In the first, the authors classify the availability of demographic information for >31,000 (97%) extant tetrapod species. This is the Demographic Species Knowlege Index (referred to as `dski` here). This study involved aggregating and centralising life-history information for all species possible, spanning data from 22 available data repositories. The full aggregated dataset can be found on [Dryad](https://doi.org/10.5061/dryad.nq02fm3).
 
-We use comparable metrics of these two demographic traits in subsequent analysis from several data repositories. However, the primary source for this information is the [Amniote Life-History Database](https://datarepository.wolframcloud.com/resources/Amniote-Life-History-Database), which we present species-level data from below and in `dski_exploration.R`, which includes **Maximum Longevity** and **Litter Size**.
+The second is the Amniote Life-History Database (referred to as `alhd` here), which is a large single repository for life-history data from the amniotes, which can be downloaded from [here](https://datarepository.wolframcloud.com/resources/Amniote-Life-History-Database).
+
+For the purpose of this study, we are interested in how key characteristics of the life-history of a species may influence their ability to withstand local changes in the weather. Generally, longer lived species with 'slow' life-history characteristics are expected to display weaker responses to changes in their environment. Here we use three commonly available  traits that generally typify life-history: longevity, litter size and body size. 
+
+For longevity and litter size, we use comparable metrics of these two demographic traits from several data repositories. The three sources for this information were the [Amniote Life-History Database](https://datarepository.wolframcloud.com/resources/Amniote-Life-History-Database), [PanTHERIA](http://esapubs.org/archive/ecol/E090/184/) and [AnAge](https://www.genomics.senescence.info/species/). For the body size data, we use only the Amniote Life-History Database.
+
+We present species-level data aggregated and summarised from the databases below and in `lifehistory_exploration.R`. Our key traits of interest are **Maximum Longevity**, **Litter Size** and **Adult bodymass**. Where multiple records were available for a single species, we calculated the maximum of the maximum longevity values, and the mean of litter size/adult bodymass.
+
+> We used natural log and z-transformed variables for **Maximum Longevity**, **Litter Size** and **Adult bodymass** in all subsequent analyses.
 
 Across the mammals, there is an interesting pattern between maximum longevity and litter size, with the apparent presence of an upper limit or trade-off between the size of the litter size and maximum longevity:
 
-<img src="./plots/dski_raw/max_longevity_litter.jpeg" width="650" />
+<img src="./plots/lifehistory_raw/max_longevity_litter.jpeg" width="650" />
 
 We can also see this for different orders of the mammals, here presented for any order with over 40 species represented with data. The majority of data is from the rodents for example, where the same triangular pattern can be observed.
 
-![](./plots/dski_raw/max_longevity_litter_order.jpeg)
+![](./plots/lifehistory_raw/max_longevity_litter_order.jpeg)
 
 Also stored in the Demographic Species Knowledge Index is species-level information on conservation status from the IUCN redlist. Here we have the threat status of all species in the data-set. This threat status can be an indication of recent and rapid population decline, and thus we also expect that there may be patterns between life-history traits and threat status. Here we can see the distribution of maximum longevity and litter size based on the IUCN redlist status:
 
-![](./plots/dski_raw/IUCN_lonlit.jpeg)
+![](./plots/lifehistory_raw/IUCN_lonlit.jpeg)
 
-There are some slight indications that longer living species that produce fewer offspring tend to be a higher threat status. Now, in the current study, we want to relate these demographic traits to observed population responses to the weather.
+For patterns of bodymass, we see a clear general positive relationship between body size and maximum longevity. Bigger bodied mammals live for longer. However, the relationship between litter size and bodymass is less clear. We do expect that most very large organisms to have small litters though on average. Here are these relationships for the scaled, ln-transformed variables.
+
+<img src="./plots/lifehistory_raw/bodymass_lonlit.jpeg" width="900" />
+
+There are some slight indications that longer living species that produce fewer offspring tend to be a higher threat status. Now, in the current study, we want to relate these life-history traits to observed population responses to the weather.
 
 
 
