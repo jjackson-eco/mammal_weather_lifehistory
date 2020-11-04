@@ -87,14 +87,6 @@ Now we have model coefficients for each of the 502 10> year records for the terr
 
 As with the raw data, we can see again from this that there doesn't seem to be a consistent pattern of weather effects on population growth rates for either precipitation or temperature. The same goes for trend effects. This is indicative of population-specific (or other level i.e phylogentic or spatial) responses. 
 
-We can also start to explore the hypotheses of the study by looking at these coefficients across different taxanomic groups, ecological realms and latitude.
-
-<img src="../plots/weather_pop_growth/coef_order_mnanom_5km.jpeg" width="700" />
-<img src="../plots/weather_pop_growth/coef_realm_mnanom_5km.jpeg" width="700" />
-<img src="../plots/weather_pop_growth/coef_lat_mnanom_5km.jpeg" width="700" />
-
-These coefficients or effects sizes form the basis of our meta-regression approach across taxa.
-
 </details>
 
 ## 2. Other annual weather variables and scales
@@ -186,5 +178,46 @@ We can also have a look at how the weather coefficients we obtained are differen
 Finally, we want to look at whether the abundance and trend coefficients calculated when each weather variable was in the model are consistent across the weather variables. Here we have a correlation matrix for the abundance (left) and trend (right) coefficients for all 16 weather variables. You can see that they are very highly correlated across weather variables.
 
 <img src="../plots/weather_pop_growth/abundance_trend_cormat.jpeg" width="1000" />
+
+</details>
+
+
+## 3. Hypothesis exploration plots plots
+<details>
+  <summary>Click here to expand</summary>
+  
+With weather effect for each record, we can start to explore the hypotheses of the study by looking at these coefficients across different taxanomic groups, ecological biomes, latitudes, and with respect to life-history variables.
+
+### Spatial variables
+
+Here we look at the distribution of the weather coefficients with respect to the biome and the latitude, both of which are often important in macro-ecological patterns. We would predict that generally, as the climate is more stable in tropical regions, the magnitude population responses to weather at low latitudes and tropical biomes is lower, with more extreme population changes in regions where weather is more changeable. However, exactly because the climate is more stable, we may also expect the opposite.
+
+<img src="../plots/weather_pop_growth/coef_biome_mnanom_5km.jpeg" width="700" />
+<img src="../plots/weather_pop_growth/coef_lat_mnanom_5km.jpeg" width="700" />
+
+It does certainly look like there are some biomes with more extreme population responses to the weather. Furthermore there seems to be  wider spread of population responses at the most extreme latitudes.
+
+### Evolutionary history
+
+We also could predict that different taxonomic groups, and shared evolutionary history may be responsible for an organisms response to the weather, due to shared adaptation to changes in the environment. Here you have the coefficients distributions for each order of mammals in the study.
+
+<img src="../plots/weather_pop_growth/coef_order_mnanom_5km.jpeg" width="700" />
+
+We can also look at how these weather coefficients are distributed around the phylogenetic tree for the mammals. Do we see covariance in population responses to weather between closely related species?
+
+<img src="../plots/weather_pop_growth/mam_temp_tree.jpeg" width="800" />
+<img src="../plots/weather_pop_growth/mam_precip_tree.jpeg" width="800" />
+
+It seems in the case of temperature that there may be some cases where there is some covariance between the population responses of closes related taxa (particularly in the top left with the rodents). However, generally these patterns are hard to decipher.
+
+### Life-history
+
+We also may expect that demographic traits, and traits related to an organisms mode of life, their life-history, has a part to play in the response to changes in the weather. We can look at the temperature and precipitation coefficients with respect to our three key life-history variables maximum longevity, litter size and adult body mass.
+
+<img src="../plots/weather_pop_growth/life_history_weathercoef.jpeg" width="800" />
+
+Again it is hard to say anything clear from this, but there may be some patterns worth exploring.
+
+These coefficients or effects sizes form the basis of our meta-regression approach across taxa, where we will explore these coefficient patterns in detail.
 
 </details>
