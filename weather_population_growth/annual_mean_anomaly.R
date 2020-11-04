@@ -188,29 +188,29 @@ ggsave(grid.arrange(temp_sp, precip_sp, ncol = 2, widths = c(6,4)),
        filename = "plots/weather_pop_growth/coef_order_mnanom_5km.jpeg",
        width = 15, height = 13, units = "in", dpi = 400)
 
-## 5c. Weather coefficients by realm
-temp_realm <- ggplot(pgr_weather, aes(x = coef_temp, y = realm, fill = realm,
+## 5c. Weather coefficients by biome
+temp_biome <- ggplot(pgr_weather, aes(x = coef_temp, y = biome, fill = biome,
                                    height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
   coord_cartesian(xlim = c(-0.5,0.5)) +
   scale_fill_viridis_d(guide = F, option = "C") +
   labs(x = "Temperature anomaly coefficient", y = NULL) +
-  theme_ridges(center_axis_labels = TRUE, font_size = 25) 
+  theme_ridges(center_axis_labels = TRUE, font_size = 20) 
 
-precip_realm <- ggplot(pgr_weather, aes(x = coef_precip, y = realm, fill = realm,
+precip_biome <- ggplot(pgr_weather, aes(x = coef_precip, y = biome, fill = biome,
                                    height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
   coord_cartesian(xlim = c(-0.5,0.5)) +
   scale_fill_viridis_d(guide = F, option = "D") +
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
-  theme_ridges(center_axis_labels = TRUE, font_size = 25) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 20) +
   theme(axis.text.y = element_blank())
 
-ggsave(grid.arrange(temp_realm, precip_realm, ncol = 2, widths = c(6,4)),
-       filename = "plots/weather_pop_growth/coef_realm_mnanom_5km.jpeg",
-       width = 15, height = 11, units = "in", dpi = 400)
+ggsave(grid.arrange(temp_biome, precip_biome, ncol = 2, widths = c(10,4)),
+       filename = "plots/weather_pop_growth/coef_biome_mnanom_5km.jpeg",
+       width = 45, height = 20, units = "cm", dpi = 400)
 
 ## 5d. Weather coefficients by latitude
 pgr_lat <- pgr_weather %>% 
