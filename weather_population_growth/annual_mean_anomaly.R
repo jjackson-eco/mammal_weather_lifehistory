@@ -29,11 +29,19 @@ mam_chelsa_annual <- readRDS("data/mam_chelsa_annual.RDS") %>%
   dplyr::select(ID,year, weather_scale = scale, mean_temp_anomaly, mean_precip_anomaly)
 glimpse(mam_chelsa_annual)
 
+# Species names to merge
+load("../rawdata/GBIF_species_names_mamUPDATE.RData", verbose = TRUE)
+
 ##__________________________________________________________________________________________________
 #### 2. Joining data ####
 
+# linking to weather data and species names 
 mammal_weather <- mammal %>% 
-  left_join(., y = mam_chelsa_annual, by = c("ID", "year"))
+  left_join(., y = mam_chelsa_annual, by = c("ID", "year")) %>% 
+  left_join(., y = dplyr::select(lpd_gbif, Binomial, gbif_species = gbif.species.tree),
+            by = "Binomial")
+
+glimpse(mammal_weather)
 
 ##__________________________________________________________________________________________________
 #### 3. Hypothesis plots across regions and taxa ####
@@ -69,32 +77,32 @@ ggsave(grid.arrange(sp_temp_pgr, sp_precip_pgr, ncol = 1),
        filename = "plots/weather_pop_growth/species_anomal_pgr.jpeg",
        width = 15, height = 20, units = "in", dpi = 400)
 
-# pop growth and anomaly - realm
-realm_temp_pgr <- ggplot(mammal_weather, aes(x = mean_temp_anomaly, y = pop_growth_rate)) +
+# pop growth and anomaly - biome
+biome_temp_pgr <- ggplot(mammal_weather, aes(x = mean_temp_anomaly, y = pop_growth_rate)) +
   geom_hline(yintercept = 1) +
   geom_vline(xintercept = 0) +
   geom_point(alpha = 0.2, colour = "firebrick", size = 2.5) + 
   scale_x_continuous(breaks = seq(-0.7, 0.7, by = 0.2)) +
-  facet_wrap(~realm) +
+  facet_wrap(~ biome) +
   labs(x = "Mean annual temperature anomaly", y = "Population growth rate") +
   theme_bw(base_size = 24) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_blank())
 
-realm_precip_pgr <- ggplot(mammal_weather, aes(x = mean_precip_anomaly, y = pop_growth_rate)) +
+biome_precip_pgr <- ggplot(mammal_weather, aes(x = mean_precip_anomaly, y = pop_growth_rate)) +
   geom_hline(yintercept = 1) +
   geom_vline(xintercept = 0) +
   geom_point(alpha = 0.2, colour = "darkblue", size = 2.5) + 
-  facet_wrap(~realm) +
+  facet_wrap(~ biome) +
   labs(x = "Mean annual precipitation anomaly", y = "Population growth rate") +
   theme_bw(base_size = 24) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_blank())
 
-ggsave(grid.arrange(realm_temp_pgr, realm_precip_pgr, ncol = 1),
-       filename = "plots/weather_pop_growth/realm_anomal_pgr.jpeg",
+ggsave(grid.arrange(biome_temp_pgr, biome_precip_pgr, ncol = 1),
+       filename = "plots/weather_pop_growth/biome_anomal_pgr.jpeg",
        width = 15, height = 20, units = "in", dpi = 400)
 
 #Not too much going on
@@ -242,7 +250,9 @@ ggsave(grid.arrange(temp_lat, precip_lat, ncol = 2, widths = c(7,6)),
 #### 6. Save data ####
 
 mnanom_5km <- dplyr::select(pgr_weather,
-                             -c(year, raw_abundance, ln_abundance, Subspecies))
+                             -c(year, raw_abundance, 
+                                ln_abundance, Subspecies)) %>% 
+  ungroup()
 
 save(mnanom_5km, file = "data/pgr_weather/mnanom_5km.RData")
 
