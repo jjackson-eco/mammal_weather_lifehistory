@@ -222,22 +222,22 @@ temp_lon_biome <- brm(
   chains = 4, cores = 4, iter = 3000, warmup = 500
 )
 
-## Longevity and biome and no sample size
-set.seed(666)
-temp_lon_biome_ns <- brm(
-  coef_temp ~ 1 + longevity + biome + (1|gr(phylo, cov = A_temp)) + (1| species),  
-  data = mam_temp, family = gaussian(),
-  data2 = list(A_temp = A_temp),
-  prior = c(
-    prior(normal(0, 0.2), class =  Intercept),
-    prior(normal(0, 0.2), class = b, coef = "longevity"),
-    prior(normal(0, 0.1), class = b), # For the rest of the beta terms i.e. the biome effect
-    prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.99,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 3000, warmup = 500
-)
+# ## Longevity and biome and no sample size
+# set.seed(666)
+# temp_lon_biome_ns <- brm(
+#   coef_temp ~ 1 + longevity + biome + (1|gr(phylo, cov = A_temp)) + (1| species),  
+#   data = mam_temp, family = gaussian(),
+#   data2 = list(A_temp = A_temp),
+#   prior = c(
+#     prior(normal(0, 0.2), class =  Intercept),
+#     prior(normal(0, 0.2), class = b, coef = "longevity"),
+#     prior(normal(0, 0.1), class = b), # For the rest of the beta terms i.e. the biome effect
+#     prior(exponential(5), class = sd, group = "phylo"),
+#     prior(exponential(5), class = sd, group = "species")),
+#   control = list(adapt_delta = 0.99,
+#                  max_treedepth = 15),
+#   chains = 4, cores = 4, iter = 3000, warmup = 500
+# )
 
 ## Litter size and biome
 set.seed(666)
@@ -257,18 +257,39 @@ temp_lit_biome <- brm(
   chains = 4, cores = 4, iter = 3000, warmup = 500
 )
 
+## Longevity and biome interaction- Why is the longevity effect negative
+set.seed(666)
+temp_lon_biome_interaction <- brm(
+  coef_temp ~ 1 + longevity*biome + sample_size + (1|gr(phylo, cov = A_temp)) + (1| species),  
+  data = mam_temp, family = gaussian(),
+  data2 = list(A_temp = A_temp),
+  prior = c(
+    prior(normal(0, 0.2), class =  Intercept),
+    prior(normal(0, 0.1), class = b, coef = "longevity"),
+    prior(normal(0, 0.1), class = b), # For the rest of the beta terms i.e. the biome effect and interaction - MORE CONSERVATIVE THAN BEFORE
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
+    prior(exponential(5), class = sd, group = "phylo"),
+    prior(exponential(5), class = sd, group = "species")),
+  control = list(adapt_delta = 0.99,
+                 max_treedepth = 15),
+  chains = 4, cores = 4, iter = 3000, warmup = 500
+)
+
+
 #_______________________________________________________________________________
 ### 4d. Full model comparisons
 
 temp_lon_biome <- add_criterion(temp_lon_biome, criterion = c("loo","waic"))
 temp_lon_biome_ns <- add_criterion(temp_lon_biome_ns, criterion = c("loo","waic"))
 temp_lit_biome <- add_criterion(temp_lit_biome, criterion = c("loo","waic"))
+temp_lon_biome_interaction <- add_criterion(temp_lon_biome_interaction, criterion = c("loo","waic"))
 
 loo_compare(temp_base, temp_lon, 
             temp_bod, temp_lit, 
             temp_biome, temp_biome_ns,
-            temp_lon_biome, temp_lon_biome_ns,
-            temp_lit_biome, criterion = "loo")
+            temp_lon_biome, #temp_lon_biome_ns,
+            temp_lit_biome, temp_lon_biome_interaction,
+            criterion = "loo")
 
 ## Really looks like the longevity effect is strongest + partly the biome - Plot it
 
