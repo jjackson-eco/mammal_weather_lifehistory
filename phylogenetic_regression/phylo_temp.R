@@ -322,7 +322,7 @@ maineff <- temp_lon_biome %>%
   geom_vline(xintercept = 0, size = 0.8) +
   stat_halfeye(fill = temp_colour) +
   scale_y_discrete(labels = c("Population intercept", "Longevity", "Sample size")) +
-  labs(x = "Posterior temperature coefficient", y = NULL) +
+  labs(x = "Posterior temperature effect", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
   theme(axis.text = element_text(size = 8),
         axis.title = element_text(size = 12))
@@ -440,7 +440,7 @@ ggplot(mam_temp, aes(x = longevity, y = coef_temp)) +
             alpha = 0.3, colour = temp_colour) +
   geom_line(data = postpred_dat, aes(y = postmn)) +
   scale_size_continuous(range = c(1,8), guide = F) +
-  labs(x = "Standardised longevity", y = "Temperature coefficient") +
+  labs(x = "Standardised longevity", y = "Temperature effect") +
   coord_cartesian(ylim = c(-2.5,2.5)) +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank()) +
