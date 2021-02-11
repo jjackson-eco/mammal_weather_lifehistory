@@ -5,7 +5,7 @@
 
 ---
 
-This mardown is intended as an accompaniment to the scripts contained within the directory `weather_variables/`, to walk through obtaining annual weather variables from raw CHELSA data for the localities of the living planet database studies for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
+This markdown is intended as an accompaniment to the scripts contained within the directory `weather_variables/`, to walk through obtaining annual weather variables from raw CHELSA data for the localities of the living planet database studies for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
 There are 3 main sections and scripts:
 
@@ -17,7 +17,7 @@ There are 3 main sections and scripts:
 
 The first task is to extract values of temperature and precipitation from the CHELSA raster files for the localities of our LPD studies. The limitation here is the computational intensity of extracting values from such large raster files. This issue is addressed neatly using methods of extraction from the `exactextractr` package alongside `raster`.
 
-For the mammal data, we restricted the raw data to only include years that overlapped with the CHELSA data i.e. 1979-2013 and only studies that had over 5 years of data. This left **1143** studies. For each of the studies that remained after the restrictions, we expanded the data out to inlclude all year-month combinations from 1979-2013 for each study. This is to give us full timeseries' that can be decomposed to extract anomalies/devaitions in the weatehr. The data looks like this:
+For the mammal data, we restricted the raw data to only include years that overlapped with the CHELSA data i.e. 1979-2013 and only studies that had over 5 years of data. This left **1143** studies. For each of the studies that remained after the restrictions, we expanded the data out to include all year-month combinations from 1979-2013 for each study. This is to give us full timeseries' that can be decomposed to extract anomalies/deviations in the weather. The data looks like this:
 
 ```
 ## 1a. Mammal living planet data
@@ -33,7 +33,7 @@ $ year      <int> 1979, 1979, 1979, 1979, 1979, 1979, 1979, 1979, 1979, 1979, 19
 $ month     <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1…
 ```
 
-Where each study has a unique ID, is on a particular species (Binomial), and has location information in Latitiude and Longitude (although not necessarily a specific location). Note that we also have year and month, which begins in January 1979 (the start of the study) for every study.
+Where each study has a unique ID, is on a particular species (Binomial), and has location information in Latitude and Longitude (although not necessarily a specific location). Note that we also have year and month, which begins in January 1979 (the start of the study) for every study.
 
 Then we set up a `files_df` data.frame, which stores the file path, year and month of each of the rasters for indexing when we extract the data.
 
@@ -90,9 +90,9 @@ Then we extract the necessary data. The `raster` package enables you to do this 
 
 ### Considering buffers
 
-There are several potential problems with extracting just a single raster value for each mammal study in each month-year. The coordinates given in the data may not be in reference to the specific location of the population, and more just an indication of the general location of the study area. The location noted might also not be biologically relavent to the study species. For migratory/highly mobile species for example, a much broader climatic area my be covered by the population. 
+There are several potential problems with extracting just a single raster value for each mammal study in each month-year. The coordinates given in the data may not be in reference to the specific location of the population, and more just an indication of the general location of the study area. The location noted might also not be biologically relevant to the study species. For migratory/highly mobile species for example, a much broader climatic area my be covered by the population. 
 
-Therefore, creating buffers of varying radius around each study site enables us to (partially) address some of these spatial difficulties. The `rgeos` package gives us tools to create a buffer with a specific radius around our coordinate points. The only slight hurdle here is that we are in a *WGS84* CRS, which would mean the buffer radius is in radians. We first have to convert the coordinates to the *UTM* CRS, which projects in meters. The result of the buffer is a spatial polygon, for which we want to extract a weighted mean from the raster cells it overlaps. This is acheived with the `exactextract` package. This makes things much much faster than traditional indexing. This general code, here for a buffer of 50m (essentially the exact raster point) is as follows:
+Therefore, creating buffers of varying radius around each study site enables us to (partially) address some of these spatial difficulties. The `rgeos` package gives us tools to create a buffer with a specific radius around our coordinate points. The only slight hurdle here is that we are in a *WGS84* CRS, which would mean the buffer radius is in radians. We first have to convert the coordinates to the *UTM* CRS, which projects in meters. The result of the buffer is a spatial polygon, for which we want to extract a weighted mean from the raster cells it overlaps. This is achieved with the `exactextract` package. This makes things much much faster than traditional indexing. This general code, here for a buffer of 50m (essentially the exact raster point) is as follows:
 
 ```
   # 3b. Extracting the climate data from a small buffer radius of 50m - if ~identical will use this
@@ -116,7 +116,7 @@ Therefore, creating buffers of varying radius around each study site enables us 
                                        fun = "mean", progress = FALSE)
 ```
 
-This is then repeated in our code for a radius of 5km and a radius of 50km, which give different levels of spatial scales to explore in terms of population responses (see correlations of these buffer values in the additional plots found in `/plots/developing_annual_weather_variables/`). To visualise this concept more intuatively, imagine a study taking place at my department at the University of Southern Denmark in Odense, DK, with coordinates Long = 10.425869, Lat = 55.368266 (see `buffer_example_sdu.R`). Here we can see the exact study location (black point) and then the buffer polygons that would be used to calculate the weighted mean of the CHELSA data, for 5km and 50km, respectively.
+This is then repeated in our code for a radius of 5km and a radius of 50km, which give different levels of spatial scales to explore in terms of population responses (see correlations of these buffer values in the additional plots found in `/plots/developing_annual_weather_variables/`). To visualise this concept more intuitively, imagine a study taking place at my department at the University of Southern Denmark in Odense, DK, with coordinates Long = 10.425869, Lat = 55.368266 (see `buffer_example_sdu.R`). Here we can see the exact study location (black point) and then the buffer polygons that would be used to calculate the weighted mean of the CHELSA data, for 5km and 50km, respectively.
 
 <img src="../plots/developing_annual_weather_variables/buffer_example_sdu.jpeg" width="800" />
 
@@ -133,9 +133,9 @@ These extractions, both exact and for buffer polygons were repeated for all year
 
 ### `weather_decomposition.R`
 
-When an organism/population responds to the weather, we hypothesise it will more often respond to deviations from the weather that is expected, rather than to the raw weather, which has seasonal variation etc that organisms have evolved to track. Therefore, in addition to the raw weather variables, we also want to evaluate these devaitions, or anomalies, in the weather.
+When an organism/population responds to the weather, we hypothesise it will more often respond to deviations from the weather that is expected, rather than to the raw weather, which has seasonal variation etc. that organisms have evolved to track. Therefore, in addition to the raw weather variables, we also want to evaluate these deviations, or anomalies, in the weather.
 
-Here, we use an **Additive Seasonal Decomposition by Loess**, or **STL**, decomposition. This uses a loess smoothing approach to estimate the seasonal (annual cycle) and trend (mean change across the time series) components, and then the additional remainder not accounted for by the seasonal or trend components. This remainder, or anomaly component, gives us the deviation in the weather compared to what is expected.
+Here, we use an **Additive Seasonal Decomposition by Loess**, or **STL**, decomposition. This uses a Loess smoothing approach to estimate the seasonal (annual cycle) and trend (mean change across the time series) components, and then the additional remainder not accounted for by the seasonal or trend components. This remainder, or anomaly component, gives us the deviation in the weather compared to what is expected.
 
 Here, we will walk through an example of this for temperature for a single study: Cheetah in Tanzania:
 
@@ -171,9 +171,9 @@ This additive decomposition gives us the seasonal, trend, and anomaly components
 
 <img src="../plots/developing_annual_weather_variables/weather_decomposition_example_cheetah.jpeg" width="650" />
 
-Then, in the rest of the script, we repeat the STL decomposition for each of our studies and weather variable buffer scales. In the plots/ directory are examples of temperature and precipitaion decompositions for ten randomly sampled studies. This data also enables us to explore the relative variation in the seasonal component compared to the anomaly component, because, for example, we expect that in highly seasonal envrionments at more extreme latitudes, we will see more seasonal patterns, whereas at lower latitudes we expect less variation in the season and more in the anomaly. 
+Then, in the rest of the script, we repeat the STL decomposition for each of our studies and weather variable buffer scales. In the plots/ directory are examples of temperature and precipitation decompositions for ten randomly sampled studies. This data also enables us to explore the relative variation in the seasonal component compared to the anomaly component, because, for example, we expect that in highly seasonal environments at more extreme latitudes, we will see more seasonal patterns, whereas at lower latitudes we expect less variation in the season and more in the anomaly. 
 
-These anomalies give us a sensible evaluation of the devaitions of weather in each month of our study, and are stored in the `chelsa_stl` object.
+These anomalies give us a sensible evaluation of the deviations of weather in each month of our study, and are stored in the `chelsa_stl` object.
 
 </details>
 
@@ -183,7 +183,7 @@ These anomalies give us a sensible evaluation of the devaitions of weather in ea
   
 ### `annual_weather_variables.R`
 
-The final step of getting weather variables that we can assess with respect to abundance changes is to calculate a set of annual weather variables from the anomalies that can be linked to abundance. There are several potential candiates for aspects of the weather anomalies that species may be responding to, including the central tendancy,  maxima/minima, variance, moments, or number of extreme values. 
+The final step of getting weather variables that we can assess with respect to abundance changes is to calculate a set of annual weather variables from the anomalies that can be linked to abundance. There are several potential candidates for aspects of the weather anomalies that species may be responding to, including the central tendency,  maxima/minima, variance, moments, or number of extreme values. 
 
 In `annual_weather_variables.R`, we load in the `chelsa_stl` RDS file, and then calculate annual summary statistics for each study and each buffer scale.
 
@@ -222,9 +222,9 @@ mam_chelsa_annual <- chelsa_stl %>%
             min_temp_anomaly = min(temp_anomaly),
             min_precip_anomaly = min(precip_anomaly),
             
-            # 5) Anomaly variance
-            temp_anomaly_variance = var(temp_anomaly),
-            precip_anomaly_variance = var(precip_anomaly),
+            # 5) Weather variance
+            temp_variance = var(temp_anomaly),
+            precip_variance = var(precip_anomaly),
             
             # 6) Anomaly skewness - Symmetry of the distribution
             temp_anomaly_skewness = skewness(temp_anomaly),
