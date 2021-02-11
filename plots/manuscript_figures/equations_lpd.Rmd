@@ -1,0 +1,72 @@
+---
+title: "Equations for paper"
+author: "John Jackson"
+date: "1/25/2021"
+output: html_document
+---
+
+\usepackage{amsmath}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### For the Gaussian model
+
+$$
+\begin{aligned}
+\underline{\text{Linear model}} \\
+\omega &\sim \text{MVNormal}(\mu, \textbf{S}) \\
+\mu_i &= \alpha_{SPECIES[j]} + \beta_{BIOME[i]} + \beta_{N}N_i \\
+\underline{\text{Varying effects}} \\
+\textbf{S} &= \sigma_{PHYLO}^2\textbf{V} \\
+\alpha_j &\sim \operatorname{Normal}(\bar{\alpha},\sigma_{SPECIES}) \\
+\underline{\text{Priors}} \\
+\bar{\alpha} &\sim \operatorname{Normal}(0,0.3) \\
+\beta_{BIOME} &\sim \operatorname{Normal}(0,0.15) \\ 
+\beta_N &\sim \operatorname{Normal}(0,0.5) \\
+\sigma_{PHYLO}^2 &\sim \operatorname{Exponential}(8) \\
+\sigma_{SPECIES} &\sim \operatorname{Exponential}(8) \\
+\end{aligned}
+$$
+
+
+### For the log-normal model (so far)
+
+$$
+\begin{aligned}
+\ln |\omega| &\sim \text{MVNormal}(\mu, \textbf{S}) \\
+\mu_i &= \alpha_{SPECIES[j]} + LH + \beta_{N}N_i \\
+\textbf{S} &= \sigma_{PHYLO}^2\textbf{V} \\
+\alpha_j &\sim \operatorname{Normal}(\bar{\alpha},\sigma_{SPECIES}) \\
+\bar{\alpha} &\sim \operatorname{Normal}(0,0.5) \\
+\beta_N &\sim \operatorname{Normal}(0,0.5) \\
+\sigma_{PHYLO}^2 &\sim \operatorname{Exponential}(8) \\
+\sigma_{SPECIES} &\sim \operatorname{Exponential}(5) \\
+\end{aligned}
+$$
+
+### For the Gamma models (so far)
+
+$$
+\begin{aligned}
+\underline{\text{Linear model}} \\
+|\omega| &\sim \text{Gamma}(\eta, \mu) \\
+\log \mu_i &= \alpha_{SPECIES[j]} + \gamma_{PHYLO[j]} + LH + \beta_{N}N_i \\
+\underline{\text{Varying effects}} \\
+\alpha_j &\sim \operatorname{Normal}(\bar{\alpha},\sigma_{SPECIES}) \\
+\gamma_j &\sim \text{MVNormal}(0, \textbf{S}) \\
+\textbf{S} &= \sigma_{PHYLO}^2\textbf{V} \\
+\underline{\text{Priors}} \\
+\bar{\alpha} &\sim \operatorname{Normal}(0,0.3) \\
+\boldsymbol{\beta}_{LH} &\sim \operatorname{Normal}(0,0.2) \\ 
+\beta_N &\sim \operatorname{Normal}(0,0.3) \\
+\sigma_{PHYLO}^2 &\sim \operatorname{Exponential}(11) \\
+\sigma_{SPECIES} &\sim \operatorname{Exponential}(2) \\
+\eta &\sim \operatorname{Gamma}(2,0.6) \\
+\end{aligned}
+$$
+
+---
+
