@@ -8,7 +8,8 @@
 ##                                                ##
 ####################################################
 
-# Accounting for autocorrelation with GAMM and formal AR(1) time-series analysis
+# Record-wise regressions linking weather to population growth rates, 
+# accounting for autocorrelation with GAMM and formal AR(1) time-series analysis
 
 rm(list = ls())
 options(width = 100)
@@ -83,9 +84,9 @@ wtd_gamarma <- gamm(pop_growth_rate ~ s(year, bs = "tp") + mean_temp_anomaly,
                   method = "REML")
 
 wtd_linear <- lm(pop_growth_rate ~ mean_temp_anomaly + ln_abundance + year, data = wtd)
+wtd_naive <- lm(pop_growth_rate ~ mean_temp_anomaly, data = wtd)
 
 ## The GAMM looks to be doing a similar job, whilst formally accounting for temporal autocorrelation
-
 
 ##__________________________________________________________________________________________________
 #### 4. Models for each record ####
