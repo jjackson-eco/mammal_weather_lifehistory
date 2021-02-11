@@ -2,7 +2,7 @@
 ##                                                ##
 ##     Global climate and population dynamics     ##
 ##                                                ##
-##       Density dependence simulation + env      ##
+##    Dylans Density dependence simulation + env  ##
 ##                                                ##
 ##                Dec 8th 2020                    ##
 ##                                                ##
