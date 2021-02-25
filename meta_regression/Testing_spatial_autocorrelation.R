@@ -21,6 +21,7 @@ library(sf)
 library(spdep)
 library(viridis)
 library(rnaturalearth)
+library(patchwork)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 1. Data in a spatial format ####
@@ -101,7 +102,7 @@ ggplot(data = world_sf) +
   geom_sf(size = 0, fill = "lightgrey") + 
   geom_sf(data = moran_mapdat_sf, aes(colour = sig), alpha = 0.3, size = 2) +
   geom_sf(data = filter(moran_mapdat_sf, sig == "< 0.05"), 
-          aes(colour = sig), alpha = 1, size = 2) +ß
+          aes(colour = sig), alpha = 1, size = 2) +
   scale_colour_viridis_d(name = "Local morans I significance", begin = 0.3, end = 0.8) +
   guides(colour = guide_legend(override.aes = list(alpha = 1))) +
   theme_bw() +
@@ -115,5 +116,34 @@ ggplot(data = world_sf) +
 table(moran_mapdat_sf$sig)
 
 21/478
+
+## Looking at the local morans I values and points from Asia in more detail
+
+world_Ii <- ggplot(data = world_sf) +
+  geom_sf(size = 0, fill = "lightgrey") + 
+  geom_sf(data = moran_mapdat_sf, aes(colour = Ii), alpha = 0.2, size = 1) +
+  geom_sf(data = filter(moran_mapdat_sf,sig == "< 0.05"), 
+          aes(colour = Ii), alpha = 0.9, size = 1.5) +
+  scale_colour_viridis_c(name = "Local morans I value", option = "C", begin = 0.2, end = 0.9) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        legend.position = "top") 
+
+Asia_Ii <- ggplot(data = world_sf) +
+  geom_sf(size = 0, fill = "lightgrey") + 
+  geom_sf(data = moran_mapdat_sf, aes(colour = Ii, shape = sig), alpha = 1, size = 1.5) +
+  coord_sf(xlim = c(120, 160), ylim = c(30, 55)) +
+  scale_colour_viridis_c(name = "Local morans I value", option = "C", begin = 0.2, end = 0.9) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        legend.position = "top") 
+
+ggsave(world_Ii + Asia_Ii, 
+       filename = "plots/phylogenetic_regression/spatial_autocorrelation_localvalues_temp.jpeg",
+       width = 24, height = 18, units = "cm", dpi = 600)
+
+
 
 
