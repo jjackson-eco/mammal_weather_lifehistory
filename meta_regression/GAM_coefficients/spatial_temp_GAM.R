@@ -114,7 +114,7 @@ temp_sp %>%
   theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 12)) +
-  ggsave("plots/spatial_autocorrelation_posterior.jpeg",
+  ggsave("plots/meta_regression/spatial_autocorrelation_posterior.jpeg",
          width = 15, height = 14, units = "cm", dpi = 500)
 
 ## model comparisons plot
@@ -129,7 +129,7 @@ mod_comp_temp %>%
                     se_diff = "elpd error difference",
                     looic = "LOO information criterion") %>% 
   colformat_num(digits = 2) %>% 
-  save_as_image("plots/spatial_autocorrelation_model_comparison.png")
+  save_as_image("plots/meta_regression/spatial_autocorrelation_model_comparison.png")
   
 
 

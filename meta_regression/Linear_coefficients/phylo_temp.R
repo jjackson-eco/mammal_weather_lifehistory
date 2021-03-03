@@ -392,7 +392,7 @@ biomeeff <- temp_lon_biome %>%
 
 ## Save 
 ggsave((maineff / vareff) | biomeeff,
-       filename = "plots/phylogenetic_regression/meta_regression_full/temp_effects_all.jpeg",
+       filename = "plots/meta_regression/meta_regression_full/temp_effects_all.jpeg",
        width = 25, height = 23, units = "cm", dpi = 600)
 
 
@@ -444,7 +444,7 @@ ggplot(mam_temp, aes(x = longevity, y = coef_temp)) +
   coord_cartesian(ylim = c(-2.5,2.5)) +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank()) +
-  ggsave(filename = "plots/phylogenetic_regression/meta_regression_full/longevity_effect_temp.jpeg",
+  ggsave(filename = "plots/meta_regression/meta_regression_full/longevity_effect_temp.jpeg",
          width = 15, height = 15, units = "cm", dpi = 800)
 
 ggplot(postpred_dat, aes(x = longevity, y = postmn)) +

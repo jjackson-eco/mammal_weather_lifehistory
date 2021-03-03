@@ -296,7 +296,7 @@ vareff <- precip_lon %>%
 ### 5c. Save
 
 ggsave(maineff / vareff,
-       filename = "plots/phylogenetic_regression/meta_regression_full/precip_effects_all.jpeg",
+       filename = "plots/meta_regression/meta_regression_full/precip_effects_all.jpeg",
        width = 17, height = 18, units = "cm", dpi = 600)
 
 
@@ -347,7 +347,7 @@ ggplot(mam_precip, aes(x = longevity, y = coef_precip)) +
   coord_cartesian(ylim = c(-2,2)) +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank()) +
-  ggsave(filename = "plots/phylogenetic_regression/meta_regression_full/longevity_effect_precip.jpeg",
+  ggsave(filename = "plots/meta_regression/meta_regression_full/longevity_effect_precip.jpeg",
          width = 15, height = 15, units = "cm", dpi = 600)
 
 

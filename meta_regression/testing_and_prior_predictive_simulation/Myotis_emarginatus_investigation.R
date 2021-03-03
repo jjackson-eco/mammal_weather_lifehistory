@@ -75,7 +75,7 @@ My_em %>%
   scale_color_manual(name = "Study ID", values = c("firebrick", "cornflowerblue")) +
   labs(x  = "Year", y = "ln Abundance", title = "Myotis emarginatus - Geoffroy's bat") +
   theme_bw(base_size = 14) +
-  ggsave(filename = "plots/phylogenetic_regression/repeated_obs_spatial/Myotis_emarginatus.jpeg",
+  ggsave(filename = "plots/meta_regression/repeated_obs_spatial/Myotis_emarginatus.jpeg",
          width = 5, height = 4.5, units = "in", dpi = 400)
 
 

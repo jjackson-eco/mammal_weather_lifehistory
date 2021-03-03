@@ -62,7 +62,7 @@ morans_precip <- moran.mc(mam_sp$coef_precip, listw, nsim = 1000)
 #### 4. Exploring spatial autocorrelation in temperature more ####
 
 ## Plot of the spatially lagged temperature coefficients with the actual values
-jpeg(filename = "plots/phylogenetic_regression/spatial_autocorrelation_temp.jpeg",
+jpeg(filename = "plots/meta_regression/spatial_autocorrelation_temp.jpeg",
      width = 15, height = 20, units = "cm",res = 500)
 par(mfrow = c(2,1))
 plot(world_sp, border = 'lightgrey', main = "Nearest neighbours plot")
@@ -109,7 +109,7 @@ ggplot(data = world_sf) +
   theme(panel.grid = element_blank(),
         panel.border = element_blank(),
         legend.position = "top") +
-  ggsave("plots/phylogenetic_regression/spatial_autocorrelation_localtemp.jpeg",
+  ggsave("plots/meta_regression/spatial_autocorrelation_localtemp.jpeg",
          width = 20, height = 16, units = "cm",dpi = 500)
 
 ## Total number of significant local morans I values
@@ -141,7 +141,7 @@ Asia_Ii <- ggplot(data = world_sf) +
         legend.position = "top") 
 
 ggsave(world_Ii + Asia_Ii, 
-       filename = "plots/phylogenetic_regression/spatial_autocorrelation_localvalues_temp.jpeg",
+       filename = "plots/meta_regression/spatial_autocorrelation_localvalues_temp.jpeg",
        width = 24, height = 18, units = "cm", dpi = 600)
 
 

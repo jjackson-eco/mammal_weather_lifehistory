@@ -160,7 +160,7 @@ varprecip_plot <- ggplot(ln_dat, aes(x = ln_bin, y = varprecip)) +
 
 ggsave((mntemp_plot + vartemp_plot) /
        (mnprecip_plot + varprecip_plot),
-      filename = "plots/phylogenetic_regression/meta_regression_full/longevity_effect_exploration_bins.jpeg",
+      filename = "plots/meta_regression/meta_regression_full/longevity_effect_exploration_bins.jpeg",
       width = 15, height = 15, units = "cm", dpi = 500)
 
 

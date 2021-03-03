@@ -229,7 +229,7 @@ lit_precip <- ggplot(mam_coef, aes(x = litter, y = abs_precip)) +
 
 ggsave((lon_temp | lit_temp)/
        (lon_precip | lit_precip),
-       file = "plots/phylogenetic_regression/meta_regression_full/posterior_lifehistory_lognormal.jpeg",
+       file = "plots/meta_regression/meta_regression_full/posterior_lifehistory_lognormal.jpeg",
        width = 20, height = 20, units = "cm", dpi = 600)
 
 #_______________________________________________________________________________
@@ -303,7 +303,7 @@ lit_precip_bin <- ggplot(litter_binned_data, aes(x = lit_bin, y = mnprecip)) +
 
 ggsave((lon_temp_bin | lit_temp_bin)/
        (lon_precip_bin | lit_precip_bin),
-       file = "plots/phylogenetic_regression/meta_regression_full/posterior_lifehistory_binned_lognormal.jpeg",
+       file = "plots/meta_regression/meta_regression_full/posterior_lifehistory_binned_lognormal.jpeg",
        width = 20, height = 20, units = "cm", dpi = 600)
 
 

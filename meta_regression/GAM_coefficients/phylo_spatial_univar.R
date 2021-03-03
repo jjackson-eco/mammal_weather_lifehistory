@@ -85,7 +85,7 @@ for(i in 1:nrow(K)){
 
 library(plot.matrix)
 
-jpeg(filename = "plots/phylogenetic_regression/distance_matrices_temp.jpeg", 
+jpeg(filename = "plots/meta_regression/distance_matrices_temp.jpeg", 
      width = 20, height = 8, units = "in", res = 500)
 par(mfrow = c(1,3))
 plot(K[rownames(A_temp),rownames(A_temp)], main = "OU distance", border = NA)
@@ -225,7 +225,7 @@ mam_temp %>%
   geom_text(aes(label = ID, colour = pareto), show.legend = F) +
   labs(x = "Linear temperature coefficient", y = "Pareto k estimate") +
   theme_bw(base_size = 14) + theme(panel.grid = element_blank()) +
-  ggsave(filename = "plots/phylogenetic_regression/repeated_obs_spatial/pareto_k_temp.jpeg",
+  ggsave(filename = "plots/meta_regression/repeated_obs_spatial/pareto_k_temp.jpeg",
          width = 6, height = 6, units = "in", dpi = 400)
 
 # biome 2 - no bat Myotis_emarginatus
@@ -264,11 +264,11 @@ tibble(biome_post, sim = 1:nrow(biome_post)) %>%
   scale_fill_viridis_c(option = "C", guide = F) +
   labs(x = "Posterior temperature effect", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 20, grid = F) +
-  ggsave(filename = "plots/phylogenetic_regression/repeated_obs_spatial/biome_effects.jpeg",
+  ggsave(filename = "plots/meta_regression/repeated_obs_spatial/biome_effects.jpeg",
          width = 7, height = 10, units = "in", dpi = 500)
 
 ### Temp base plot
-jpeg(filename = 'plots/phylogenetic_regression/repeated_obs_spatial/temp_base_posterior.jpeg',
+jpeg(filename = 'plots/meta_regression/repeated_obs_spatial/temp_base_posterior.jpeg',
      width = 16, height = 13, units = "cm",res = 500)
 plot(temp_base)
 dev.off()
