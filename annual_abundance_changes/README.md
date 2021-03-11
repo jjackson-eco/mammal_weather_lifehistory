@@ -250,7 +250,7 @@ Then, we ran this simulation for varying lengths of timeseries (5,10,20,50,100 a
 
 <img src="../plots/annual_abundance/Accounting_for_autocorrelation_testing/Environment_coefficient_simulation.jpeg" width="700"/>
 
-and for the density dependence effect
+and for the density dependence effect (`bDD`)
 
 <img src="../plots/annual_abundance/Accounting_for_autocorrelation_testing/DD_coefficient_simulation.jpeg" width="700"/>
 
