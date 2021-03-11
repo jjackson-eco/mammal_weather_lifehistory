@@ -14,9 +14,9 @@ rm(list=ls())
 options(width = 100)
 
 ### Setting up the initial parameters
-t_step = 5
+t_step = 5       # timestep i.e. the length of each timeseries (here years) - testing with 5 to start with
 
-p <- list()
+p <- list()      # parameters for our models
 p$b0 <- 1        # Initial value to feed to the density dependence
 p$bDD <- 0.5     # coefficient for density dependence
 p$bENV <- 0.2    # coefficient for the environment
@@ -25,7 +25,7 @@ p$sigmaENV <- 1  # environmental variance
 
 x0 <- 2.0        # starting abundance
 
-n_sims <- 1000
+n_sims <- 1000   # number of simulations
 
 ## Iteration function to create the two components of the model
 iter <- function(p, x0, t_step) {
@@ -44,7 +44,7 @@ fit_mod <- function (p, x, beta) {
   unname(coef(lm(diff(x$x) ~ x$x[-(length(x$x))] + x$env[-(length(x$env))])))[beta]
 }
 
-## Function to run the simulation and pull out the necessary work
+## Function to run the simulation and pull out the necessary values
 run_sim <- function(p, x0, t_step, n_sims, beta) {
   slopes <- numeric(n_sims)
   for (i in seq_len(n_sims)){

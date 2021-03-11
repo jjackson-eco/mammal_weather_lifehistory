@@ -1,12 +1,12 @@
-# Detrending annual abundance change data
-#### 2020-05-06 
+# Annual abundance data to population growth rates
+#### 2021-03-11 
 #### John Jackson
 
 ---
 
-This markdown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of detrending annual abundance data from the Living Planet Database for the terrestrial mammals. Please refer to the scripts mentioned in each section of the markdown for full details on each section. We initially planned to use a detrending method to account for temporal trends in the abundance time series, but instead now focus on a single model with temporal effects included. Therefore, there are several unused scripts in this directory exploring these different approaches.
+This markdown is intended as an accompaniment to the scripts contained within the directory `annual_abundance_changes`, to walk through the process of managing annual abundance data from the Living Planet Database for the terrestrial mammals, calculating annual population growth rates and exploring how best to account for temporal autocorrelation in abundance. Please refer to the scripts mentioned in each section of the markdown for full details on each section. We initially planned to use a detrending method to account for temporal trends in the abundance time series, but this was replaced with directly accounting for temporal autocorrelation in the models. There are several scripts here that were just exploratory i.e. detrending scripts,
 
-There are 3 main sections and scripts:
+There are 4 main sections and scripts:
 
 ## 1. Exploring and accounting for gaps in the abundance timeseries
 <details>
@@ -188,7 +188,81 @@ We can see that just under 50% of the records have statistical support for an AR
 
 ---
 
-## 3. Calculating annual population growth rates
+## 3. Simulating the effect of density dependence on estimating weather effects
+<details>
+  <summary>Click here to expand</summary>
+
+### `density_dependence_simulation.R`
+
+Following on from the investigation of temporal autocorrelation in abundance measures in the LPD data, a pervasive feature of population dynamics that manifests in temporally autocorrelated abundance is density dependence. Investigating density dependence directly is beyond the scope of this study. Instead however, we wanted to investigate whether the presence of density dependence in the system had the potential to bias any estimates of weather effects on abundance changes.
+
+Here, we used a simulation following the advice of Dr. Dylan Childs to test whether the presence of density dependence might bias our estimation of weather effects on abundance changes. The aim here is to simulate a number (`n_sims = 1000`) of timeseries that have both a given strength of density dependence (`bDD`), and an effect of the environment on abundance changes (`bENV`). Given these parameters and some variance/noise, we simulate timeseries and then look at whether retrofitting a linear model to the timeseries enables us to accurately estimate the environmental effect. In other words, does the presence of density dependence prevent us from estimating the weather effects accurately.
+
+The simulation has the following starting parameters:
+
+```
+t_step = 5       # timestep i.e. the length of each timeseries (here years) - testing with 5 to start with
+
+p <- list()      # parameters for our models
+p$b0 <- 1        # Initial value to feed to the density dependence
+p$bDD <- 0.5     # coefficient for density dependence
+p$bENV <- 0.2    # coefficient for the environment
+p$sigma <- 1     # noise variance
+p$sigmaENV <- 1  # environmental variance
+
+x0 <- 2.0        # starting abundance
+
+n_sims <- 1000   # number of simulations
+```
+
+Then we want to create functions that i) generate our timeseries/environmental data using the parameters defined above, ii) runs a linear model to estimate the effect of the environment and density dependence, and the iii) run the simulation and pull out the necessary coefficients from the retrofit model.
+
+```
+## Iteration function to create the two components of the model
+iter <- function(p, x0, t_step) {
+  x    <- numeric(t_step + 1)
+  env  <- rnorm(t_step + 1, 0, p$sigmaENV)
+  x[1] <- x0
+  noise <- rnorm(t_step, 0, p$sigma)
+  for (t  in seq_len(t_step)) {
+    x[t+1] <- p$b0 + (1 - p$bDD) * x[t] + p$bENV * env[t] + noise[t]
+  }
+  list("x" = x, "env" = env)
+}
+
+## Fit the model function 
+fit_mod <- function (p, x, beta) {
+  unname(coef(lm(diff(x$x) ~ x$x[-(length(x$x))] + x$env[-(length(x$env))])))[beta]
+}
+
+## Function to run the simulation and pull out the necessary values
+run_sim <- function(p, x0, t_step, n_sims, beta) {
+  slopes <- numeric(n_sims)
+  for (i in seq_len(n_sims)){
+    x <- iter(p, x0, t_step)
+    slopes[i] <- fit_mod(p, x, beta = beta)
+  }
+  slopes
+}
+```
+
+Then, we ran this simulation for varying lengths of timeseries (5,10,20,50,100 and 1000 years) and looked at the coefficients generated in the model relative to the parameters put in. You can see the results here for estimated the environmental effect (`bENV`)
+
+<img src="../plots/annual_abundance/Accounting_for_autocorrelation_testing/Environment_coefficient_simulation.jpeg" width="700"/>
+
+and for the density dependence effect
+
+<img src="../plots/annual_abundance/Accounting_for_autocorrelation_testing/DD_coefficient_simulation.jpeg" width="700"/>
+
+Where the dashed line is the simulation retrofit coefficient, and the solid line is the actual model parameter. You can see from the upper figure that for the environmental effect, even for short timeseries the estimation of an environmental effect is not hindered by the presence of density dependence. This is good news for our estimation of weather effects on population growth rates for the LPD data. However, this is not the case for density dependence estimation, which is really affected by the length of the timeseries. Very hard to accurately estimate density dependence from small timeseries.
+
+Together with the results of section 2, this suggests that accounting for temporal autocorrelation in abundance (with lag 1) should be sufficient to estimate weather effects on abundance changes.
+
+</details>
+
+---
+
+## 4. Calculating annual population growth rates
 <details>
   <summary>Click here to expand</summary>
 
