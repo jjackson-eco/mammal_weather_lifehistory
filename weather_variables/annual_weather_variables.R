@@ -56,8 +56,8 @@ mam_chelsa_annual <- chelsa_stl %>%
             min_precip_anomaly = min(precip_anomaly),
             
             # 5) Weather variance
-            temp_variance = var(temp_anomaly),
-            precip_variance = var(precip_anomaly),
+            temp_variance = var(temp),
+            precip_variance = var(precip),
             
             # 6) Anomaly skewness - Symmetry of the distribution
             temp_anomaly_skewness = skewness(temp_anomaly),
