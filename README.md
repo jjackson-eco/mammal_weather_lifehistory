@@ -1,6 +1,6 @@
 # Analysis for 
 # _Life-history predicts global population responses to the weather in the terrestrial mammals_
-# Jackson, J., Le Coeur, C. and Jones, O.R
+#### Jackson, J., Le Coeur, C. and Jones, O.R
 
 #### 2021-03-16
 #### Repository created by John Jackson
