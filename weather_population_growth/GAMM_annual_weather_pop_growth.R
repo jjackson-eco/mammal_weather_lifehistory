@@ -4,18 +4,27 @@
 ##                                                ##
 ##      Annual weather and population growth      ##
 ##                                                ##
-##               June 11th 2020                   ##
+##               March 16th 2021                  ##
 ##                                                ##
 ####################################################
+
+# Record-wise regressions linking weather to population growth rates, 
+# accounting for autocorrelation with GAMM and formal AR(1) time-series analysis.
+# Models across all weather variables and spatial scales.
+
 rm(list = ls())
 options(width = 100)
 
 library(tidyverse)
+library(psych)
 library(ggridges)
 library(viridis)
-library(grid)
+library(patchwork)
 library(gridExtra)
-library(psych)
+library(mgcv)      # Simon Wood to the rescue again. All Hail
+
+temp_colour <- "#990a80"
+precip_colour <- "#287f79"
 
 ##__________________________________________________________________________________________________
 #### 1. Load data ####
@@ -29,11 +38,20 @@ mam_chelsa_annual <- readRDS("data/mam_chelsa_annual.RDS") %>%
   dplyr::select(-c(4:6))
 glimpse(mam_chelsa_annual)
 
+# Species names to merge
+load("../rawdata/GBIF_species_names_mamUPDATE.RData", verbose = TRUE)
+
 ##__________________________________________________________________________________________________
 #### 2. Joining data ####
 
+# linking to weather data and species names 
 mammal_weather <- mammal %>% 
-  left_join(., y = mam_chelsa_annual, by = c("ID", "year"))
+  left_join(., y = mam_chelsa_annual, by = c("ID", "year")) %>% 
+  left_join(., y = dplyr::select(lpd_gbif, Binomial, gbif_species = gbif.species.tree),
+            by = "Binomial") %>% 
+  mutate(year_s = as.numeric(scale(year)))
+
+glimpse(mammal_weather)
 
 ##__________________________________________________________________________________________________
 #### 3. Linear models for each variable and scale for each record ####
@@ -64,13 +82,17 @@ pgr_weather_res <- bind_rows(lapply(X = 1:nrow(iter_dat), function(x){
   
   # model
   if(length(which(is.na(cdat$weather_val) == T)) > 0){modcoef = rep(NA,4)}
-  else{mod_weather = lm(pop_growth_rate ~ weather_val + ln_abundance + year, data = cdat)
-       modcoef = coefficients(mod_weather)}
+  else{mod_weather = gamm(pop_growth_rate ~ 
+                            s(year, bs = "tp", k = 5) + weather_val,
+                          data = cdat, 
+                          family = gaussian,
+                          correlation = corARMA(form = ~ year, p = 1),
+                          method = "REML")
+       modcoef = coef(mod_weather$gam)}
   
   # returning data
   cat('\r',"Your Job is",round((x/nrow(iter_dat))*100, 0),"% Complete       ")
   return(tibble(crow, coef_weather = modcoef[2], 
-                coef_abun = modcoef[3], coef_trend = modcoef[4],
                 rec_info))
 }))
   
@@ -81,9 +103,9 @@ pgr_weather_res <- pgr_weather_res %>%
          weather_var_lab = gsub("recip", "recipitation", weather_var_lab))
 
 ##__________________________________________________________________________________________________
-#### 4. Density rigge plots for the weather variables ####
+#### 4. Density ridge plots for the weather variables ####
 
-#pgr_weather_res <- readRDS("data/pgr_weather/pgr_weather_res.RDS")
+# pgr_weather_res <- readRDS("data/pgr_weather/pgr_weather_res.RDS")
 
 # removing very large coefficients
 pgr_plotdat_sm <- pgr_weather_res %>% 
@@ -112,7 +134,7 @@ ggsave(pgr_weath_sm,
        width = 8, height = 11, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
-#### 5. Spatial scales + Abundance and trend coefficients ####
+#### 5. Spatial scales ####
 
 # 5a. Spatial scales consistent?
 sp_res <- pgr_weather_res %>% 
@@ -124,54 +146,6 @@ jpeg(filename = "plots/weather_pop_growth/scale_weather_coef.jpeg",
      width = 7, height = 7, units = "in",res = 400)
 pairs.panels(sp_res, smooth = FALSE, lm = TRUE,  ellipses = FALSE)
 dev.off()
-
-# 5b. Other coefficients
-abun_coef <- pgr_weather_res %>% 
-  dplyr::select(ID_block, scale, coef_abun, weather_var) %>% 
-  pivot_wider(names_from = weather_var, values_from = coef_abun) %>% 
-  dplyr::select(-c(1:2))
-
-abun_cormat <- cor(abun_coef, use = "pairwise.complete.obs") %>% 
-  as.data.frame() %>% mutate(Var1 = rownames(.)) %>% 
-  pivot_longer(-Var1, names_to = "Var2") %>% 
-  ggplot(aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile() + 
-  labs(x = NULL, y = NULL, title = "Abundance") +
-  scale_x_discrete(expand = c(0,0)) +
-  scale_y_discrete(expand = c(0,0)) +
-  scale_fill_viridis_c(option = "C", begin = 0, end = 0.9,
-                       limits = c(0.5,1), breaks = seq(0,1,0.2),
-                       name = "Correlation\ncoefficient",
-                       guide = FALSE) +
-  theme_bw(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 90, size = 9),
-        axis.text.y = element_text(size = 9)) 
-
-trend_coef <- pgr_weather_res %>% 
-  dplyr::select(ID_block, scale, coef_trend, weather_var) %>% 
-  pivot_wider(names_from = weather_var, values_from = coef_trend) %>% 
-  dplyr::select(-c(1:2))
-
-trend_cormat <- cor(trend_coef, use = "pairwise.complete.obs") %>% 
-  as.data.frame() %>% mutate(Var1 = rownames(.)) %>% 
-  pivot_longer(-Var1, names_to = "Var2") %>% 
-  ggplot(aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile() + 
-  labs(x = NULL, y = NULL, title = "Trend") +
-  scale_x_discrete(expand = c(0,0)) +
-  scale_y_discrete(expand = c(0,0)) +
-  scale_fill_viridis_c(option = "C", begin = 0, end = 0.9,
-                       limits = c(0.5,1), breaks = seq(0,1,0.2),
-                       name = "Correlation\ncoefficient",
-                       guide = guide_colorbar(barwidth = 2, 
-                                              barheight = 10)) +
-  theme_bw(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 90, size = 9),
-        axis.text.y = element_text(size = 9)) 
-
-ggsave(grid.arrange(abun_cormat, trend_cormat, ncol = 2, widths = c(6,7)),
-       filename = "plots/weather_pop_growth/abundance_trend_cormat.jpeg",
-       width = 14, height = 6, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
 #### 6. Save data ####
