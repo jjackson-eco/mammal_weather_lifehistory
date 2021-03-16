@@ -15,12 +15,14 @@ rm(list = ls())
 options(width = 100)
 
 library(tidyverse)
+library(ggridges)
 library(viridis)
 library(patchwork)
+library(gridExtra)
 library(mgcv)      # Simon Wood to the rescue again. All Hail
 
-temp_colour <- viridis(20, option = "C")[13]
-precip_colour <- viridis(20, option = "D")[10]
+temp_colour <- "#990a80"
+precip_colour <- "#287f79"
 
 ##__________________________________________________________________________________________________
 #### 1. Load data ####
@@ -129,7 +131,6 @@ lin_gam <- pgr_weather_gam %>%
   left_join(x =., y = dplyr::select(mnanom_5km, ID_block, 
                                     lin_temp = coef_temp, lin_precip = coef_precip),
             by = "ID_block")
-  
 
 temp_compare <- ggplot(lin_gam, aes(x = lin_temp, y = coef_temp, size = n_obs)) + 
   geom_point(alpha = 0.6, colour = temp_colour) +
@@ -157,5 +158,100 @@ ggsave(temp_compare + precip_compare,
 mnanom_5km_GAM <- pgr_weather_gam
 save(mnanom_5km_GAM, file = "data/pgr_weather/mnanom_5km_GAM.RData")
 
+##__________________________________________________________________________________________________
+#### 7. Hypothesis exploration plots ####
+
+## 7a. Coefficients overall
+coef_ovrdat <- pgr_weather_gam %>% 
+  dplyr::select(ID_block, starts_with("coef_")) %>% 
+  pivot_longer(-ID_block) %>% 
+  mutate(model = if_else(name == "coef_temp", "Temperature", "Precipitation"),
+         label = if_else(name == "coef_temp", 
+                         "Mean temperature anomaly",
+                         "Mean precipitation anomaly")) 
+
+ggplot(coef_ovrdat, aes(x = value, y = label, fill = model)) +
+  geom_vline(xintercept = 0) +
+  geom_density_ridges(alpha = 0.7, scale = 1, size = 0.3) +
+  coord_cartesian(xlim = c(-1,1)) +
+  scale_fill_manual(guide = F, values = c(precip_colour, temp_colour)) +
+  labs(x = "Model coefficient", y = NULL) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 16) +
+  ggsave(filename = "plots/weather_pop_growth/overall_coefficients_mnanom_5km_GAM.jpeg",
+         height = 5, width = 6, units = "in", dpi = 400)
+
+## 7b. Weather coefficients by Order
+temp_sp <- ggplot(pgr_weather_gam, aes(x = coef_temp, y = Order, 
+                                   fill = Order, height = stat(density))) +
+  geom_vline(xintercept = 0) +
+  geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "C") +
+  labs(x = "Temperature anomaly coefficient", y = NULL) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 25) 
+
+precip_sp <- ggplot(pgr_weather_gam, aes(x = coef_precip, y = Order, 
+                                     fill = Order, height = stat(density))) +
+  geom_vline(xintercept = 0) +
+  geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "D") +
+  labs(x = "Precipitation anomaly coefficient", y = NULL) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 25) +
+  theme(axis.text.y = element_blank())
+
+ggsave(grid.arrange(temp_sp, precip_sp, ncol = 2, widths = c(6,4)),
+       filename = "plots/weather_pop_growth/coef_order_mnanom_5km_GAM.jpeg",
+       width = 15, height = 13, units = "in", dpi = 400)
+
+## 7c. Weather coefficients by biome
+temp_biome <- ggplot(pgr_weather_gam, aes(x = coef_temp, y = biome, fill = biome,
+                                      height = stat(density))) +
+  geom_vline(xintercept = 0) +
+  geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "C") +
+  labs(x = "Temperature anomaly coefficient", y = NULL) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 20) 
+
+precip_biome <- ggplot(pgr_weather_gam, aes(x = coef_precip, y = biome, fill = biome,
+                                        height = stat(density))) +
+  geom_vline(xintercept = 0) +
+  geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "D") +
+  labs(x = "Precipitation anomaly coefficient", y = NULL) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 20) +
+  theme(axis.text.y = element_blank())
+
+ggsave(grid.arrange(temp_biome, precip_biome, ncol = 2, widths = c(10,4)),
+       filename = "plots/weather_pop_growth/coef_biome_mnanom_5km_GAM.jpeg",
+       width = 45, height = 20, units = "cm", dpi = 400)
+
+## 7d. Weather coefficients by latitude
+pgr_lat <- pgr_weather_gam %>% 
+  mutate(lat = abs(Latitude) - (abs(Latitude) %% 22.5))
+
+temp_lat <- ggplot(pgr_lat, aes(x = coef_temp, y = factor(lat), 
+                                fill = factor(lat), height = stat(density))) +
+  geom_vline(xintercept = 0) +
+  stat_density_ridges(quantile_lines = T, quantiles = 2, alpha = 0.7, scale = 1.1) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "C", begin = 0.1, end = 0.9) + 
+  labs(x = "Temperature anomaly coefficient", y = "Absolute latitude") +
+  theme_ridges(center_axis_labels = TRUE, font_size = 25) 
+
+precip_lat <- ggplot(pgr_lat, aes(x = coef_precip, y = factor(lat), 
+                                  fill = factor(lat), height = stat(density))) +
+  geom_vline(xintercept = 0) +
+  stat_density_ridges(quantile_lines = T, quantiles = 2, alpha = 0.7, scale = 1.1) +
+  coord_cartesian(xlim = c(-0.5,0.5)) +
+  scale_fill_viridis_d(guide = F, option = "D", begin = 0.2, end = 0.8) + 
+  labs(x = "Precipitation anomaly coefficient", y = NULL) +
+  theme_ridges(center_axis_labels = TRUE, font_size = 25) 
+
+ggsave(grid.arrange(temp_lat, precip_lat, ncol = 2, widths = c(7,6)),
+       filename = "plots/weather_pop_growth/coef_lat_mnanom_5km_GAM.jpeg",
+       width = 15, height = 11, units = "in", dpi = 400)
 
 
