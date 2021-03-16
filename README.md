@@ -1,13 +1,26 @@
-# Global weather and changes in abundance for the terrestrial mammals
+# Analysis for 
+# _Life-history predicts global population responses to the weather in the terrestrial mammals_
 
 #### 2020-04-24
 #### John Jackson
 
 ---
 
-Study on terrestrial mammals to investigate how weather influences annual changes in abundance.
+Full analysis and code for our study on terrestrial mammals to investigate how weather influences annual changes in abundance and how this is linked to species-level life-history traits. For the manuscript please see <link to bioarkiv/paper>.
 
-Here we are making use of:
+The analysis is split into the following 5 sections. Sections 2-5 are associated with a specific directory and their own `README.md` file, so see those for more details:
+
+1. **Exploring** raw data for mammal abundance, weather, phylogeny, and life-history (explored here).
+2. Extracting salient `weather_variables/` from the weather data.
+3. Managing mammal data on `annual_abundance_changes/` and calculating annual population growth rates.
+4. Linking `weather_population_growth/` to asses weather effects on population change for each record.
+5. `meta_regression/` to explore comparative patterns in weather effects across the mammals.
+
+In this README, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R`, `mam_exploration.R`, `phylo_exploration.R` and `dski_exploration` in the root of the repository here. 
+
+---
+
+We are making use of:
 
 1. The Living Planet Database of vertebrate abundance timeseries, which can be downloaded at [The Living Planet Index website](https://livingplanetindex.org/home/index).
 2. The CHELSA Climatologies at high resolution for the earth’s land surface areas 1979-2013, which can be downloaded from [Karger et al. (2017)](https://www.nature.com/articles/sdata2017122).
@@ -16,22 +29,11 @@ Here we are making use of:
 
 ---
 
-The analysis is split into the following sections:
-
-1. Exploring raw data from CHELSA, the Living Planet Database, the mammal phylogeny, and comparative life-history data.
-2. Extracting salient weather data from CHELSA for the localities of the Living Planet studies.
-3. Detrending annual abundance data to focus on annual changes excluding underlying trends.
-4. ...
-
-Here, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R`, `mam_exploration.R`, `phylo_exploration.R` and `dski_exploration`. The rest of the sections can be found in separate directories with additional README files.
-
----
-
 ## 1. Living Planet Database for terrestrial mammals `mam`
 
 The Living Planet Index is a key indicator of the state of global biodiversity, monitoring trends in vertebrate popualtions over many decades. Developed by the Zoological Society of London (ZSL) and the World Wildlife Fund (WWF), this index has been a crucial indicator for international policy on conservation. Here, we are using the data that underpins the LPI, which is also maintained by ZSL and the WWF. We are restricting to only include data from the terrestrial mammals for ease of processing and interpretation at this stage. According to the Living Planet Index website: 
 
-> *The Living Planet Database (LPD) currently holds time-series data for over 20,000 populations of more than 4,200 mammal, bird, fish, reptile and amphibian species from around the world, which are gathered from a variety of sources such as journals, online databases and government reports. Using a method developed by ZSL and WWF, these species population trends are aggregated to produce indices of the state of biodiversity. The rest of our work focusses on expanding the coverage of LPI data to more broadly represent vertebrate biodiversity from all around the globe and disaggregating the index to measure trends in different thematic areas. This includes assessing the changes in different taxonomic groups, looking at species trends at a national or regional level, identifying how different threats affect populations and providing an insight into how conservation intervention can promote species recoveries.*
+> *The Living Planet Database (LPD) currently holds time-series data for over 20,000 populations of more than 4,200 mammal, bird, fish, reptile and amphibian species from around the world, which are gathered from a variety of sources such as journals, online databases and government reports. Using a method developed by ZSL and WWF, these species population trends are aggregated to produce indices of the state of biodiversity. The rest of our work focuses on expanding the coverage of LPI data to more broadly represent vertebrate biodiversity from all around the globe and disaggregating the index to measure trends in different thematic areas. This includes assessing the changes in different taxonomic groups, looking at species trends at a national or regional level, identifying how different threats affect populations and providing an insight into how conservation intervention can promote species recoveries.*
 
 Access to the LPD can be obtained at https://livingplanetindex.org/home/index. 
 
@@ -124,15 +126,15 @@ We can also see this for different orders of the mammals, here presented for any
 
 ![](./plots/lifehistory_raw/max_longevity_litter_order.jpeg)
 
-Also stored in the Demographic Species Knowledge Index is species-level information on conservation status from the IUCN redlist. Here we have the threat status of all species in the data-set. This threat status can be an indication of recent and rapid population decline, and thus we also expect that there may be patterns between life-history traits and threat status. Here we can see the distribution of maximum longevity and litter size based on the IUCN redlist status:
+Also stored in the Demographic Species Knowledge Index is species-level information on conservation status from the IUCN redlist. Here we have the threat status of all species in the data-set. This threat status can be an indication of recent and rapid population decline, and thus we also expect that there may be patterns between life-history traits and threat status. Here we can see the distribution of maximum longevity and litter size based on the IUCN redlist status. There are some slight indications that longer living species that produce fewer offspring tend to be a higher threat status. 
 
 ![](./plots/lifehistory_raw/IUCN_lonlit.jpeg)
 
-For patterns of bodymass, we see a clear general positive relationship between body size and maximum longevity. Bigger bodied mammals live for longer. However, the relationship between litter size and bodymass is less clear. We do expect that most very large organisms to have small litters though on average. Here are these relationships for the scaled, ln-transformed variables.
+For allometric patterns of bodymass, we see a clear general positive relationship between body size and maximum longevity. Bigger bodied mammals live for longer. However, the relationship between litter size and bodymass is less clear. We do expect that most very large organisms to have small litters though on average. Here are these relationships for the scaled, ln-transformed variables.
 
 <img src="./plots/lifehistory_raw/bodymass_lonlit.jpeg" width="900" />
 
-There are some slight indications that longer living species that produce fewer offspring tend to be a higher threat status. Now, in the current study, we want to relate these life-history traits to observed population responses to the weather.
+Now, in the current study, we want to relate these life-history traits to observed population responses to the weather.
 
 
 
