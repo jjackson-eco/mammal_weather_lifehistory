@@ -5,6 +5,8 @@
 
 ---
 
+\usepackage{amsmath}
+
 This markdown is intended as an accompaniment to the scripts contained within the directory `weather_population_growth`, to walk through the process of calculating the effect of annual weather on population growth rates for each timeseries record in the LPD for the terrestrial mammals. This serves as the first step in a two-step meta regression approach to explore global weather effects on population growth. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
 There are 2 main sections and scripts:
@@ -13,9 +15,9 @@ There are 2 main sections and scripts:
 <details>
   <summary>Click here to expand</summary>
 
-### `GAMM_ARMA_populationgrowth_rates.R`
+### `GAM_weather_pop_growth_meananomaly.R`
 
-First, we will walk through the process for calculating weather effects using the mean annual weather anomaly for a 5km buffer radius around the study site to demonstrate the process before expanding this out to look across different radius sizes, for different weather variables, and using different methods (with different levels of naivity) for estimated. We do this using a GAM model for each record, which accounts for a low basis-dimension smoothing term for year, which has an explicit ARMA autoregressive error structure (AR 1) to account for temporal autocorrelation. 
+First, we will walk through the process for calculating weather effects using the mean annual weather anomaly for a 5km buffer radius around the study site to demonstrate the process before expanding this out to look across different radius sizes, for different weather variables, and using different methods (with different levels of naivity) for estimated weather effects. Our main models here are GAMs, which have a low basis-dimension smoothing term for year and an explicit ARMA autoregressive error structure (AR 1) to account for temporal autocorrelation. 
 
 We need to join the annual CHELSA anomaly data with our population growth data first:
 
@@ -97,7 +99,7 @@ We can see that there doesn't seem to be a consistent pattern of weather effects
 
 ### `annual_weather_variables.R`
 
-Now we want to repeat the same linear modelling framework but expand to calculate coefficients for all of our annual weather variables and spatial scales. We begin in very much the same way, but don't exclude any of the spatial scales or weather variables.
+Now we want to repeat the same GAM modelling framework but expand to calculate coefficients for all of our annual weather variables and spatial scales. We begin in very much the same way, but don't exclude any of the spatial scales or weather variables.
 
 ```
 ##__________________________________________________________________________________________________
