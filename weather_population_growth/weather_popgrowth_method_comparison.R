@@ -81,7 +81,7 @@ pgr_weather <- mammal_weather %>%
     coef_temp_TMB = as.numeric(coef(temp_TMB)$cond$ID[length(coef(temp_TMB)$cond$ID)])
     
     # Model 5. GAMM with a coarse year smoothing term and an autoregression (1) correlation structure 
-    temp_gamm = gamm(pop_growth_rate ~ s(year, bs = "tp", k = 3) + mean_temp_anomaly,
+    temp_gamm = gamm(pop_growth_rate ~ s(year, bs = "tp", k = 5) + mean_temp_anomaly,
                     data = ., family = gaussian,
                     correlation = corARMA(form = ~ year, p = 1),
                     method = "REML")
@@ -109,11 +109,12 @@ pgr_weather <- mammal_weather %>%
       coef_precip_TMB = as.numeric(coef(precip_TMB)$cond$ID[length(coef(precip_TMB)$cond$ID)])
       
       # Model 5. GAMM with a coarse year smoothing term and an autoregression (1) correlation structure 
-      precip_gamm = gamm(pop_growth_rate ~ s(year, bs = "tp", k = 3) + mean_precip_anomaly,
+      precip_gamm = gamm(pop_growth_rate ~ s(year, bs = "tp", k = 5) + mean_precip_anomaly,
                        data = ., family = gaussian,
                        correlation = corARMA(form = ~ year, p = 1),
                        method = "REML")
       coef_precip_gamm = coef(precip_gamm$gam)[2]}
+    
     else{coef_precip_naive = NA
          coef_precip_lintr = NA
          coef_precip_linear = NA
