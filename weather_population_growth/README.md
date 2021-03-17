@@ -276,6 +276,8 @@ And for precipitation:
 
 <img src="../plots/weather_pop_growth/precip_effect_comparison.jpeg" width="700" />
 
+You can see that in particular for the GAM approach taken in this study, it was a good representation of the weather coefficients for both temperature and precipitation relative to other methods. And, as with our density dependence simulation in the previous section, we see that weather coefficients (environmental effects) are highly correlated even when we don't account for temporal autocorrelation or trend. The only exception to these reassuring findings is the glmmTMB method, which is not as well correlated. However these coefficients are still well related to the GAM coefficients.
+
 </details>
 
 ## 4. Hypothesis exploration plots
