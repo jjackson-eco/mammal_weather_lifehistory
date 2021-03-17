@@ -7,7 +7,7 @@
 
 This markdown is intended as an accompaniment to the scripts contained within the directory `weather_population_growth`, to walk through the process of calculating the effect of annual weather on population growth rates for each timeseries record in the LPD for the terrestrial mammals. This serves as the first step in a two-step meta regression approach to explore global weather effects on population growth. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
-There are 2 main sections and scripts:
+There are 4 main sections and scripts:
 
 ## 1. Annual mean weather anomalies with GAM models
 <details>
