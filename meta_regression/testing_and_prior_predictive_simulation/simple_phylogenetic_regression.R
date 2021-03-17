@@ -82,7 +82,7 @@ plot(Dmat, A_temp, type = "b", xlab = "Phylogenetic distance", ylab = "Brownian 
 # sample from a Gaussian for the intercept i.e. the coefficient of the temperature effect
 set.seed(100)
 ppd_coefs <- tibble(weak_int = rnorm(1000, mean = 0, sd = 10),
-                        reg_int = rnorm(1000, mean = 0, sd = 1),
+                    reg_int = rnorm(1000, mean = 0, sd = 0.5),
                     sim = 1:1000)
 
 
