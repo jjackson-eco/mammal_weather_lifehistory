@@ -15,7 +15,7 @@ There are 4 main sections and scripts:
 
 ### `GAM_weather_pop_growth_meananomaly.R`
 
-First, we will walk through the process for calculating weather effects using the mean annual weather anomaly for a 5km buffer radius around the study site to demonstrate the process before expanding this out to look across different radius sizes, for different weather variables, and using different methods (with different levels of naivity) for estimated weather effects. Our main models here are GAMs, which have a low basis-dimension smoothing term for year and an explicit ARMA autoregressive error structure (AR 1) to account for temporal autocorrelation. 
+First, we will walk through the process for calculating weather effects using the mean annual weather anomaly for a 5km buffer radius around the study site to demonstrate the process before expanding this out to look across different radius sizes, for different weather variables, and using different methods (with different levels of naivety) for estimated weather effects. Our main models here are GAMs, which have a low basis-dimension smoothing term for year and an explicit ARMA autoregressive error structure (AR 1) to account for temporal autocorrelation. 
 
 We need to join the annual CHELSA anomaly data with our population growth data first:
 
