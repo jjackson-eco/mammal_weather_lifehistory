@@ -10,6 +10,7 @@
 
 # Record-wise regressions linking weather to population growth rates, 
 # accounting for autocorrelation with GAMM and formal AR(1) time-series analysis
+# Models just for 5km buffer radius and the mean weather anomaly.
 
 rm(list = ls())
 options(width = 100)
@@ -132,9 +133,22 @@ lin_gam <- pgr_weather_gam %>%
                                     lin_temp = coef_temp, lin_precip = coef_precip),
             by = "ID_block")
 
+# Correlation for plot labels
+temp_cor <- cor.test(lin_gam$lin_temp, lin_gam$coef_temp)
+temp_cor_val <-  c(round(temp_cor$estimate, 2),
+                   ifelse(temp_cor$p.value < 0.001, "p < 0.001",
+                          paste0("p = ", round(temp_cor$p.value, 2))))
+
+precip_cor <- cor.test(lin_gam$lin_precip, lin_gam$coef_precip)
+precip_cor_val <- c(round(precip_cor$estimate, 2),
+                    ifelse(precip_cor$p.value < 0.001, "p < 0.001",
+                           paste0("p = ", round(precip_cor$p.value, 2))))
+
 temp_compare <- ggplot(lin_gam, aes(x = lin_temp, y = coef_temp, size = n_obs)) + 
   geom_point(alpha = 0.6, colour = temp_colour) +
   geom_abline(slope = 1, intercept = 0) +
+  annotate('text', x = -2.5, y = 4,
+           label = paste0("r = ", temp_cor_val[1], ", ", temp_cor_val[2])) +
   scale_size_continuous(range = c(1,8), guide = F) +
   labs(x = "Linear temperature effect", y = "GAM temperature effect") +
   theme_bw(base_size = 13) +
@@ -143,6 +157,8 @@ temp_compare <- ggplot(lin_gam, aes(x = lin_temp, y = coef_temp, size = n_obs)) 
 precip_compare <- ggplot(lin_gam, aes(x = lin_precip, y = coef_precip, size = n_obs)) + 
   geom_point(alpha = 0.6, colour = precip_colour) +
   geom_abline(slope = 1, intercept = 0) +
+  annotate('text', x = -2, y = 2.3,
+           label = paste0("r = ", precip_cor_val[1], ", ", precip_cor_val[2])) +
   scale_size_continuous(range = c(1,8), guide = F) +
   labs(x = "Linear precipitation effect", y = "GAM precipitation effect") +
   theme_bw(base_size = 13) +
@@ -150,7 +166,7 @@ precip_compare <- ggplot(lin_gam, aes(x = lin_precip, y = coef_precip, size = n_
 
 ggsave(temp_compare + precip_compare,
        filename = "plots/weather_pop_growth/linear_gam_comparison.jpeg",
-       width = 25, height = 18, units = "cm", dpi = 400)
+       width = 20, height = 10, units = "cm", dpi = 400)
 
 ##__________________________________________________________________________________________________
 #### 6. Saving data from GAM ####

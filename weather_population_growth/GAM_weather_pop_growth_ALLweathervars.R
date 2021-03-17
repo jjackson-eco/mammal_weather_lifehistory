@@ -54,7 +54,7 @@ mammal_weather <- mammal %>%
 glimpse(mammal_weather)
 
 ##__________________________________________________________________________________________________
-#### 3. Linear models for each variable and scale for each record ####
+#### 3. GAMs for each variable and scale for each record ####
 
 # 3a. set up iteration data
 # Ignoring number of odd days vars for now - they follow a zero inflated pattern
