@@ -5,92 +5,64 @@
 
 ---
 
-This markdown is intended as an accompaniment to the scripts contained within the directory `meta_regression/`, to walk through the Bayesian meta-regression framework carried out in this study. Here we generate the key results and findings presented in the manuscript  This serves as the first step in a two-step meta regression approach to explore global weather effects on population growth. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
+This markdown is intended as an accompaniment to the scripts contained within the directory `meta_regression/`, to walk through the Bayesian meta-regression framework carried out in this study. We carried out two forms of meta-regression model during these analysis:
+
+1. Gaussian meta-regression on weather coefficient values to estimate consistent patterns across the mammals.
+2. Gamma meta-regressions on absolute weather coefficients to explore relationships to life-history.
+
+
+Here we generate the key results and findings presented in the manuscript. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
 There are 4 main sections and scripts:
 
-## 1. Testing models and Prior Predictive Simulation
+## 1. Prior Predictive Simulation
 
 <details>
   <summary>Click here to expand</summary>
 
-### `GAM_weather_pop_growth_meananomaly.R`
+### `testing_and_prior_predictive_simulation/prior_predictive_simulation.R`
 
-First, we will walk through the process for calculating weather effects using the mean annual weather anomaly for a 5km buffer radius around the study site to demonstrate the process before expanding this out to look across different radius sizes, for different weather variables, and using different methods (with different levels of naivety) for estimated weather effects. Our main models here are GAMs, which have a low basis-dimension smoothing term for year and an explicit ARMA autoregressive error structure (AR 1) to account for temporal autocorrelation. 
+Before fitting our Bayesian meta-regression models, we need to develop effective priors. We opted to use conservative, regularising priors following McElreath 2020, which gave estimates within the parameter space observed in the raw data. This was achieved through prior predictive simulation (PPS). Here, we compare the estimates and expectation of priors to the limits of observed data to inform the priors. In addition, priors were further tuned to improve the efficiency/accuracy of Markov chains during model selection analyses.
 
-We need to join the annual CHELSA anomaly data with our population growth data first:
+In all cases, we chose conservative regularising priors to reflect the high number of parameters in phylogenetically or spatially controlled models. 
 
-```
-##__________________________________________________________________________________________________
-#### 1. Load data ####
+Here we walk through simulations carried out to inform priors for the global intercept (mean weather coefficient), the beta coefficients for differences (i.e. biome), the life-history slope effects and the random effects variance terms (i.e. phylogenetic covariance and species variance). We present priors of increasing regularisation.
 
-# mammal data
-load("../rawdata/mammal.RData")
-glimpse(mammal)
+### Intercept terms
 
-# annual weather anomaly - focus on just the mean anomaly in this script at a 5km range
-mam_chelsa_annual <- readRDS("data/mam_chelsa_annual.RDS") %>% 
-  filter(scale == "scale_5km") %>% 
-  dplyr::select(ID,year, weather_scale = scale, mean_temp_anomaly, mean_precip_anomaly)
-glimpse(mam_chelsa_annual)
+Here we used normal priors to describe the intercept of population responses across records. For all priors we used a mean of 0 as we had no prior expectation regarding the direction of weather effects. Then, we used three simulated priors to inform the priors used in the study:
 
-# Species names to merge
-load("../rawdata/GBIF_species_names_mamUPDATE.RData", verbose = TRUE)
+1. Weak prior - Normal(0,10)
+2. Medium regularising prior - Normal(0,2)
+3. Regularising prior - Normal(0,0.5)
 
-##__________________________________________________________________________________________________
-#### 2. Joining data ####
+Here we compare the intercept priors to the observed coefficient bounds:
 
-# linking to weather data and species names 
-mammal_weather <- mammal %>% 
-  left_join(., y = mam_chelsa_annual, by = c("ID", "year")) %>% 
-  left_join(., y = dplyr::select(lpd_gbif, Binomial, gbif_species = gbif.species.tree),
-            by = "Binomial") %>% 
-  mutate(year_s = as.numeric(scale(year)))
-```
+<img src="../plots/meta_regression/prior_predictive_simulation/weather_coefficient_pps.jpeg" width="600" />
 
-### Calculating weather effects on population growth rate
+### Coefficient difference beta terms
 
-Now, we want to look at this hypothesis explictly using the timeseries data from each study, whilst accounting forany temporal trends in the data, and also temporal autocorrelation. We estimate weather effects on population growth rate for each record using generalised additive models (GAMs) from package `mgcv`. Here, the population growth rate lambda at time *t* is given by
+For the beta coefficients describing differences in grouping variables, we looked at pairwise differences in all observed coefficients to inform the parameter space for the prior. Again, we used normal priors and explored the same prior parameters. Here are the simulated differences in coefficients expected by the prior to an intercept of 0.
 
-<img src="../plots/weather_pop_growth/model_equation.png" width="500" />
+<img src="../plots/meta_regression/prior_predictive_simulation/coefficient_differences_beta.jpeg" width="600" />
 
-where beta 0 is the intercept, w gives the weather variable at time *t* with weather coefficient omega, and *f(y_t)* is smoothing term for the year (y) at time *t*. The smoothing term was fit with a thin plate regression spline with a basis dimension of 5, and an explicit ARMA autoregressive correlation structure of order one specified in the `nlme` package. This smoothing term serves two purposes: first, it accounts for trends in abundance through time, and second it specifically incorporates temporal autocorrelation. Thus, these models estimate the effect of weather whilst accounting for abundance trends and temporal autocorrelation respectively. GAMs were also fit using restricted maximum likelihood (REML). In this script, the weather variable is the annual mean temperature and precipitation anomaly at a 5km buffer radius. We estimated the GAM models and extracted the beta coefficients as follows:
+### Life-history effect simulations
 
-```
-pgr_weather_gam <- mammal_weather %>% 
-  group_by(ID_block) %>% 
-  group_modify(~{
-    
-    # Temperature
-    mod_temp = gamm(pop_growth_rate ~ s(year, bs = "tp", k = 5) + mean_temp_anomaly,
-                    data = ., family = gaussian,
-                    correlation = corARMA(form = ~ year, p = 1),
-                    method = "REML")
-    coef_tempmod = coef(mod_temp$gam)
-    
-    # Precipitation + dealing with NA values
-    if(length(which(is.na(.$mean_precip_anomaly) == T)) == 0){
-      mod_precip = gamm(pop_growth_rate ~ s(year, bs = "tp", k = 5) + mean_precip_anomaly,
-                        data = ., family = gaussian,
-                        correlation = corARMA(form = ~ year, p = 1),
-                        method = "REML")
-      coef_precipmod = coef(mod_precip$gam)}
-    else{coef_precipmod = rep(NA,15)}     # Arbitrary long NA vector
-    
-    tibble(.[1,],
-           coef_temp = unname(coef_tempmod[2]),
-           coef_precip = unname(coef_precipmod[2]),
-           n_obs = nrow(.))
-  }) 
-```
+For the slope terms describing the effect of life-history on population responses to weather, we used an intercept of 0 once more and then simulated beta slope terms using the same normal priors explored previously. We then predicted weather effects from simulated life-history values between -2 and 2. These plots present the predictions of weather effects for each of the normal priors. The solid and dashed black lines are the maximum observed coefficients for temperature and precipitation, respectively.
 
-Now we have model coefficients for each of the 494 10> year records for the terrestrial mammals (not final sample size as we have not intersected with life-history yet). We can now look at comparative patterns in these coefficients. First, lets look at the overall density distributions of the coefficients across the records. Here you can see ridge density plots for each of the coefficient, with coefficients between -1 and 1 shown here. **It is important to note that coefficients can be much larger, and this restriction is to better display the density distribution**.
+<img src="../plots/meta_regression/prior_predictive_simulation/life_history_effect_pps.jpeg" width="800" />
 
-<img src="../plots/weather_pop_growth/overall_coefficients_mnanom_5km_GAM.jpeg" width="700" />
+### Random effect variance terms
 
-We can see that there doesn't seem to be a consistent pattern of weather effects on population growth rates for either precipitation or temperature.  
+We used exponential priors when considering variance terms relating to the mixed effects in the meta-regression, which mainly were used for phylogenetic covariance and species variance. Exponential terms were beneficial here as they are non-zero and flexible for exploring large variances. Here, we explored the priors of varying exponential rates from 0.5-20, and their consequent distributions of variance terms. Smaller rates give weaker priors with a wider range of variance terms. In our case, particularly for phylogenetic covariance, we do not expect variance terms > 1. We present the resulting distributions from exponential priors of varying rates. The solid lines indicate a variance of 1.
+
+<img src="../plots/meta_regression/prior_predictive_simulation/random_effect_variance_pps.jpeg" width="600" />
 
 </details>
+
+In all cases, more regularising, conservative priors were much more representative of observed restrictions (i.e. maxima and minima) of the raw data. Furthermore, we only presented isolated priors, without exploring the consequences of adding a greater number of parameters e.g. random effects that would further restrict the coefficients obtained.
+
+Thus, in all subsequent bayesian models, we used 
 
 ## 2. Other annual weather variables and scales
 <details>
