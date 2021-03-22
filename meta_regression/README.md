@@ -10,7 +10,6 @@ This markdown is intended as an accompaniment to the scripts contained within th
 1. Gaussian meta-regression on weather coefficient values to estimate consistent patterns across the mammals.
 2. Gamma meta-regressions on absolute weather coefficients to explore relationships to life-history.
 
-
 Here we generate the key results and findings presented in the manuscript. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
 There are 4 main sections and scripts:
@@ -58,30 +57,216 @@ We used exponential priors when considering variance terms relating to the mixed
 
 <img src="../plots/meta_regression/prior_predictive_simulation/random_effect_variance_pps.jpeg" width="600" />
 
-</details>
-
 In all cases, more regularising, conservative priors were much more representative of observed restrictions (i.e. maxima and minima) of the raw data. Furthermore, we only presented isolated priors, without exploring the consequences of adding a greater number of parameters e.g. random effects that would further restrict the coefficients obtained.
 
 Thus, in all subsequent Bayesian models in model selection, we used regularising priors, i.e. normal priors with standard deviation < 1 and exponential priors with rates > 5. Please see meta-regression scripts for specific details on each prior.
+
+</details>
 
 ## 2. General form of the Gaussian meta-regression
 <details>
   <summary>Click here to expand</summary>
 
+### `GAM_coefficients/`
+
 ### `phylo_temp_GAM.R`
 ### `phylo_precip_GAM.R`
 
-Now we are going to present the general framework that was used to fit the meta-regressions in models and that were used to explore consistent patterns across the mammals using Guassian models. In the general models that were explored for consistent patterns we incorporated species variance and also phylogenetic covariance. However, we also explored spatial autocorrelation (see section 4).
+Now we are going to present the general framework that was used to fit the Gaussian meta-regressions models, which were used to explore consistent patterns across the mammals. In the general models that were explored for consistent patterns we incorporated species variance and also phylogenetic covariance. However, we also explored/tested for spatial autocorrelation (see section 4). Note also that similar scripts can be found for linear coefficients (i.e. linear models to estimate weather effects) in the `Linear_coefficients/` directory.
+
+This framework begins with handling coefficient data (`mnanom_5km_GAM`), phylogenetic data (`mamMCC_pruned`), and life-history data (`lifehistory`) + the species names data to merge files (`lpd_gbif`). Another useful script on this regard is the `generating_coefficient_data_GAM.R` file, which goes through this whole process independently (used in later models). First we do some wrangling the coefficient data, merging with species names and life history, and then doing some variable transformations. Example here for the temperature coefficients, which is identical for precipitation but with extra columns in the `drop_na` function.
+
+```
+mam_temp <- mnanom_5km_GAM %>% 
+  ungroup() %>%  ## <- The groups ruin the z-transformations
+  left_join(x = ., y = dplyr::select(lpd_gbif, Binomial, gbif.species.id), 
+            by = "Binomial") %>% 
+  left_join(x = ., y = dplyr::select(lifehistory, c(3,6:9)),
+            by = "gbif.species.id") %>% 
+  mutate(species = gsub(" ", "_", gbif_species),
+         phylo = species,
+         # z transform the coefficients
+         coef_temp = as.numeric(scale(coef_temp)),
+         coef_precip = as.numeric(scale(coef_precip)),
+         # z transform absolute latitude for models
+         lat = as.numeric(scale(abs(Latitude))),
+         # observation-level term for residual variance (not sure if needed)
+         OLRE = 1:n(),
+         # iucn change  
+         IUCNstatus = if_else(is.na(IUCNstatus) == T, "NotAss", IUCNstatus),
+         sample_size = as.numeric(scale(log(n_obs)))) %>% 
+  dplyr::select(id = ID, id_block = ID_block, n_obs, sample_size, 
+                order = Order, species, phylo, 
+                biome, lat, iucn = IUCNstatus, litter,
+                longevity, bodymass, coef_temp, 
+                coef_precip) %>% 
+  drop_na(litter, longevity, bodymass)
+```
+
+Then we have to do some handling of the phlogenetic tree, trimming the tips to only include species in our dataset and then converting the tree to a variance-covariance matrix for analyses. 
+
+```
+# Trim tree to right data
+mamMCC_temp <- keep.tip(mamMCC_pruned, mam_temp$phylo) 
+
+# Covariance matrix - Brownian motion model
+A_temp <- ape::vcv.phylo(mamMCC_temp)
 
 ```
 
+### `brms` models
+
+Now we move to Gaussian models, which were implemented using the `brms` package, which is an interface for stan in R using NUTS (no U-turn) and Hamiltonian Monte-Carlo (HMC) MCMC sampling. Following McElreath (2020), we first carried out single Markov Chain tests to visualize convergence. These can be found in `testing_and_prior_predictive_simulation/phylo_meta_regression_test.R`. Now, we fit the base model that does not include predictors of interest (spatial effects on life-history):
+
 ```
+## Base model
+set.seed(666)
+temp_base <- brm(
+  coef_temp ~ 1 + sample_size + (1|gr(phylo, cov = A_temp)) + (1| species),  
+  data = mam_temp, family = gaussian(),
+  data2 = list(A_temp = A_temp),
+  prior = c(
+    prior(normal(0, 0.3), class =  Intercept),
+    prior(normal(0, 0.3), class = b, coef = "sample_size"),
+    prior(exponential(8), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "species")),
+  control = list(adapt_delta = 0.97,
+                 max_treedepth = 15),
+  chains = 3, cores = 3, iter = 4000, warmup = 2000
+)
+```
+
+We specify the wrangled coefficient data and then the variance-covariance phylogenetic matrix with `data` and `data2`. Then the regularising priors were specified following the findings of section 1. We had additional control arguments to aid in chain convergence, specifying delta and the maximum tree depth. Final models were run using 3 chains, with 4000 total iterations and 2000 warm up iterations.
+
+Then we explored the spatial biome effects adding biome as a predictor:
+
+```
+## Biome
+set.seed(666)
+temp_biome <- brm(
+  coef_temp ~ 1 + biome + sample_size + (1|gr(phylo, cov = A_temp)) + (1| species),  
+  data = mam_temp, family = gaussian(),
+  data2 = list(A_temp = A_temp),
+  prior = c(
+    prior(normal(0, 0.3), class =  Intercept),
+    prior(normal(0, 0.15), class = b),
+    prior(normal(0, 0.3), class = b, coef = "sample_size"),
+    prior(exponential(8), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "species")),
+  control = list(adapt_delta = 0.97,
+                 max_treedepth = 15),
+  chains = 3, cores = 3, iter = 4000, warmup = 2000
+)
+```
+
+This framework was applied to both temperature and precipitation. We can now inspect the Markov chains and posteriors of the candidate models. Here we have the trace and density plot for temperature as an example
+
+<img src="../plots/meta_regression/temp_biome_mod_parms.jpeg" width="700" />
+
+### Cross-validation with `loo`
+
+To perform model comparisons in subsequent analyses we used cross validation implemented using the `loo` package. Here, we compared the estimated out-of-sample predictive performance of models including vs. excluding predictors of interest using the estimated log-wise predictive density or elpd. This same framework was applied to all subsequent models.
+
+First, we add LOO criterion to models of interest, and then we use the `loo_compare` function to compare the models using the LOO criterion.
+
+```
+#_______________________________________________________________________________
+### 4b. Model comparisons
+
+## Model comparisons
+temp_base <- add_criterion(temp_base, criterion = c("loo","waic"))
+temp_biome <- add_criterion(temp_biome, criterion = c("loo","waic"))
+
+mod_comp_temp <- as.data.frame(loo_compare(temp_base, temp_biome, criterion = "loo"))
+```
+
+And doing this we can see the predictive performance of the model with the biome effect relative to the base model for temperature
+
+<img src="../plots/meta_regression/temperature_gaussian_model_comparison.png" width="800" />
+
+and precipitation
+
+<img src="../plots/meta_regression/precipitation_gaussian_model_comparison.png" width="800" />
 
 </details>
 
 ## 3. General form of the Gamma meta-regression
 <details>
   <summary>Click here to expand</summary>
+
+Now we will perform the same meta-regression framework, but now to investigate how species-level life-history influences absolute weather responses. Our life-history traits here are scaled variables for **maximum longevity**, **mean litter size** and **adult bodymass**. The key difference in the first step of generating data (see `generating_coefficient_data_GAM.R` is the calculation of absolute coefficients for temperature and precipitation effects:
+
+```
+mam_coef <- mnanom_5km_GAM %>% 
+  ungroup() %>%  ## <- The groups ruin the z-transformations
+  left_join(x = ., y = dplyr::select(lpd_gbif, Binomial, gbif.species.id), 
+            by = "Binomial") %>% 
+  left_join(x = ., y = dplyr::select(lifehistory, c(3,6:9)),
+            by = "gbif.species.id") %>% 
+  mutate(species = gsub(" ", "_", gbif_species),
+         phylo = species,
+         # raw coefficients
+         coef_temp_raw = coef_temp,
+         coef_precip_raw = coef_precip,
+         # z transformed coefficients
+         coef_temp = as.numeric(scale(coef_temp)),
+         coef_precip = as.numeric(scale(coef_precip)),
+         # absolute values of z transformed coefficients
+         abs_temp = abs(coef_temp),
+         abs_precip = abs(coef_precip),  ## <----- Precipitation studies have some NA values
+         # logged absolute coefficients
+         log_abs_temp = log(abs_temp),
+         log_abs_precip = log(abs_precip),
+         # z transform absolute latitude for models
+         lat = as.numeric(scale(abs(Latitude))),
+         # observation-level term for residual variance (not sure if needed)
+         OLRE = 1:n(),
+         # iucn change  
+         IUCNstatus = if_else(is.na(IUCNstatus) == T, "NotAss", IUCNstatus),
+         sample_size = as.numeric(scale(log(n_obs)))) %>% 
+  dplyr::select(id = ID, id_block = ID_block, n_obs, sample_size, 
+                order = Order, species, phylo,
+                biome, Latitude, Longitude, lat, iucn = IUCNstatus, litter,
+                longevity, bodymass, coef_temp_raw, coef_precip_raw,
+                coef_temp, coef_precip, abs_temp, 
+                abs_precip, log_abs_temp, log_abs_precip) %>% 
+  drop_na(litter, longevity, bodymass)
+```
+
+And now the process for the meta-regression is the same, but with a few key differences. We use a Gamma model with a log link function. The overall distribution of the absolute weather effects is modelled using a gamma prior with two parameters, alpha and beta, which control the distributional form of the response. Here we used `gamma(2,0.5)` for all models, but the beta value was tuned for each model. 
+
+Running Gamma regressions, which have a log link, with this number of parameters (phylogenetic regression) is more computationally intensive than the Gaussian regression. Therefore, we opted to use a High Performance Computing cluster to run these model selections. Therefore, for these Gamma regressions please refer to the scripts in `UCloud_regression_scripts_jan2021/`.
+
+### Model Selection
+
+In the Gamma models assessing life-history effects on absolute weather responses, we evaluated a set of models that incorporated univariate effects of life-history first, and then models incorporating two-way interactions. The general form of the model fit is as follows, with the longevity effect on temperature 
+
+```
+## Longevity
+set.seed(666)
+temp_longevity <- brm(
+  abs_temp ~ 1 + longevity + sample_size + (1|gr(phylo, cov = A_temp)) + (1| species),  
+  data = mam_temp, 
+  family = Gamma(link = "log"), 
+  data2 = list(A_temp = A_temp),
+  prior = c(
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "longevity"),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
+    prior(exponential(11), class = sd, group = "phylo"),
+    prior(exponential(2), class = sd, group = "species"),
+    prior(gamma(2,0.7), class = shape)),
+  control = list(adapt_delta = 0.99,
+                 max_treedepth = 17),
+  chains = 3, cores = 3, iter = 4000, warmup = 2000
+)
+```
+
+Then, with all other variables in the model formula kept constant, the full set of life-history (and biome) predictor models evaluated, with their corresponding model names in the scripts, is as follows:
+
+<img src="../plots/meta_regression/model_lookup_table.png" width="700" />
+
+
 
 </details>
 
