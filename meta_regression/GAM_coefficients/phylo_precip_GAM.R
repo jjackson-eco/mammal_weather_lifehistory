@@ -27,6 +27,7 @@ library(patchwork)
 library(ggridges)
 library(ggdist)
 library(viridis)
+library(flextable)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 1. Load data ####
@@ -133,5 +134,32 @@ mod_comp_precip <- as.data.frame(loo_compare(precip_base, precip_biome, criterio
 save(mod_comp_precip, file = "results/gaussian_models/model_comparison_precip_rawcoef.RData")
 save(precip_biome, file = "results/gaussian_models/precip_biome_rawcoef.RData")
 
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### 6. Table and model plots ####
 
+load("results/gaussian_models/model_comparison_precip_rawcoef.RData")
+load("results/gaussian_models/precip_biome_rawcoef.RData")
+
+# Model comparison table
+mod_comp_precip %>% 
+  mutate(model = c("Base model", "Biome effect")) %>% 
+  dplyr::select(model, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
+  flextable(cwidth = 1.2) %>% 
+  set_header_labels(model = "Model",
+                    elpd_loo = "LOO elpd",
+                    se_elpd_loo = "LOO elpd error",
+                    elpd_diff = "elpd difference",
+                    se_diff = "elpd error difference",
+                    looic = "LOO information criterion") %>% 
+  colformat_double(digits = 2) %>% 
+  save_as_image("plots/meta_regression/precipitation_gaussian_model_comparison.png")
+
+# Model plot
+precip_biome_pars <- parnames(precip_biome)
+
+jpeg("plots/meta_regression/precip_biome_mod_parms.jpeg", 
+     width = 13, height = 15, res = 500, units = "cm")
+plot(temp_biome, pars = c("b_Intercept", "b_sample_size","sd_species__Intercept", 
+                          "sd_phylo__Intercept", "sigma"))
+dev.off()
 

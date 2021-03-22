@@ -27,6 +27,7 @@ library(patchwork)
 library(ggridges)
 library(ggdist)
 library(viridis)
+library(flextable)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 1. Load data ####
@@ -133,5 +134,31 @@ mod_comp_temp <- as.data.frame(loo_compare(temp_base, temp_biome, criterion = "l
 save(mod_comp_temp, file = "results/gaussian_models/model_comparison_temp_rawcoef.RData")
 save(temp_biome, file = "results/gaussian_models/temp_biome_rawcoef.RData")
 
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### 6. Table and model plots ####
 
+load("results/gaussian_models/model_comparison_temp_rawcoef.RData")
+load("results/gaussian_models/temp_biome_rawcoef.RData")
 
+# Model comparison table
+mod_comp_temp %>% 
+  mutate(model = c("Base model", "Biome effect")) %>% 
+  dplyr::select(model, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
+  flextable(cwidth = 1.2) %>% 
+  set_header_labels(model = "Model",
+                    elpd_loo = "LOO elpd",
+                    se_elpd_loo = "LOO elpd error",
+                    elpd_diff = "elpd difference",
+                    se_diff = "elpd error difference",
+                    looic = "LOO information criterion") %>% 
+  colformat_double(digits = 2) %>% 
+  save_as_image("plots/meta_regression/temperature_gaussian_model_comparison.png")
+
+# Model plot
+temp_biome_pars <- parnames(temp_biome)
+
+jpeg("plots/meta_regression/temp_biome_mod_parms.jpeg", 
+     width = 13, height = 15, res = 500, units = "cm")
+plot(temp_biome, pars = c("b_Intercept", "b_sample_size","sd_species__Intercept", 
+                          "sd_phylo__Intercept", "sigma"))
+dev.off()
