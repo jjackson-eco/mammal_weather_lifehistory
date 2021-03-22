@@ -27,6 +27,7 @@ library(patchwork)
 library(ggridges)
 library(ggdist)
 library(viridis)
+library(flextable)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 1. Load data ####
@@ -87,6 +88,24 @@ A_temp <- ape::vcv.phylo(mamMCC_temp)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 4. Temperature models ####
+
+# Full set of predictor variables tested
+lh_predictors <- tibble(predictors = c("longevity", "litter", "bodymass", "biome",
+                   "longevity + bodymass", "litter + bodymass",
+                   "longevity*bodymass", "litter*bodymass",
+                   "longevity + bodymass + litter",
+                   "longevity + bodymass + litter + longevity:bodymass + litter:bodymass + litter:longevity"),
+                   temp_name = c("temp_longevity", "temp_litter", "temp_bodymass","temp_biome", 
+                                 "temp_lonbod_simple", "temp_litbod_simple",
+                                 "temp_lonbod", "temp_litbod", "temp_lh_uni", "temp_lh"), 
+                   precip_name = c("precip_longevity", "precip_litter", "precip_bodymass","precip_biome", 
+                                   "precip_lonbod_simple", "precip_litbod_simple",
+                                   "precip_lonbod", "precip_litbod", "precip_lh_uni", "precip_lh"))
+
+# Save the lookup table
+lh_predictors %>% 
+  flextable(cwidth = 2) %>% 
+  save_as_image("plots/meta_regression/model_lookup_table.png")
 
 # Base model chain test
 set.seed(666)
