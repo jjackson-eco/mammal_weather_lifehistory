@@ -318,7 +318,23 @@ ggsave((lon_temp_bin | lit_temp_bin)/
        width = 20, height = 20, units = "cm", dpi = 600)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
-#### 5. Saving data for manuscript figure ####
+#### 5. Model comparison tables ####
+
+temp_modcomp %>% 
+  mutate(model = rownames(.)) %>% 
+  slice(1:9) %>% # litbod didn't work well
+  dplyr::select(model, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
+  flextable(cwidth = 1.2) %>% 
+  set_header_labels(model = "Model",
+                    elpd_loo = "LOO elpd",
+                    se_elpd_loo = "LOO elpd error",
+                    elpd_diff = "elpd difference",
+                    se_diff = "elpd error difference",
+                    looic = "LOO information criterion") %>% 
+  colformat_double(digits = 2)
+
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### 6. Saving data for manuscript figure ####
 
 save(posterior_summary_longevity, posterior_summary_litter,
      longevity_binned_data, litter_binned_data,
