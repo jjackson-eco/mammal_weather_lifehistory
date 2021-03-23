@@ -17,11 +17,9 @@ The analysis is split into the following 5 sections. Sections 2-5 are associated
 4. Linking `weather_population_growth/` to asses weather effects on population change for each record.
 5. `meta_regression/` to explore comparative patterns in weather effects across the mammals.
 
-In this README, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R`, `mam_exploration.R`, `phylo_exploration.R` and `dski_exploration` in the root of the repository here. 
-
 ---
 
-We are making use of:
+In this first README, we will walk through section 1: the exploration of the raw data used in the study, which is performed in `chelsa_exploration.R`, `mam_exploration.R`, `phylo_exploration.R` and `dski_exploration` in the root of the repository here. We are making use of:
 
 1. The Living Planet Database of vertebrate abundance timeseries, which can be downloaded at [The Living Planet Index website](https://livingplanetindex.org/home/index).
 2. The CHELSA Climatologies at high resolution for the earth’s land surface areas 1979-2013, which can be downloaded from [Karger et al. (2017)](https://www.nature.com/articles/sdata2017122).
@@ -31,6 +29,9 @@ We are making use of:
 ---
 
 ## 1. Living Planet Database for terrestrial mammals `mam`
+
+<details>
+  <summary>Click here to expand</summary>
 
 The Living Planet Index is a key indicator of the state of global biodiversity, monitoring trends in vertebrate popualtions over many decades. Developed by the Zoological Society of London (ZSL) and the World Wildlife Fund (WWF), this index has been a crucial indicator for international policy on conservation. Here, we are using the data that underpins the LPI, which is also maintained by ZSL and the WWF. We are restricting to only include data from the terrestrial mammals for ease of processing and interpretation at this stage. According to the Living Planet Index website: 
 
@@ -62,9 +63,12 @@ To make studies comparable, we have ln transformed the abundance for each of the
 
 ![](./plots/mam_raw/mam_ln_abundance.jpeg)
 
----
+</details>
 
 ## 2. CHELSA
+
+<details>
+  <summary>Click here to expand</summary>
 
 The data from CHELSA is in the form of raster files (`.tif`), which can be downloaded from [here](http://chelsa-climate.org/downloads/). The rasters are at a spatial resolution of 30 arc sec, which is approximately 1 kilometer squared, and records are between 1979-2013. Thus, there is data for over 900 million raster cells. There are several monthly/annual timeseries measures of temperature and precipitation. Here we focus on monthly mean temperature and total precipitation from CHELSA `version 1.2.1`.
 
@@ -81,9 +85,12 @@ Full bash scripts can be accessed from https://github.com/jonesor/compadre-clima
 ![](./plots/chelsa_raw/temp_aug93.jpeg)
 ![](./plots/chelsa_raw/precip_aug93.jpeg) 
 
----
+</details>
 
 ## 3. The mammal phylogeny
+
+<details>
+  <summary>Click here to expand</summary>
 
 The mammal phylogeny used in the current study is from the following paper:
 
@@ -97,9 +104,12 @@ Species names were first matched against the species names from the [Catalogue o
 
 ![](./plots/mam_LPD_tree.jpeg)
 
----
+</details>
 
 ## 4. Life-history data
+
+<details>
+  <summary>Click here to expand</summary>
 
 Here we are using species-level life-history data as predictors of responses to the weather. The data used in this study is from the following two publications:
 
@@ -137,5 +147,5 @@ For allometric patterns of bodymass, we see a clear general positive relationshi
 
 Now, in the current study, we want to relate these life-history traits to observed population responses to the weather.
 
-
+</details>
 
