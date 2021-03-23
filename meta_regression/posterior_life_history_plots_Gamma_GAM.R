@@ -320,18 +320,54 @@ ggsave((lon_temp_bin | lit_temp_bin)/
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 5. Model comparison tables ####
 
+## Predictors variables 
+# Full set of predictor variables tested
+lh_predictors <- tibble(predictors = c("longevity", "litter", "bodymass", "biome",
+                                       "longevity + bodymass", "litter + bodymass",
+                                       "longevity*bodymass", "litter*bodymass",
+                                       "longevity + bodymass + litter",
+                                       "longevity + bodymass + litter + longevity:bodymass + litter:bodymass + litter:longevity"),
+                        temp_name = c("temp_longevity", "temp_litter", "temp_bodymass","temp_biome", 
+                                      "temp_lonbod_simple", "temp_litbod_simple",
+                                      "temp_lonbod", "temp_litbod", "temp_lh_uni", "temp_lh"), 
+                        precip_name = c("precip_longevity", "precip_litter", "precip_bodymass","precip_biome", 
+                                        "precip_lonbod_simple", "precip_litbod_simple",
+                                        "precip_lonbod", "precip_litbod", "precip_lh_uni", "precip_lh"))
+
 temp_modcomp %>% 
   mutate(model = rownames(.)) %>% 
   slice(1:9) %>% # litbod didn't work well
-  dplyr::select(model, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
-  flextable(cwidth = 1.2) %>% 
+  left_join(x = ., y = dplyr::select(lh_predictors, - precip_name), 
+            by = c("model" = "temp_name")) %>% 
+  dplyr::select(model, predictors, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
+  flextable(cwidth = 1.5) %>% 
   set_header_labels(model = "Model",
+                    predictos = "Life-history predictors",
                     elpd_loo = "LOO elpd",
                     se_elpd_loo = "LOO elpd error",
                     elpd_diff = "elpd difference",
                     se_diff = "elpd error difference",
                     looic = "LOO information criterion") %>% 
-  colformat_double(digits = 2)
+  colformat_double(digits = 2) %>% 
+  save_as_image("results/UCloud_gamma_models/temperature_model_selection.png")
+
+
+precip_modcomp %>% 
+  mutate(model = rownames(.)) %>% 
+  slice(1:8) %>% # litbod and lonbod_simple didn't work well
+  left_join(x = ., y = dplyr::select(lh_predictors, - temp_name), 
+            by = c("model" = "precip_name")) %>% 
+  dplyr::select(model, predictors, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
+  flextable(cwidth = 1.2) %>% 
+  set_header_labels(model = "Model",
+                    predictos = "Life-history predictors",
+                    elpd_loo = "LOO elpd",
+                    se_elpd_loo = "LOO elpd error",
+                    elpd_diff = "elpd difference",
+                    se_diff = "elpd error difference",
+                    looic = "LOO information criterion") %>% 
+  colformat_double(digits = 2) %>% 
+  save_as_image("results/UCloud_gamma_models/precipitation_model_selection.png")
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 6. Saving data for manuscript figure ####
