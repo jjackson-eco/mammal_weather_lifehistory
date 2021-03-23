@@ -352,6 +352,10 @@ moranslocal_temp <- localmoran(mam_sp$coef_temp, listW_l)
 
 And now we can plot the local Morans I significance for each of the records
 
-<img src="../plots/meta_regression/spatial_autocorrelation_localtemp.jpeg" width="700" />
+<img src="../plots/meta_regression/spatial_autocorrelation_localtemp.jpeg" width="900" />
+
+We can see that there are a small number of points dictating this significance relative to the total. We can also visualise the Morans I scores themselves for each study, and here we do this as well as investigating the patterns in eastern Asia in a little more detail.
+
+<img src="../plots/meta_regression/spatial_autocorrelation_localvalues_temp.jpeg" width="900" />
 
 </details>
