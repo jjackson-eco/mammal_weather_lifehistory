@@ -12,7 +12,8 @@
 ##########################################################
 
 ## Investigating the effects of biome and life-history on absolute population responses
-## from GAM ARMA models. Implementing the meta-regression framework for temperature. Using log-normal models
+## from GAM ARMA models. Implementing the meta-regression framework for temperature. Using log-normal models.
+## Also has the table for the life-history predictors used in the model selection.
 
 rm(list = ls())
 options(width = 100)
@@ -105,6 +106,9 @@ lh_predictors <- tibble(predictors = c("longevity", "litter", "bodymass", "biome
 # Save the lookup table
 lh_predictors %>% 
   flextable(cwidth = 2) %>% 
+  set_header_labels(predictors = "Predictors",
+                    temp_name = "Temperature model name",
+                    precip_name = "Precipitation model name") %>% 
   save_as_image("plots/meta_regression/model_lookup_table.png")
 
 # Base model chain test
