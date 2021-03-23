@@ -194,7 +194,12 @@ and precipitation
 <details>
   <summary>Click here to expand</summary>
 
-Now we will perform the same meta-regression framework, but now to investigate how species-level life-history influences absolute weather responses. Our life-history traits here are scaled variables for **maximum longevity**, **mean litter size** and **adult bodymass**. The key difference in the first step of generating data (see `generating_coefficient_data_GAM.R` is the calculation of absolute coefficients for temperature and precipitation effects:
+### `UCloud_regression_scripts_jan2021/`
+
+### `phylo_regression_precip_UCloud.R`
+### `phylo_regression_temp_UCloud.R`
+
+Now we will perform the same meta-regression framework, but now to investigate how species-level life-history influences absolute weather responses. Our life-history traits here are scaled variables for **maximum longevity**, **mean litter size** and **adult bodymass**. The key difference in the first step of generating data (see `generating_coefficient_data_GAM.R` for the calculation of absolute coefficients for temperature and precipitation effects:
 
 ```
 mam_coef <- mnanom_5km_GAM %>% 
@@ -266,12 +271,87 @@ Then, with all other variables in the model formula kept constant, the full set 
 
 <img src="../plots/meta_regression/model_lookup_table.png" width="700" />
 
+and with this, we present the results of the model selection.
 
+### Temperature model selection results 
+
+<img src="../results/UCloud_gamma_models/temperature_model_selection.png" width="800" />
+
+### Precipitation model selection results 
+
+<img src="../results/UCloud_gamma_models/precipitation_model_selection.png" width="800" />
+
+In both cases, there was evidence for longevity and litter size effects, but the most parsimonious model with both effects was the model where longevity, litter and bodymass are all included as univariate predictors (no interactions).
 
 </details>
 
 ## 4. Spatial autocorrelation
 <details>
   <summary>Click here to expand</summary>
+
+### `Testing_spatial_autocorrelation.R`
+### `GAM_coefficients/spatial_temp_GAM.R`
+
+In all models thus far, we have controlled for phylogenetic covariance between species, within species variance, and the sample size (length of the time series record). However, another important feature of the data assessed in this study is their spatial distribution. Indeed, we may expect population-level processes to be similar in geographically similar locations, particularly if there are consistent patterns across taxa.
+
+So, in addition to the phylogenetically controlled analysis performed so far, we also explored the role of spatial autocorrelation at driving differences in responses to weather.
+
+### Spatial autocorrelation in the GAM coefficients
+
+The first step here before fully incorporating spatial autocorrelation into the meta-regression is to explore the degree of spatial autocorrelation in the GAM coefficients using the reported longitude and latitude of the LPD record (`Testing_spatial_autocorrelation.R`). Here we opted to do this using a Morans I test using a k nearest neighbors approach as specified in the `spdep` package.
+
+First we converted the coefficient data to a spatial object.
+
+```
+## Specify the coordinates
+mam_sp <- mam_coef %>% 
+  dplyr::select(id, coef_temp, coef_precip, Longitude, Latitude) %>% 
+  drop_na(coef_precip) # Keeping only non-missing values from precipitation effects
+
+coordinates(mam_sp) <- ~ Longitude + Latitude
+
+```
+
+Then, a key way to estimate Morans I is using a k nearest neighbor method. So, because here we have spatial points, we want to first convert the points to a nearest neighbor list, which is then converted to a neighborhood matrix (matrix of neighbors for each of the spatial points) for the Morans I test (see plot below).
+
+```
+# return k nearest neighbours for each coordinate point
+knea <- knearneigh(coordinates(mam_sp), longlat = TRUE)
+
+# convert to a neighbours list
+neighbours <- knn2nb(knea)
+
+# convert neighbours list to a weights matrix for analysis
+listw <- nb2listw(neighbours)
+
+```
+
+And now we compute the Morans I for both temperature and precipitation coefficients, with the significance estimated using 1000 random permutations from the `moran.mc` function.
+
+```
+morans_temp <- moran.mc(mam_sp$coef_temp, listw, nsim = 1000)
+morans_precip <- moran.mc(mam_sp$coef_precip, listw, nsim = 1000)
+```
+
+These Morans I tests reveal low levels of spatial autocorrelation for both temperature (I = 0.12) and precipitation (I = -0.07). Despite its low magnitude, the Morans I test for temperature was significant (p = 0.01). Therefore, we need to explore these patterns further.
+
+### Local Morans I for temperature
+
+To pick apart the temperature effect, first we can visualise the nearest neighbors of the studies, and then the Morans I plot, which gives the Temperature effect with respect to the Spatially lagged temperature effect.
+
+<img src="../plots/meta_regression/spatial_autocorrelation_temp.jpeg" width="700" />
+
+We can see that there is a poor correlation between the Temperature effects and their spatially lagged counterparts, but there are a few points where there is a strong spatially lagged effect. 
+
+Therefore, we fit a local Morans I to explore these patterns further.
+
+```
+listW_l <- nb2listw(neighbours, style = "W")
+moranslocal_temp <- localmoran(mam_sp$coef_temp, listW_l)
+```
+
+And now we can plot the local Morans I significance for each of the records
+
+<img src="../plots/meta_regression/spatial_autocorrelation_localtemp.jpeg" width="700" />
 
 </details>
