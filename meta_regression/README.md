@@ -358,4 +358,39 @@ We can see that there are a small number of points dictating this significance r
 
 <img src="../plots/meta_regression/spatial_autocorrelation_localvalues_temp.jpeg" width="900" />
 
+So, it seems from the local Morans I that this small number of points could be driving spatial autocorrelation in the temperature coefficients. Therefore, we will explore how accounting for this spatial autocorrelation influences the meta-regression.
+
+### SAR meta-regression with Spatial Autocorrelation
+
+Then, in `GAM_coefficients/spatial_temp_GAM.R`, we explore the consistent patterns in temperature effects (section 1) incorporating spatial autocorrelation in `brms`. We ignored the phylogenetic autocorrelation here so as not to overparameterise the model.
+
+We used a SAR (Spatial simultaneous autoregressive) autocorrelation structure in the `brms` framework. We did this using a lagged term, and with the same nearest neighbors matrix calculated above (here `Wmat`). The full model is given by
+
+```
+## spatial model
+set.seed(666)
+temp_sp <- brm(
+  coef_temp ~ 1 + sample_size + biome + sar(Wmat, type = "lag") + (1| species),  
+  data = mam_coef, family = gaussian(),
+  data2 = list(Wmat = Wmat),
+  prior = c( # lagsar gets a flat prior bound between 0 and 1
+    prior(normal(0, 0.3), class =  Intercept),
+    prior(normal(0, 0.3), class = b, coef = "sample_size"),
+    prior(exponential(8), class = sd, group = "species")),
+  control = list(adapt_delta = 0.97,
+                 max_treedepth = 15),
+  chains = 3, cores = 3, iter = 4000, warmup = 2000
+)
+```
+
+As before we tested the predictive performance of this model relative to the base model excluding spatial autocorrelation, following the same LOO framework. The LOO model comparisons are given below
+
+<img src="../plots/meta_regression/spatial_autocorrelation_model_comparison.png" width="700" />
+
+We can see here that there isn't good evidence for spatial autocorrelation in the temperature meta-regression, with the base model out performing the test model. We can also explore the posterior of the spatial autocorrelation model to look at this effect in more detail. The SAR autocorrelation term is highlighted in purple here
+
+<img src="../plots/meta_regression/spatial_autocorrelation_posterior.jpeg" width="800" />
+
+So, from our exploration of spatial autocorrelation we conclude that there isn't evidence for substantial spatial autocorrelation in the mammal lpd records for temperature or precipitation effects.
+
 </details>
