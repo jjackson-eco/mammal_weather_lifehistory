@@ -12,7 +12,7 @@ This markdown is intended as an accompaniment to the scripts contained within th
 
 Here we generate the key results and findings presented in the manuscript. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
-There are 4 main sections and scripts:
+There are 4 main sections with scripts here:
 
 ## 1. Prior Predictive Simulation
 
