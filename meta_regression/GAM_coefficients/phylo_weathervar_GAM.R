@@ -26,6 +26,7 @@ library(nlme)
 library(patchwork)
 library(ggridges)
 library(ggdist)
+library(tidybayes)
 library(viridis)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -158,10 +159,9 @@ precip_biome <- brm(
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(8), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
-  chains = 3, cores = 3, iter = 4000, warmup = 2000
-)
+  chains = 3, cores = 3, iter = 4000, warmup = 2000)
 
 #_______________________________________________________________________________
 ### 5b. Model comparisons
@@ -180,4 +180,52 @@ save(temp_biome, file = "results/gaussian_models/tempvar_biome_rawcoef.RData")
 
 save(mod_comp_precip, file = "results/gaussian_models/model_comparison_precipvar_rawcoef.RData")
 save(precip_biome, file = "results/gaussian_models/precipvar_biome_rawcoef.RData")
+
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### 6. Model plots ####
+
+temp_colour <- "#990a80"
+precip_colour <- "#287f79"
+
+## Temperature
+temp_plot <- temp_biome %>%
+  gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
+  ungroup() %>% 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye(show.legend = FALSE, fill = temp_colour) +
+  geom_vline(xintercept = 0, size = 0.8) +
+  scale_y_discrete(labels = c(expression(paste("Global intercept ", bar(alpha))),
+                              expression(paste("Sample size ", beta[N])),
+                              expression(paste("Phylogenetic covariance ", sigma[PHYLO])),
+                              expression(paste("Species level variance ", sigma[SPECIES])),
+                              "Population-level variance")) +
+  labs(x = "Posterior estimate", y = NULL, tag = "a)") +
+  theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 10))
+
+## Precipitation
+precip_plot <- precip_biome %>%
+  gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
+  ungroup() %>% 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye(show.legend = FALSE, fill = precip_colour) +
+  geom_vline(xintercept = 0, size = 0.8) +
+  scale_y_discrete(labels = c(expression(paste("Global intercept ", bar(alpha))),
+                              expression(paste("Sample size ", beta[N])),
+                              expression(paste("Phylogenetic covariance ", sigma[PHYLO])),
+                              expression(paste("Species level variance ", sigma[SPECIES])),
+                              "Population-level variance")) +
+  labs(x = "Posterior estimate", y = NULL, tag = "b)") +
+  theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 12))
+
+temp_plot + precip_plot
+
+ggsave(temp_plot + precip_plot,
+       filename = "plots/meta_regression/weathervar_posterior.jpeg",
+         width = 35, height = 14, units = "cm", dpi = 500)
+
+
 
