@@ -5,9 +5,9 @@
 
 ---
 
-This markdown is intended as an accompaniment to the scripts contained within the directory `meta_regression/`, to walk through the Bayesian meta-regression framework carried out in this study. We carried out two forms of meta-regression model during these analysis:
+This markdown is intended as an accompaniment to the scripts contained within the directory `meta_regression/`, to walk through the Bayesian meta-regression framework carried out in this study. We performed two forms of meta-regression model in these analysis:
 
-1. Gaussian meta-regression on weather coefficient values to estimate consistent patterns across the mammals.
+1. Gaussian meta-regressions on weather coefficient values to estimate consistent patterns across the mammals.
 2. Gamma meta-regressions on absolute weather coefficients to explore relationships to life-history.
 
 Here we generate the key results and findings presented in the manuscript. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
@@ -21,7 +21,7 @@ There are 4 main sections with scripts here:
 
 ### `testing_and_prior_predictive_simulation/prior_predictive_simulation.R`
 
-Before fitting our Bayesian meta-regression models, we need to develop effective priors. We opted to use conservative, regularising priors following McElreath 2020, which gave estimates within the parameter space observed in the raw data. This was achieved through prior predictive simulation (PPS). Here, we compare the estimates and expectation of priors to the limits of observed data to inform the priors. In addition, priors were further tuned to improve the efficiency/accuracy of Markov chains during model selection analyses.
+Before fitting our Bayesian meta-regression models, we need to develop effective priors. We opted to use conservative, regularising priors following McElreath 2020, which gave predictions within the parameter space observed in the raw data. This was achieved through prior predictive simulation (PPS). Here, we compare the estimates and predictions of priors to the limits of observed data and expected patterns to inform the priors. In addition, priors were further tuned to improve the efficiency/accuracy of Markov chains during model selection analyses.
 
 In all cases, we chose conservative regularising priors to reflect the high number of parameters in phylogenetically or spatially controlled models. 
 
@@ -29,7 +29,7 @@ Here we walk through simulations carried out to inform priors for the global int
 
 ### Intercept terms
 
-Here we used normal priors to describe the intercept of population responses across records. For all priors we used a mean of 0 as we had no prior expectation regarding the direction of weather effects. Then, we used three simulated priors to inform the priors used in the study:
+Here we used normal priors to describe the global intercept of population responses across records. For all priors we used a mean of 0 as we had no prior expectation regarding the direction of weather effects. Then, we used three simulated in our PPS:
 
 1. Weak prior - Normal(0,10)
 2. Medium regularising prior - Normal(0,2)
@@ -41,25 +41,25 @@ Here we compare the intercept priors to the observed coefficient bounds:
 
 ### Coefficient difference beta terms
 
-For the beta coefficients describing differences in grouping variables, we looked at pairwise differences in all observed coefficients to inform the parameter space for the prior. Again, we used normal priors and explored the same prior parameters. Here are the simulated differences in coefficients expected by the prior to an intercept of 0.
+For the beta coefficients describing differences in grouping variables, we looked at pairwise differences in all observed coefficients to inform the parameter space for the prior. Again, we used normal priors and explored the same prior parameters. Here are the simulated differences in coefficients expected by the prior, with an intercept of 0 once more.
 
 <img src="../plots/meta_regression/prior_predictive_simulation/coefficient_differences_beta.jpeg" width="600" />
 
 ### Life-history effect simulations
 
-For the slope terms describing the effect of life-history on population responses to weather, we used an intercept of 0 once more and then simulated beta slope terms using the same normal priors explored previously. We then predicted weather effects from simulated life-history values between -2 and 2. These plots present the predictions of weather effects for each of the normal priors. The solid and dashed black lines are the maximum observed coefficients for temperature and precipitation, respectively.
+For the slope terms describing the effect of life-history on population responses to weather, we used an intercept of 0 once more and then simulated beta slope terms using the same normal priors explored previously, but for a log-normal model. We then predicted weather effects from simulated life-history values between -2 and 2 back-transformed using the exponential. These plots present the predictions of weather effects for each of the normal priors. The solid and dashed black lines are the maximum observed coefficients for temperature and precipitation, respectively.
 
 <img src="../plots/meta_regression/prior_predictive_simulation/life_history_effect_pps.jpeg" width="800" />
 
 ### Random effect variance terms
 
-We used exponential priors when considering variance terms relating to the mixed effects in the meta-regression, which mainly were used for phylogenetic covariance and species variance. Exponential terms were beneficial here as they are non-zero and flexible for exploring large variances. Here, we explored the priors of varying exponential rates from 0.5-20, and their consequent distributions of variance terms. Smaller rates give weaker priors with a wider range of variance terms. In our case, particularly for phylogenetic covariance, we do not expect variance terms > 1. We present the resulting distributions from exponential priors of varying rates. The solid lines indicate a variance of 1.
+We used exponential priors when considering variance terms relating to the mixed effects in the meta-regression, which were used for phylogenetic covariance and species variance. Exponential terms were beneficial here as they are non-zero and flexible for exploring large variances. Here, we explored the priors of varying exponential rates from 0.5-20, and their consequent distributions of variance terms. Smaller rates give weaker priors with a wider range of variance terms. In our case, particularly for phylogenetic covariance, we do not expect variance terms > 1, and in most cases phylogenetic covariance will be far lower. Therefore, higher exponential rates that are more conservative are more representative. We present the resulting distributions from exponential priors of varying rates. The solid lines indicate a variance of 1.
 
 <img src="../plots/meta_regression/prior_predictive_simulation/random_effect_variance_pps.jpeg" width="600" />
 
-In all cases, more regularising, conservative priors were much more representative of observed restrictions (i.e. maxima and minima) of the raw data. Furthermore, we only presented isolated priors, without exploring the consequences of adding a greater number of parameters e.g. random effects that would further restrict the coefficients obtained.
+In all cases, more regularising, conservative priors were much more representative of observed restrictions (i.e. maxima and minima) of the raw data. Furthermore, we only presented isolated priors, without exploring the consequences of adding a greater number of parameters e.g. random effects that would further restrict the coefficients obtained through mean-centering.
 
-Thus, in all subsequent Bayesian models in model selection, we used regularising priors, i.e. normal priors with standard deviation < 1 and exponential priors with rates > 5. Please see meta-regression scripts for specific details on each prior.
+Thus, in all subsequent models, we used regularising priors, i.e. normal priors with standard deviation < 1 and exponential priors with rates > 5. Please see meta-regression scripts for specific details on each prior.
 
 </details>
 
@@ -72,9 +72,9 @@ Thus, in all subsequent Bayesian models in model selection, we used regularising
 ### `phylo_temp_GAM.R`
 ### `phylo_precip_GAM.R`
 
-Now we are going to present the general framework that was used to fit the Gaussian meta-regressions models, which were used to explore consistent patterns across the mammals. In the general models that were explored for consistent patterns we incorporated species variance and also phylogenetic covariance. However, we also explored/tested for spatial autocorrelation (see section 4). Note also that similar scripts can be found for linear coefficients (i.e. linear models to estimate weather effects) in the `Linear_coefficients/` directory.
+Now we present the general framework that was used to fit the Gaussian meta-regressions models, which were used to explore consistent patterns across the mammals and spatial effects. In the general models that were explored for consistent patterns we incorporated species variance and also phylogenetic covariance. However, we also explored/tested for spatial autocorrelation (see section 4). Note also that similar scripts can be found for linear coefficients (i.e. linear models to estimate weather effects) in the `Linear_coefficients/` directory.
 
-This framework begins with handling coefficient data (`mnanom_5km_GAM`), phylogenetic data (`mamMCC_pruned`), and life-history data (`lifehistory`) + the species names data to merge files (`lpd_gbif`). Another useful script on this regard is the `generating_coefficient_data_GAM.R` file, which goes through this whole process independently (used in later models). First we do some wrangling the coefficient data, merging with species names and life history, and then doing some variable transformations. Example here for the temperature coefficients, which is identical for precipitation but with extra columns in the `drop_na` function.
+This framework begins with handling/merging coefficient data (`mnanom_5km_GAM`), phylogenetic data (`mamMCC_pruned`), and life-history data (`lifehistory`) + the species names data to merge files (`lpd_gbif`). A useful script here is `generating_coefficient_data_GAM.R`, which goes through this whole process independently (used in later models). First we do some wrangling of the coefficient data, merging with species names and life history, and then doing some variable transformations. Example here for the temperature coefficients, which is identical for precipitation but with extra columns in the `drop_na` function.
 
 ```
 mam_temp <- mnanom_5km_GAM %>% 
@@ -116,7 +116,7 @@ A_temp <- ape::vcv.phylo(mamMCC_temp)
 
 ### `brms` models
 
-Now we move to Gaussian models, which were implemented using the `brms` package, which is an interface for stan in R using NUTS (no U-turn) and Hamiltonian Monte-Carlo (HMC) MCMC sampling. Following McElreath (2020), we first carried out single Markov Chain tests to visualize convergence. These can be found in `testing_and_prior_predictive_simulation/phylo_meta_regression_test.R`. Now, we fit the base model that does not include predictors of interest (spatial effects on life-history):
+Now we move to the Gaussian models, which were implemented using the `brms` package, which is an interface for stan in R using NUTS (no U-turn) and Hamiltonian Monte-Carlo (HMC) MCMC sampling. Following McElreath (2020), we first carried out single Markov Chain tests to visualize convergence. These can be found in `testing_and_prior_predictive_simulation/phylo_meta_regression_test.R`. Now, we fit the base model that does not include predictors of interest (spatial effects on life-history):
 
 ```
 ## Base model
@@ -159,7 +159,7 @@ temp_biome <- brm(
 )
 ```
 
-This framework was applied to both temperature and precipitation. We can now inspect the Markov chains and posteriors of the candidate models. Here we have the trace and density plot for temperature as an example
+This framework was applied to both temperature and precipitation. We can now inspect the Markov chains and posteriors of the candidate models. Here we have the trace and density plot for the key effects from the temperature model as an example.
 
 <img src="../plots/meta_regression/temp_biome_mod_parms.jpeg" width="700" />
 
@@ -199,7 +199,7 @@ and precipitation
 ### `phylo_regression_precip_UCloud.R`
 ### `phylo_regression_temp_UCloud.R`
 
-Now we will perform the same meta-regression framework, but now to investigate how species-level life-history influences absolute weather responses. Our life-history traits here are scaled variables for **maximum longevity**, **mean litter size** and **adult bodymass**. The key difference in the first step of generating data (see `generating_coefficient_data_GAM.R` for the calculation of absolute coefficients for temperature and precipitation effects:
+Now we will perform the same meta-regression framework, but now to investigate how species-level life-history influences absolute weather responses. Our life-history traits here are scaled variables for **maximum longevity**, **mean litter size** and **adult bodymass**. The key difference here compared to section 2 is the first step of generating data (see `generating_coefficient_data_GAM.R` for the calculation of absolute coefficients for temperature and precipitation effects:
 
 ```
 mam_coef <- mnanom_5km_GAM %>% 
@@ -238,13 +238,13 @@ mam_coef <- mnanom_5km_GAM %>%
   drop_na(litter, longevity, bodymass)
 ```
 
-And now the process for the meta-regression is the same, but with a few key differences. We use a Gamma model with a log link function. The overall distribution of the absolute weather effects is modelled using a gamma prior with two parameters, alpha and beta, which control the distributional form of the response. Here we used `gamma(2,0.5)` for all models, but the beta value was tuned for each model. 
+And now the process for the meta-regression is the same, but with a few key differences. We use a Gamma model with a log link function. The overall distribution of the absolute weather effects is modelled using a gamma prior with two parameters, alpha and beta, which control the distributional form of the response. Here we initially used `gamma(2,0.5)` for all models, but the beta value was tuned for each model. 
 
-Running Gamma regressions, which have a log link, with this number of parameters (phylogenetic regression) is more computationally intensive than the Gaussian regression. Therefore, we opted to use a High Performance Computing cluster to run these model selections. Therefore, for these Gamma regressions please refer to the scripts in `UCloud_regression_scripts_jan2021/`.
+Running Gamma regressions, which have a log link, with this number of parameters (phylogenetic regression) is more computationally intensive than the Gaussian regression. Therefore, we opted to use a High Performance Computing cluster to run these model selections. Therefore, for these Gamma regressions please refer to the scripts in `UCloud_regression_scripts_jan2021/`, and consider this if replicating these analyses.
 
 ### Model Selection
 
-In the Gamma models assessing life-history effects on absolute weather responses, we evaluated a set of models that incorporated univariate effects of life-history first, and then models incorporating two-way interactions. The general form of the model fit is as follows, with the longevity effect on temperature 
+In the Gamma models assessing life-history effects on absolute weather responses, we evaluated a set of models that incorporated univariate effects of life-history first, and then models incorporating two-way interactions. The general form of the model fit is as follows, with the longevity effect on temperature demonstrated.
 
 ```
 ## Longevity
@@ -281,7 +281,7 @@ and with this, we present the results of the model selection.
 
 <img src="../results/UCloud_gamma_models/precipitation_model_selection.png" width="800" />
 
-In both cases, there was evidence for longevity and litter size effects, but the most parsimonious model with both effects was the model where longevity, litter and bodymass are all included as univariate predictors (no interactions).
+In both cases, there was evidence for longevity and litter size effects, but the most parsimonious model with both effects was the model where longevity, litter and bodymass were all included as univariate predictors (no interactions).
 
 </details>
 
@@ -362,7 +362,7 @@ So, it seems from the local Morans I that this small number of points could be d
 
 ### SAR meta-regression with Spatial Autocorrelation
 
-Then, in `GAM_coefficients/spatial_temp_GAM.R`, we explore the consistent patterns in temperature effects (section 1) incorporating spatial autocorrelation in `brms`. We ignored the phylogenetic autocorrelation here so as not to overparameterise the model.
+Then, in `GAM_coefficients/spatial_temp_GAM.R`, we explore the consistent patterns in temperature effects (section 2) incorporating spatial autocorrelation in `brms`. We ignored the phylogenetic autocorrelation here so as not to overparameterise the model.
 
 We used a SAR (Spatial simultaneous autoregressive) autocorrelation structure in the `brms` framework. We did this using a lagged term, and with the same nearest neighbors matrix calculated above (here `Wmat`). The full model is given by
 
