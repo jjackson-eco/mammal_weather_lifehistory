@@ -7,7 +7,7 @@
 
 ---
 
-Full analysis and code for our study on terrestrial mammals to investigate how weather influences annual changes in abundance and how this is linked to species-level life-history traits. For the manuscript please see <link to bioarkiv/paper>.
+Full analysis and code for our study on terrestrial mammals to investigate how weather influences annual changes in abundance and how this is linked to species-level life-history traits. For the manuscript please see <link to bioarkiv/paper>. Package version info for this analysis is given in the last section of this readme.
 
 The analysis is split into the following 5 sections. Sections 2-5 are associated with a specific directory and their own `README.md` file, so see those for more details:
 
@@ -149,3 +149,72 @@ Now, in the current study, we want to relate these life-history traits to observ
 
 </details>
 
+## Package Versions
+
+<details>
+  <summary>Click here to expand</summary>
+
+```
+R version 4.0.4 (2021-02-15)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base  
+
+other attached packages:
+ [1] sf_0.9-7                rgeos_0.5-5             sp_1.4-5                rnaturalearthdata_0.1.0
+ [5] rnaturalearth_0.1.0     treeio_1.14.3           ggtree_2.4.1            caper_1.0.1            
+ [9] mvtnorm_1.1-1           MASS_7.3-53             phytools_0.7-70         maps_3.3.0             
+[13] phangorn_2.5.5          cowplot_1.1.1           viridis_0.5.1           viridisLite_0.3.0      
+[17] ggdist_2.4.0            ggridges_0.5.3          patchwork_1.1.1         nlme_3.1-152           
+[21] brms_2.15.0             Rcpp_1.0.6              ape_5.4-1               tidybayes_2.3.1        
+[25] forcats_0.5.1           stringr_1.4.0           dplyr_1.0.5             purrr_0.3.4            
+[29] readr_1.4.0             tidyr_1.1.3             tibble_3.1.0            ggplot2_3.3.3          
+[33] tidyverse_1.3.0        
+
+loaded via a namespace (and not attached):
+  [1] readxl_1.3.1            backports_1.2.1         fastmatch_1.1-0        
+  [4] plyr_1.8.6              igraph_1.2.6            lazyeval_0.2.2         
+  [7] splines_4.0.4           svUnit_1.0.3            crosstalk_1.1.1        
+ [10] rstantools_2.1.1        inline_0.3.17           digest_0.6.27          
+ [13] htmltools_0.5.1.1       rsconnect_0.8.16        fansi_0.4.2            
+ [16] magrittr_2.0.1          modelr_0.1.8            RcppParallel_5.0.3     
+ [19] matrixStats_0.58.0      xts_0.12.1              prettyunits_1.1.1      
+ [22] colorspace_2.0-0        rvest_1.0.0             haven_2.3.1            
+ [25] xfun_0.22               callr_3.5.1             crayon_1.4.1           
+ [28] jsonlite_1.7.2          lme4_1.1-26             zoo_1.8-9              
+ [31] glue_1.4.2              gtable_0.3.0            V8_3.4.0               
+ [34] distributional_0.2.2    pkgbuild_1.2.0          rstan_2.21.2           
+ [37] abind_1.4-5             scales_1.1.1            DBI_1.1.1              
+ [40] miniUI_0.1.1.1          plotrix_3.8-1           xtable_1.8-4           
+ [43] units_0.7-0             tmvnsim_1.0-2           tidytree_0.3.3         
+ [46] proxy_0.4-25            stats4_4.0.4            StanHeaders_2.21.0-7   
+ [49] DT_0.17                 htmlwidgets_1.5.3       httr_1.4.2             
+ [52] threejs_0.3.3           arrayhelpers_1.1-0      ellipsis_0.3.1         
+ [55] pkgconfig_2.0.3         loo_2.4.1               farver_2.1.0           
+ [58] dbplyr_2.1.0            utf8_1.1.4              tidyselect_1.1.0       
+ [61] labeling_0.4.2          rlang_0.4.10            reshape2_1.4.4         
+ [64] later_1.1.0.1           munsell_0.5.0           cellranger_1.1.0       
+ [67] tools_4.0.4             cli_2.3.1               generics_0.1.0         
+ [70] broom_0.7.5             fastmap_1.1.0           processx_3.4.5         
+ [73] fs_1.5.0                mime_0.10               projpred_2.0.2         
+ [76] aplot_0.0.6             xml2_1.3.2              compiler_4.0.4         
+ [79] bayesplot_1.8.0         shinythemes_1.2.0       rstudioapi_0.13        
+ [82] gamm4_0.2-6             curl_4.3                e1071_1.7-5            
+ [85] clusterGeneration_1.3.7 reprex_1.0.0            statmod_1.4.35         
+ [88] stringi_1.5.3           ps_1.6.0                Brobdingnag_1.2-6      
+ [91] lattice_0.20-41         Matrix_1.3-2            classInt_0.4-3         
+ [94] nloptr_1.2.2.2          markdown_1.1            shinyjs_2.0.0          
+ [97] vctrs_0.3.6             pillar_1.5.1            lifecycle_1.0.0        
+[100] BiocManager_1.30.10     combinat_0.0-8          bridgesampling_1.0-0   
+[103] httpuv_1.5.5            R6_2.5.0                promises_1.2.0.1       
+[106] KernSmooth_2.23-18      gridExtra_2.3           codetools_0.2-18       
+[109] boot_1.3-26             colourpicker_1.1.0      gtools_3.8.2           
+[112] assertthat_0.2.1        withr_2.4.1             mnormt_2.0.2           
+[115] shinystan_2.5.0         expm_0.999-6            mgcv_1.8-33            
+[118] parallel_4.0.4          hms_1.0.0               quadprog_1.5-8         
+[121] grid_4.0.4              class_7.3-18            coda_0.19-4            
+[124] minqa_1.2.4             rvcheck_0.1.8           scatterplot3d_0.3-41   
+[127] numDeriv_2016.8-1.1     shiny_1.6.0             lubridate_1.7.10       
+[130] base64enc_0.1-3         dygraphs_1.1.1.6        tinytex_0.30           
+```
+</details>
