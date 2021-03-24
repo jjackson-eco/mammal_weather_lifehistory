@@ -12,7 +12,7 @@ This markdown is intended as an accompaniment to the scripts contained within th
 
 Here we generate the key results and findings presented in the manuscript. Please refer to the scripts mentioned in each section of the markdown for full details on each section.
 
-There are 4 main sections with scripts here:
+There are 5 main sections with scripts here:
 
 ## 1. Prior Predictive Simulation
 
@@ -392,5 +392,19 @@ We can see here that there isn't good evidence for spatial autocorrelation in th
 <img src="../plots/meta_regression/spatial_autocorrelation_posterior.jpeg" width="800" />
 
 So, from our exploration of spatial autocorrelation we conclude that there isn't evidence for substantial spatial autocorrelation in the mammal lpd records for temperature or precipitation effects.
+
+</details>
+
+## 5. Weather Variance
+<details>
+  <summary>Click here to expand</summary>
+
+### `GAM_coefficients/phylo_weathervar_GAM.R`
+
+To validate our approach using annual weather anomalies as the key weather variable, we also repeated the Gaussian meta-regression framework in section 2 but using annual weather variances as opposed to weather anomalies. The weather variances were calculated as the annual variance from monthly mean temperatures and total precipitations.
+
+The Bayesian meta-regressions calculated for weather variance were identical, except for weather coefficients being estimated using variance. Here we present the posteriors for variance in temperature (a) and precipitation.
+
+<img src="../plots/meta_regression/weathervar_posterior.jpeg" width="900" />
 
 </details>
