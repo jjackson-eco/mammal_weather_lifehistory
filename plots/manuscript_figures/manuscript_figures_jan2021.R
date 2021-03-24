@@ -544,3 +544,70 @@ summarise(posterior_summary_litter, min_t = min(post_mn_temp),
           max_t = max(post_mn_temp), min_p = min(post_mn_precip),
           max_p = max(post_mn_precip),
           tfold = max_t/min_t, pfold = max_p/min_p)
+
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### Figure S14 - Posteriors predictions of sample size effects ####
+
+# prediction data
+preddat_n <- expand_grid(longevity = mean(mam_coef$longevity),
+                         litter = mean(mam_coef$litter),
+                         bodymass = mean(mam_coef$bodymass),
+                         sample_size = seq(-1.3,2.6, length.out = 50),
+                         phylo = unique(mam_coef$phylo)) %>% 
+  mutate(species = phylo)
+
+# posterior predictions
+temp_pred_n <-  brms::posterior_predict(temp_lh_uni, newdata = preddat_n, 
+                                          type = "response") 
+precip_pred_n <-  brms::posterior_predict(precip_lh_uni, 
+                                            newdata = preddat_n, 
+                                            # account for NAs in the precipitation coefficients
+                                            allow_new_levels = TRUE,
+                                            type = "response") 
+
+
+
+# summary data for each sample size
+posterior_summary_n <- bind_rows(lapply(unique(preddat_n$sample_size), function(x){
+  
+  cpos = which(preddat_n$sample_size == x) # vector of positions corresponding to where the values are equal to x
+  
+  # posterior mean 
+  post_mn_temp = mean(temp_pred_n[,cpos])
+  post_mn_precip = mean(precip_pred_n[,cpos])
+  
+  
+  # return data
+  return(tibble(sample_size = x, 
+                post_mn_temp = post_mn_temp, 
+                post_mn_precip = post_mn_precip))
+}))
+
+temp_n <- ggplot(mam_coef, aes(x = sample_size, y = abs_temp)) +
+  geom_point(size = 3, colour = temp_colour, alpha = 0.3) +
+  geom_line(data = posterior_summary_n, aes(y = post_mn_temp),
+            colour = "black", size = 1.5) +
+  coord_cartesian(ylim = c(0,4)) +
+  scale_x_continuous(breaks = seq(min(mam_coef$sample_size),max(mam_coef$sample_size), length = 10),
+                     labels = round(seq(9,35, length = 10), 1)) +
+  labs(x = "Record length (years)", y = "|Temperature effect on abundance|",
+       tag = "a)") +
+  theme_bw(base_size = 13) +
+  theme(panel.grid = element_blank()) 
+
+precip_n <- ggplot(mam_coef, aes(x = sample_size, y = abs_precip)) +
+  geom_point(size = 3, colour = precip_colour, alpha = 0.3) +
+  geom_line(data = posterior_summary_n, aes(y = post_mn_precip),
+            colour = "black", size = 1.5) +
+  coord_cartesian(ylim = c(0,4)) +
+  scale_x_continuous(breaks = seq(min(mam_coef$sample_size),max(mam_coef$sample_size), length = 10),
+                     labels = round(seq(9,35, length = 10), 1)) +
+  labs(x = "Record length (years)", y = "|Precipitation effect on abundance|",
+       tag = "b)") +
+  theme_bw(base_size = 13) +
+  theme(panel.grid = element_blank()) 
+
+ggsave(temp_n + precip_n, 
+       filename = "plots/meta_regression/sample_size_posterior_prediction.jpeg",
+       width = 25, height = 14, units = "cm", dpi = 500)
+
