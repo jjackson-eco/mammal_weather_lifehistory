@@ -7,6 +7,8 @@
 
 ---
 
+[![DOI](https://zenodo.org/badge/250286353.svg)](https://zenodo.org/badge/latestdoi/250286353)
+
 Full analysis and code for our study on terrestrial mammals to investigate how weather influences annual changes in abundance and how this is linked to species-level life-history traits. For the manuscript please see <link to bioarkiv/paper>. Package version info for this analysis is given in the last section of this readme.
 
 The analysis is split into the following 5 sections. Sections 2-5 are associated with a specific directory and their own `README.md` file, so see those for more details:
