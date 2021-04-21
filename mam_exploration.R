@@ -54,7 +54,7 @@ mam_map <- ggplot(data = world_sf) +
   geom_point(data = mam_IDsum, 
              aes(x = Longitude, y = Latitude, 
                  colour = Order),
-             alpha = 0.5, size = 3) +
+             alpha = 0.5, size = 2.9) +
   guides(colour = guide_legend(title = NULL,
                                override.aes = list(size = 4, alpha = 1))) +
   theme_bw(base_size = 25) +
