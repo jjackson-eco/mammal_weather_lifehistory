@@ -44,7 +44,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf")
 wtd_map <- ggplot(data = world_sf) +
   geom_sf(size = 0.1, fill = "#9DBF9E") +
   geom_point(aes(x = wtd$Longitude[1], y = wtd$Latitude[1]), 
-             ize = 2, colour = "blue") +
+             size = 2, colour = "blue") +
   coord_sf(xlim = c(-145, -45), ylim = c(20, 55), expand = FALSE) +
   theme_void()
 
@@ -149,7 +149,29 @@ ggplot(wtd_residab, aes(x = year, y = ln_abundance)) +
          width = 7, height = 5, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
-#### 4. Multivariate time-series analysis ####
+#### 4. R population growth rates - ln of raw abundance changes ####
+
+pgr_1989 <- tibble(x = 1989, xend = 1990, 
+                   y = wtd_residab[wtd_residab$year == 1989,]$raw_abundance,
+                   yend = wtd_residab[wtd_residab$year == 1990,]$raw_abundance) %>% 
+  mutate(pgr = log(yend/y))
+pgr_1989
+
+# ln abundance plot
+ggplot(wtd_residab, aes(x = year, y = raw_abundance)) +
+  geom_segment(data = pgr_1989, aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_point(size = 3) + 
+  annotate("text", x = 1997, y = 150000,
+           label = expression(paste(R[1989], " = ",ln, frac(N[1990],N[1989]), 
+                                    " = ", ln, frac(110626, 177356), " = ", -0.47))) +
+  labs(x = "Year (t)", y = "Number of Deer (N)") +
+  theme_bw(base_size = 12) +
+  ggsave(filename = "plots/annual_abundance/annual_abundance_options/option4_R.jpeg",
+         width = 7, height = 5, units = "in", dpi = 400)
+
+
+##__________________________________________________________________________________________________
+#### 5. Multivariate time-series analysis ####
 
 # residual abundance timeseries style
 ggplot(wtd_residab, aes(x = year, y = resid_ab)) +
@@ -157,11 +179,11 @@ ggplot(wtd_residab, aes(x = year, y = resid_ab)) +
   geom_line(size = 1) +
   labs(x = "Year (t)", y = "Stationary abundance (y)") +
   theme_bw(base_size = 12) +
-  ggsave("plots/annual_abundance/annual_abundance_options/option4_timeseries.jpeg",
+  ggsave("plots/annual_abundance/annual_abundance_options/option5_timeseries.jpeg",
          width = 7, height = 5, units = "in", dpi = 400)
 
 ##__________________________________________________________________________________________________
-#### 5. Calculating 1-3 for all records ####
+#### 6. Calculating 1-4 for all records ####
 
 mam_pgr <- mam_IDblocks %>% 
   mutate(ln_abundance = log(raw_abundance + 1),
@@ -191,11 +213,20 @@ mam_pgr <- mam_IDblocks %>%
     t0 = .$ln_abundance[-(nrow(.))]
     
     pgr = t1/t0
-    year = .$year[-(nrow(.))] # years with pop growth rates
+    
+    # method 4 - R
+    t1R = .$raw_abundance[-1]
+    t0R = .$raw_abundance[-(nrow(.))]
+    
+    pgr_R = log(t1/t0)
+    
+    # years with pop growth rates
+    year = .$year[-(nrow(.))] 
     
     mutate(., option1 = c(pgr_res10,NA),
            option2 = c(pgr_res, NA),
-           option3 = c(pgr, NA))
+           option3 = c(pgr, NA),
+           option4 = c(pgr_R, NA))
   }) %>% 
   ungroup() %>% 
   filter(is.na(option3) == F & option3 < 2) 
@@ -212,8 +243,8 @@ dev.off()
 # looking at pgrs from option 3
 hist(mam_pgr$option3)
 
-
-
+ggplot(mam_pgr, aes(x = option3, y = option4)) +
+  geom_point()
 
 
 

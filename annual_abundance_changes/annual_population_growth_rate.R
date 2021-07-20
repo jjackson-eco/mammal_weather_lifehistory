@@ -28,16 +28,17 @@ glimpse(mam_IDblocks)
 load("../rawdata/mam.RData", verbose = T)
 
 ##__________________________________________________________________________________________________
-#### 2. Calculate per-capita growth rate between time t and t+1 ####
+#### 2. Calculate log growth rate between time t and t+1 ####
 
-# This will remove one year from each ID_block - Does this matter?
+# This will remove one year from each ID_block
 mammal <- mam_IDblocks %>% 
+  mutate(raw_abundance2 = raw_abundance + 1) %>% # For the 0 observations, adjusting all to non-zeros
   group_by(ID_block) %>% 
   group_modify(~{
-    t0 <- .$ln_abundance[-(length(.$ln_abundance))] # get rid the last obs
-    t1 <- .$ln_abundance[-1]                        # get rid of the first obs
+    t0 <- .$raw_abundance2[-(length(.$raw_abundance2))] # get rid the last obs
+    t1 <- .$raw_abundance2[-1]                        # get rid of the first obs
     
-    mutate(., pop_growth_rate = c(t1/t0,NA))
+    mutate(., pop_growth_rate = c(log(t1/t0),NA))
   }) %>% 
   ungroup() %>% 
   filter(is.na(pop_growth_rate) == F)
@@ -47,8 +48,8 @@ mammal <- mam_IDblocks %>%
 
 # 3a. Histogram
 ggplot(mammal, aes(x = pop_growth_rate)) +
-  geom_histogram(bins = 100, fill = "black") +
-  labs(x = "Per-capita population growth rate", 
+  geom_histogram(bins = 50, fill = "black") +
+  labs(x = "ln Population growth rate", 
        y = "Frequency") +
   theme_bw(base_size = 12) +
   ggsave(filename = "plots/annual_abundance/annual_population_growth_rates/pop_growth_rate_histogram.jpeg",
@@ -59,8 +60,8 @@ ggplot(mammal, aes(x = ln_abundance, y = pop_growth_rate)) +
   geom_hline(yintercept = 1, linetype = "dashed") +
   geom_point(alpha = 0.15, colour = viridis(10)[6], size = 2.5) +
   geom_smooth(method = "lm", se = F, colour = "black") +
-  coord_cartesian(ylim = c(0,3)) +
-  labs(x = "ln Abundance", y = "Per-capita population growth rate") +
+  # coord_cartesian(ylim = c(0,3)) +
+  labs(x = "ln Abundance", y = "ln Population growth rate") +
   theme_bw(base_size = 18) + 
   # theme(panel.grid.major = element_blank(),
   #       panel.grid.minor = element_blank()) +
@@ -71,13 +72,13 @@ ggplot(mammal, aes(x = ln_abundance, y = pop_growth_rate)) +
 mamquant <- tibble(quant = quantile(mammal$pop_growth_rate, probs = c(0.01,0.99)))
 
 ggplot(mammal, aes(x = 1, y = pop_growth_rate)) +
-  geom_hline(yintercept = 1) +
+  geom_hline(yintercept = 0) +
   geom_violin() +
   geom_jitter(alpha = 0.2, aes(colour = pop_growth_rate), show.legend = F) +
   geom_hline(data = mamquant, aes(yintercept = quant), linetype = "dashed") +
-  scale_y_continuous(breaks = seq(0,8,by = 0.5)) +
+  # scale_y_continuous(breaks = seq(0,8,by = 0.5)) +
   scale_color_viridis_c() +
-  labs(x = NULL, y = "Per-capita population growth rate") +
+  labs(x = NULL, y = "ln Population growth rate") +
   theme_bw(base_size = 14) +
   theme(panel.grid = element_blank(),
         axis.text.x = element_blank(),

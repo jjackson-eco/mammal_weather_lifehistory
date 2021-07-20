@@ -271,13 +271,15 @@ Together with the results of section 2, this suggests that accounting for tempor
 Using the abundance data that has been split in to consecutive blocks, we will calculate per-capita annual population growth rates, which we will then relate to annual weather data. This is calculated as r = N~t+1~/N~t~ , where N is the abundance on the ln scale at time t. We store the results in the `mammal` data frame for future reference.
 
 ```
+# This will remove one year from each ID_block
 mammal <- mam_IDblocks %>% 
+  mutate(raw_abundance2 = raw_abundance + 1) %>% # For the 0 observations, adjusting all to non-zeros
   group_by(ID_block) %>% 
   group_modify(~{
-    t0 <- .$ln_abundance[-(length(.$ln_abundance))]
-    t1 <- .$ln_abundance[-1]
+    t0 <- .$raw_abundance2[-(length(.$raw_abundance2))] # get rid the last obs
+    t1 <- .$raw_abundance2[-1]                        # get rid of the first obs
     
-    mutate(., pop_growth_rate = c(t1/t0,NA))
+    mutate(., pop_growth_rate = c(log(t1/t0),NA))
   }) %>% 
   ungroup() %>% 
   filter(is.na(pop_growth_rate) == F)
