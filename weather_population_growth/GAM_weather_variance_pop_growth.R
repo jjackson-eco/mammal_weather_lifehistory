@@ -4,7 +4,7 @@
 ##                                                ##
 ##    GAMM timeseries method - Weather variance   ##
 ##                                                ##
-##                Feb 8th 2020                    ##
+##                Aug 9th 2021                    ##
 ##                                                ##
 ####################################################
 
