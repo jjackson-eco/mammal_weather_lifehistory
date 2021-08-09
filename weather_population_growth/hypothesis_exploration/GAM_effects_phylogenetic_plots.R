@@ -4,7 +4,7 @@
 ##                                                     ##
 ##     Mammal Phylogeny and GAM weather effects plots  ##
 ##                                                     ##
-##                   March 17th 2020                   ##
+##                    Aug 9th 2021                     ##
 ##                                                     ##
 #########################################################
 rm(list = ls())
