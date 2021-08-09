@@ -60,7 +60,7 @@ glimpse(mammal_weather)
 # Ignoring number of odd days vars for now - they follow a zero inflated pattern
 iter_dat <- expand_grid(ID_block = unique(mammal_weather$ID_block),
                                scale = unique(mammal_weather$scale),
-                               weather_var = colnames(mammal_weather)[24:39])
+                               weather_var = colnames(mammal_weather)[25:40])
 
 # 3b. weather coefficients for each variable
 pgr_weather_res <- bind_rows(lapply(X = 1:nrow(iter_dat), function(x){
@@ -109,7 +109,7 @@ pgr_weather_res <- pgr_weather_res %>%
 
 # removing very large coefficients
 pgr_plotdat_sm <- pgr_weather_res %>% 
-  filter(coef_weather >= -0.05 & coef_weather < 0.05)
+  filter(coef_weather >= -0.2 & coef_weather < 0.2)
 
 pgr_plotdat_lg <- pgr_weather_res %>% 
   filter(coef_weather >= -5 & coef_weather < 5)
