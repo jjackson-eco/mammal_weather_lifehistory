@@ -99,7 +99,7 @@ temp_plot <- ggplot(pgr_weather, aes(x = coef_temp, y = coef_temp_noDD)) +
   geom_point(size = 3, alpha = 0.8, colour = temp_colour) +
   geom_abline(slope = 1, intercept = 0) +
   labs(x = "Temperature coefficient", y = "Temperature coefficient\n(no density dependence)") +
-  annotate(geom = "text", label = bquote(rho == .(temp_rho) ~ ", p" < 0.001), x = -2, y = 2) +
+  annotate(geom = "text", label = bquote(rho == .(temp_rho) ~ ", p" < 0.001), x = -5, y = 5) +
   theme_bw(base_size = 12) +
   theme(panel.grid = element_blank())
 
@@ -114,13 +114,13 @@ precip_plot <- ggplot(pgr_weather, aes(x = coef_precip, y = coef_precip_noDD)) +
   geom_point(size = 3, alpha = 0.8, colour = precip_colour) +
   geom_abline(slope = 1, intercept = 0) +
   labs(x = "Precipitation coefficient", y = "Precipitation coefficient\n(no density dependence)") +
-  annotate(geom = "text", label = bquote(rho == .(precip_rho) ~ ", p" < 0.001), x = -1, y = 2) +
+  annotate(geom = "text", label = bquote(rho == .(precip_rho) ~ ", p" < 0.001), x = -0, y = 4) +
   theme_bw(base_size = 12) +
   theme(panel.grid = element_blank())
 
 ggsave(temp_plot + precip_plot,
        filename = "plots/weather_pop_growth/density_dependence_term_test.jpeg",
-       width = 17, height = 10, units = "cm", dpi = 400)
+       width = 17, height = 11, units = "cm", dpi = 600)
 
 
   
