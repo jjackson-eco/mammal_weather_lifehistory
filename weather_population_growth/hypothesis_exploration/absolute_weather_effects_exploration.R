@@ -4,7 +4,7 @@
 ##                                                     ##
 ##  Exploring absolute weather effects + life-history  ##   
 ##                                                     ##
-##                 Nov 9th 2020                        ##
+##                 Aug 9th 2021                        ##
 ##                                                     ##
 #########################################################
 
@@ -107,7 +107,7 @@ precip_plot <- mam_temp %>%
 
 
 ggsave(temp_plot + precip_plot,
-       filename = "plots/phylogenetic_regression/absolute_weather_effect_lh.jpeg",
+       filename = "plots/weather_pop_growth/absolute_weather_effect_lh.jpeg",
        width = 26, height = 10, units = "cm", dpi = 500)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
