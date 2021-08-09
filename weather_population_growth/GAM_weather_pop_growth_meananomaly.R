@@ -4,7 +4,7 @@
 ##                                                ##
 ##           GAMM timeseries method               ##
 ##                                                ##
-##                Dec 8th 2020                    ##
+##                Aug 9th 2020                    ##
 ##                                                ##
 ####################################################
 
@@ -59,22 +59,22 @@ glimpse(mammal_weather)
 wtd <- filter(mammal_weather, ID_block == "22039_1")
 
 ggplot(wtd, aes(x = year, y = pop_growth_rate)) + 
-  geom_hline(yintercept = 1, linetype = "solid", size = 0.2) +
+  geom_hline(yintercept = 0, linetype = "solid", size = 0.2) +
   geom_segment(aes(xend = year, yend = pop_growth_rate + mean_temp_anomaly),
                colour = temp_colour, arrow = arrow(length = unit(0.1, "cm"))) +
   # geom_segment(aes(xend = year, yend = pop_growth_rate + mean_precip_anomaly),
   #              colour = precip_colour, arrow = arrow(length = unit(0.1, "cm"))) +
   geom_point(size = 3) + geom_line() +
   geom_smooth(se = F, colour = "black", size = 0.5) +
-  labs(x = "Year", y = "Per-capita population growth rate") +
+  labs(x = "Year", y = "Population growth rate") +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank())
 
 
 ggplot(wtd, aes(x = mean_temp_anomaly, y = pop_growth_rate)) + 
-  geom_hline(yintercept = 1, linetype = "solid", size = 0.2) +
+  geom_hline(yintercept = 0, linetype = "solid", size = 0.2) +
   geom_point(size = 3) +
-  labs(x = "Temperature anomaly", y = "Per-capita population growth rate") +
+  labs(x = "Temperature anomaly", y = "Population growth rate") +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank())
 
@@ -147,7 +147,7 @@ precip_cor_val <- c(round(precip_cor$estimate, 2),
 temp_compare <- ggplot(lin_gam, aes(x = lin_temp, y = coef_temp, size = n_obs)) + 
   geom_point(alpha = 0.6, colour = temp_colour) +
   geom_abline(slope = 1, intercept = 0) +
-  annotate('text', x = -2.5, y = 4,
+  annotate('text', x = -5, y = 7,
            label = paste0("r = ", temp_cor_val[1], ", ", temp_cor_val[2])) +
   scale_size_continuous(range = c(1,8), guide = F) +
   labs(x = "Linear temperature effect", y = "GAM temperature effect") +
@@ -157,7 +157,7 @@ temp_compare <- ggplot(lin_gam, aes(x = lin_temp, y = coef_temp, size = n_obs)) 
 precip_compare <- ggplot(lin_gam, aes(x = lin_precip, y = coef_precip, size = n_obs)) + 
   geom_point(alpha = 0.6, colour = precip_colour) +
   geom_abline(slope = 1, intercept = 0) +
-  annotate('text', x = -2, y = 2.3,
+  annotate('text', x = -0.5, y = 5,
            label = paste0("r = ", precip_cor_val[1], ", ", precip_cor_val[2])) +
   scale_size_continuous(range = c(1,8), guide = F) +
   labs(x = "Linear precipitation effect", y = "GAM precipitation effect") +
@@ -189,7 +189,7 @@ coef_ovrdat <- pgr_weather_gam %>%
 ggplot(coef_ovrdat, aes(x = value, y = label, fill = model)) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1, size = 0.3) +
-  coord_cartesian(xlim = c(-1,1)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_manual(guide = F, values = c(precip_colour, temp_colour)) +
   labs(x = "Model coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 16) +
@@ -201,7 +201,7 @@ temp_sp <- ggplot(pgr_weather_gam, aes(x = coef_temp, y = Order,
                                    fill = Order, height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-0.5,0.5)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_viridis_d(guide = F, option = "C") +
   labs(x = "Temperature anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
@@ -210,13 +210,13 @@ precip_sp <- ggplot(pgr_weather_gam, aes(x = coef_precip, y = Order,
                                      fill = Order, height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-0.5,0.5)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_viridis_d(guide = F, option = "D") +
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) +
   theme(axis.text.y = element_blank())
 
-ggsave(grid.arrange(temp_sp, precip_sp, ncol = 2, widths = c(6,4)),
+ggsave(temp_sp + precip_sp,
        filename = "plots/weather_pop_growth/coef_order_mnanom_5km_GAM.jpeg",
        width = 15, height = 13, units = "in", dpi = 400)
 
@@ -225,7 +225,7 @@ temp_biome <- ggplot(pgr_weather_gam, aes(x = coef_temp, y = biome, fill = biome
                                       height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 2, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-0.5,0.5)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_viridis_d(guide = F, option = "C") +
   labs(x = "Temperature anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 20) 
@@ -234,13 +234,13 @@ precip_biome <- ggplot(pgr_weather_gam, aes(x = coef_precip, y = biome, fill = b
                                         height = stat(density))) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1.5, stat = "density", size = 0.3) +
-  coord_cartesian(xlim = c(-0.5,0.5)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_viridis_d(guide = F, option = "D") +
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 20) +
   theme(axis.text.y = element_blank())
 
-ggsave(grid.arrange(temp_biome, precip_biome, ncol = 2, widths = c(10,4)),
+ggsave(temp_biome + precip_biome,
        filename = "plots/weather_pop_growth/coef_biome_mnanom_5km_GAM.jpeg",
        width = 45, height = 20, units = "cm", dpi = 400)
 
@@ -252,7 +252,7 @@ temp_lat <- ggplot(pgr_lat, aes(x = coef_temp, y = factor(lat),
                                 fill = factor(lat), height = stat(density))) +
   geom_vline(xintercept = 0) +
   stat_density_ridges(quantile_lines = T, quantiles = 2, alpha = 0.7, scale = 1.1) +
-  coord_cartesian(xlim = c(-0.5,0.5)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_viridis_d(guide = F, option = "C", begin = 0.1, end = 0.9) + 
   labs(x = "Temperature anomaly coefficient", y = "Absolute latitude") +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
@@ -261,7 +261,7 @@ precip_lat <- ggplot(pgr_lat, aes(x = coef_precip, y = factor(lat),
                                   fill = factor(lat), height = stat(density))) +
   geom_vline(xintercept = 0) +
   stat_density_ridges(quantile_lines = T, quantiles = 2, alpha = 0.7, scale = 1.1) +
-  coord_cartesian(xlim = c(-0.5,0.5)) +
+  coord_cartesian(xlim = c(-5,5)) +
   scale_fill_viridis_d(guide = F, option = "D", begin = 0.2, end = 0.8) + 
   labs(x = "Precipitation anomaly coefficient", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, font_size = 25) 
