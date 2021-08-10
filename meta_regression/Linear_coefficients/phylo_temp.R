@@ -94,7 +94,7 @@ temp_base <- brm(
     prior(normal(0, 0.2), class =  Intercept),
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -114,7 +114,7 @@ temp_lon <- brm(
     prior(normal(0, 0.2), class = b, coef = "longevity"),
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -131,7 +131,7 @@ temp_bod <- brm(
     prior(normal(0, 0.2), class = b, coef = "bodymass"),
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -148,7 +148,7 @@ temp_lit <- brm(
     prior(normal(0, 0.15), class = b, coef = "litter"),
     prior(normal(0, 0.7), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -165,7 +165,7 @@ temp_biome <- brm(
     prior(normal(0, 0.2), class = b),
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -181,7 +181,7 @@ temp_biome_ns <- brm(
     prior(normal(0, 0.2), class =  Intercept),
     prior(normal(0, 0.2), class = b),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -216,7 +216,7 @@ temp_lon_biome <- brm(
     prior(normal(0, 0.2), class = b), # For the rest of the beta terms i.e. the biome effect
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.99,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -251,7 +251,7 @@ temp_lit_biome <- brm(
     prior(normal(0, 0.2), class = b), # For the rest of the beta terms i.e. the biome effect
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.99,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
@@ -269,7 +269,7 @@ temp_lon_biome_interaction <- brm(
     prior(normal(0, 0.1), class = b), # For the rest of the beta terms i.e. the biome effect and interaction - MORE CONSERVATIVE THAN BEFORE
     prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(5), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.99,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 3000, warmup = 500
