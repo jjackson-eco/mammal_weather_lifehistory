@@ -7,7 +7,7 @@
 ##        brms Phylogenetic meta-regression       ##
 ##              and spatial effects               ##
 ##                                                ##
-##                 Nov 9th 2020                   ##
+##                 Aug 11th 2021                  ##
 ##                                                ##
 ####################################################
 
@@ -93,11 +93,11 @@ temp_base <- brm(
   data = mam_temp, family = gaussian(),
   data2 = list(A_temp = A_temp),
   prior = c(
-    prior(normal(0, 0.3), class =  Intercept),
+    prior(normal(0, 0.2), class =  Intercept),
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(8), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 3, cores = 3, iter = 4000, warmup = 2000
 )
@@ -109,8 +109,8 @@ temp_biome <- brm(
   data = mam_temp, family = gaussian(),
   data2 = list(A_temp = A_temp),
   prior = c(
-    prior(normal(0, 0.3), class =  Intercept),
-    prior(normal(0, 0.15), class = b),
+    prior(normal(0, 0.2), class =  Intercept),
+    prior(normal(0, 0.1), class = b),
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(8), class = sd, group = "species")),

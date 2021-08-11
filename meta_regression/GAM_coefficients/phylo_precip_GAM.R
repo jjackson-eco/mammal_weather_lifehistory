@@ -7,7 +7,7 @@
 ##        brms Phylogenetic meta-regression       ##
 ##              and spatial effects               ##
 ##                                                ##
-##                 Jan 27th 2020                  ##
+##                 Aug 11th 2021                  ##
 ##                                                ##
 ####################################################
 
@@ -109,8 +109,8 @@ precip_biome <- brm(
   data = mam_precip, family = gaussian(),
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 0.3), class =  Intercept),
-    prior(normal(0, 0.15), class = b),
+    prior(normal(0, 0.2), class =  Intercept),
+    prior(normal(0, 0.1), class = b),
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(8), class = sd, group = "species")),
@@ -159,7 +159,7 @@ precip_biome_pars <- parnames(precip_biome)
 
 jpeg("plots/meta_regression/precip_biome_mod_parms.jpeg", 
      width = 13, height = 15, res = 500, units = "cm")
-plot(temp_biome, pars = c("b_Intercept", "b_sample_size","sd_species__Intercept", 
+plot(precip_biome, pars = c("b_Intercept", "b_sample_size","sd_species__Intercept", 
                           "sd_phylo__Intercept", "sigma"))
 dev.off()
 

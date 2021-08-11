@@ -7,7 +7,7 @@
 ##        brms Phylogenetic meta-regression       ##
 ##        life-history and spatial effects        ##
 ##                                                ##
-##                Nov 13th 2020                   ##
+##                Aug 11th 2021                   ##
 ##                                                ##
 ####################################################
 
@@ -93,13 +93,13 @@ precip_base <- brm(
   data = mam_precip, family = gaussian(), 
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 0.1), class =  Intercept),
+    prior(normal(0, 0.5), class =  Intercept),
     prior(normal(0, 0.2), class = b, coef = "sample_size"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
 
 #_______________________________________________________________________________
@@ -115,12 +115,13 @@ precip_lon <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b, coef = "sample_size"),
     prior(normal(0, 0.2), class = b, coef = "longevity"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  control = list(adapt_delta = 0.98,
+                 max_treedepth = 18),
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
+
 
 ## Bodymass
 set.seed(666)
@@ -132,11 +133,11 @@ precip_bod <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b, coef = "sample_size"),
     prior(normal(0, 0.2), class = b, coef = "bodymass"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  control = list(adapt_delta = 0.98,
+                 max_treedepth = 18),
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
 
 ## Litter size
@@ -149,12 +150,13 @@ precip_lit <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b, coef = "sample_size"),
     prior(normal(0, 0.2), class = b, coef = "litter"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  control = list(adapt_delta = 0.98,
+                 max_treedepth = 18),
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
+
 
 ## Biome
 set.seed(666)
@@ -166,12 +168,13 @@ precip_biome <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b, coef = "sample_size"),
     prior(normal(0, 0.2), class = b),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  control = list(adapt_delta = 0.98,
+                 max_treedepth = 18),
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
+
 
 #_______________________________________________________________________________
 ### 4b. Univariate model comparisons
@@ -197,10 +200,10 @@ precip_lh <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b),
     prior(exponential(6), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
 
 ## Longevity effect controlling for bodymass
@@ -213,10 +216,10 @@ precip_lonbm <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b),
     prior(exponential(6), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
 
 ## Longevity effect excluding sample size
@@ -229,10 +232,10 @@ precip_lon_ns <- brm(
     prior(normal(0, 0.1), class =  Intercept),
     prior(normal(0, 0.2), class = b),
     prior(exponential(6), class = sd, group = "phylo"),
-    prior(exponential(5), class = sd, group = "species")),
+    prior(exponential(3), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
-  chains = 4, cores = 4, iter = 2000, warmup = 300
+  chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
 
 #_______________________________________________________________________________
@@ -246,8 +249,7 @@ loo_compare(precip_base, precip_lon, precip_bod,
             precip_lit, precip_biome, precip_lh,
             precip_lonbm, precip_lon_ns, criterion = "loo")
 
-# Looks like best support is for just the model 
-# with longevity and controlling for sample size
+# Looks like best support is for life history model
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 5. Posterior plots ####
