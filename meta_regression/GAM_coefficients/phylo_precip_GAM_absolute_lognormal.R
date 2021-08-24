@@ -7,7 +7,7 @@
 ##          brms Phylogenetic meta-regression           ##
 ##          life-history and spatial effects            ##
 ##                                                      ##
-##                   Dec 16th 2020                      ##
+##                   Aug 12th 2021                      ##
 ##                                                      ##
 ##########################################################
 
@@ -111,8 +111,8 @@ precip_base <- brm(
   data = mam_precip, family = gaussian(),
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 1), class =  Intercept),
-    prior(normal(0, 1), class = b, coef = "sample_size"),
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(6), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
@@ -130,12 +130,12 @@ precip_longevity <- brm(
   data = mam_precip, family = gaussian(),
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 0.8), class =  Intercept),
-    prior(normal(0, 0.6), class = b, coef = "sample_size"),
-    prior(normal(0, 0.5), class = b, coef = "longevity"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
+    prior(normal(0, 0.3), class = b, coef = "longevity"),
+    prior(exponential(5), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
@@ -147,10 +147,10 @@ precip_litter <- brm(
   data = mam_precip, family = gaussian(),
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 1), class =  Intercept),
-    prior(normal(0, 0.8), class = b, coef = "sample_size"),
-    prior(normal(0, 0.8), class = b, coef = "litter"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
+    prior(normal(0, 0.3), class = b, coef = "litter"),
+    prior(exponential(5), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
@@ -164,10 +164,10 @@ precip_bodymass <- brm(
   data = mam_precip, family = gaussian(),
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 1), class =  Intercept),
-    prior(normal(0, 0.8), class = b, coef = "sample_size"),
-    prior(normal(0, 0.8), class = b, coef = "bodymass"),
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
+    prior(normal(0, 0.3), class = b, coef = "bodymass"),
+    prior(exponential(5), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
@@ -181,10 +181,10 @@ precip_biome <- brm(
   data = mam_precip, family = gaussian(),
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 1), class =  Intercept),
-    prior(normal(0, 0.8), class = b, coef = "sample_size"),
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(normal(0, 0.3), class = b), # more conservative as lots of category levels
-    prior(exponential(6), class = sd, group = "phylo"),
+    prior(exponential(5), class = sd, group = "phylo"),
     prior(exponential(5), class = sd, group = "species")),
   control = list(adapt_delta = 0.97,
                  max_treedepth = 15),
@@ -204,116 +204,7 @@ precip_biome <- add_criterion(precip_biome, criterion = c("loo","waic"))
 as.data.frame(loo_compare(precip_base, precip_longevity, precip_bodymass, 
                           precip_litter, precip_biome, criterion = "loo"))
 
-#_______________________________________________________________________________
-### 4c. Life-history models full
-
-# More conservative priors due to lots of parameters
-lh_priors <- c(
-  prior(normal(0, 0.5), class =  Intercept),
-  prior(normal(0, 0.3), class = b),
-  prior(normal(0, 0.3), class = b, coef = "sample_size"),
-  prior(exponential(8), class = sd, group = "phylo"),
-  prior(exponential(5), class = sd, group = "species"))
-
-## Life-history full
-set.seed(666)
-precip_lh <- brm(
-  log_abs_precip ~ 1 + longevity + bodymass + litter +
-    longevity:bodymass + litter:bodymass + litter:longevity + 
-    sample_size + (1|gr(phylo, cov = A_precip)) + (1| species),  
-  data = mam_precip, 
-  family = gaussian(), 
-  data2 = list(A_precip = A_precip),
-  prior = lh_priors,
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 4000, warmup = 2000
-)
-
-## Life-history univariate only
-set.seed(666)
-precip_lh_uni <- brm(
-  log_abs_precip ~ 1 + longevity + bodymass + litter +
-    sample_size + (1|gr(phylo, cov = A_precip)) + (1| species),  
-  data = mam_precip, 
-  family = gaussian(), 
-  data2 = list(A_precip = A_precip),
-  prior = lh_priors,
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 4000, warmup = 2000
-)
-
-## Longevity and Body Mass full
-set.seed(666)
-precip_lonbod <- brm(
-  log_abs_precip ~ 1 + longevity*bodymass + sample_size + (1|gr(phylo, cov = A_precip)) + (1| species),  
-  data = mam_precip, 
-  family = gaussian(), 
-  data2 = list(A_precip = A_precip),
-  prior = lh_priors,
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 4000, warmup = 2000
-)
-
-## Litter and Body Mass full
-set.seed(666)
-precip_litbod <- brm(
-  log_abs_precip ~ 1 + litter*bodymass + sample_size + (1|gr(phylo, cov = A_precip)) + (1| species),  
-  data = mam_precip, 
-  family = gaussian(),
-  data2 = list(A_precip = A_precip),
-  prior = lh_priors,
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 4000, warmup = 2000
-)
-
-## Body mass correction - additive only
-set.seed(666)
-precip_lonbod_simple <- brm(
-  log_abs_precip ~ 1 + longevity + bodymass + sample_size + (1|gr(phylo, cov = A_precip)) + (1| species),  
-  data = mam_precip, 
-  family = gaussian(), 
-  data2 = list(A_precip = A_precip),
-  prior = lh_priors,
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 4000, warmup = 2000
-)
-
-set.seed(666)
-precip_litbod_simple <- brm(
-  log_abs_precip ~ 1 + litter + bodymass + sample_size + (1|gr(phylo, cov = A_precip)) + (1| species),  
-  data = mam_precip, 
-  family = gaussian(), 
-  data2 = list(A_precip = A_precip),
-  prior = lh_priors,
-  control = list(adapt_delta = 0.97,
-                 max_treedepth = 15),
-  chains = 4, cores = 4, iter = 4000, warmup = 2000
-)
-
-#_______________________________________________________________________________
-### 4b. Full model comparisons
-
-precip_lh <- add_criterion(precip_lh, criterion = c("loo","waic"))
-precip_lh_uni <- add_criterion(precip_lh_uni, criterion = c("loo","waic"))
-precip_lonbod <- add_criterion(precip_lonbod, criterion = c("loo","waic"))
-precip_litbod<- add_criterion(precip_litbod, criterion = c("loo","waic"))
-precip_lonbod_simple <- add_criterion(precip_lonbod_simple, criterion = c("loo","waic"))
-precip_litbod_simple <- add_criterion(precip_litbod_simple, criterion = c("loo","waic"))
-
-precip_modcomp_lognormal <- as.data.frame(loo_compare(precip_base, precip_longevity, precip_bodymass, 
-                                                precip_litter, precip_biome, precip_lonbod_simple,
-                                                precip_litbod_simple, precip_lh_uni, precip_lonbod, precip_litbod,
-                                                precip_lh, criterion = "loo"))
-
-
-# Looks like best is litter and body mass, but also strong evidence for longevity separately relative to base model.
-# Not good evidence for interactions though. Therefore we pick the univariate only model.
-precip_modcomp_lognormal
+ 
 precip_lh_uni
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________

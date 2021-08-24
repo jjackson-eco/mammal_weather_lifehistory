@@ -7,7 +7,7 @@
 ##        brms Phylogenetic meta-regression       ##
 ##              and spatial effects               ##
 ##                                                ##
-##                 Feb 11th 2020                  ##
+##                 Aug 23rd 2021                  ##
 ##                                                ##
 ####################################################
 

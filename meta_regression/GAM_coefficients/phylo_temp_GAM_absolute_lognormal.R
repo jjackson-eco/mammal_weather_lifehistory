@@ -7,7 +7,7 @@
 ##          brms Phylogenetic meta-regression           ##
 ##          life-history and spatial effects            ##
 ##                                                      ##
-##                   Dec 16th 2020                      ##
+##                   Aug 12th 2021                      ##
 ##                                                      ##
 ##########################################################
 
@@ -232,9 +232,9 @@ as.data.frame(loo_compare(temp_base, temp_longevity, temp_bodymass,
 
 # More conservative priors due to lots of parameters
 lh_priors <- c(
-  prior(normal(0, 0.5), class =  Intercept),
-  prior(normal(0, 0.3), class = b),
-  prior(normal(0, 0.3), class = b, coef = "sample_size"),
+  prior(normal(0, 0.3), class =  Intercept),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 0.2), class = b, coef = "sample_size"),
   prior(exponential(10), class = sd, group = "phylo"),
   prior(exponential(5), class = sd, group = "species"))
 
@@ -248,7 +248,7 @@ temp_lh <- brm(
   family = gaussian(), 
   data2 = list(A_temp = A_temp),
   prior = lh_priors,
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
@@ -275,7 +275,7 @@ temp_lonbod <- brm(
   family = gaussian(), 
   data2 = list(A_temp = A_temp),
   prior = lh_priors,
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
@@ -288,7 +288,7 @@ temp_litbod <- brm(
   family = gaussian(),
   data2 = list(A_temp = A_temp),
   prior = lh_priors,
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
@@ -301,7 +301,7 @@ temp_lonbod_simple <- brm(
   family = gaussian(), 
   data2 = list(A_temp = A_temp),
   prior = lh_priors,
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 4000, warmup = 2000
 )
@@ -313,7 +313,7 @@ temp_litbod_simple <- brm(
   family = gaussian(), 
   data2 = list(A_temp = A_temp),
   prior = lh_priors,
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 4, cores = 4, iter = 4000, warmup = 2000
 )

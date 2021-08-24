@@ -4,7 +4,7 @@
 ##                                                          ##
 ## Spatially autocorrelated meta-regression for Temperature ##
 ##                                                          ##
-##                     Feb 25th 2021                        ##
+##                     Aug 23rd 2021                        ##
 ##                                                          ##
 ##############################################################
 
@@ -96,7 +96,7 @@ mod_comp_temp <- as.data.frame(loo_compare(temp_base, temp_sp, criterion = "loo"
 
 temp_colour <- "#990a80"
 
-temp_sp %>%
+sp_temp_plot <- temp_sp %>%
   gather_draws(`lagsar|sd.*|b_Intercept|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
   ungroup() %>% 
   mutate(spatial = if_else(.variable == "lagsar", "yes", "no")) %>% 
@@ -113,9 +113,12 @@ temp_sp %>%
   labs(x = "Posterior estimate", y = NULL) +
   theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
   theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 12)) +
-  ggsave("plots/meta_regression/spatial_autocorrelation_posterior.jpeg",
-         width = 15, height = 14, units = "cm", dpi = 500)
+        axis.title = element_text(size = 12))
+
+
+ggsave(plot = sp_temp_plot, 
+       filename =  "plots/meta_regression/spatial_autocorrelation_posterior.jpeg",
+       device = "jpeg", width = 15, height = 14, units = "cm", dpi = 500)
 
 ## model comparisons plot
 mod_comp_temp %>% 

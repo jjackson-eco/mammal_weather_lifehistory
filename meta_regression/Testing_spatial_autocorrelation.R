@@ -4,7 +4,7 @@
 ##                                                         ##
 ##    Testing for spatial autocorrelation in GAM models    ##
 ##                                                         ##
-##                    Feb 4th 2020                         ##
+##                    Aug 23rd 2021                        ##
 ##                                                         ##
 #############################################################
 
@@ -115,7 +115,7 @@ ggplot(data = world_sf) +
 ## Total number of significant local morans I values
 table(moran_mapdat_sf$sig)
 
-21/478
+24/454
 
 ## Looking at the local morans I values and points from Asia in more detail
 
@@ -125,22 +125,27 @@ world_Ii <- ggplot(data = world_sf) +
   geom_sf(data = filter(moran_mapdat_sf,sig == "< 0.05"), 
           aes(colour = Ii), alpha = 0.9, size = 1.5) +
   scale_colour_viridis_c(name = "Local morans I value", option = "C", begin = 0.2, end = 0.9) +
+  guides(colour = guide_colorbar(title.position = "top")) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         panel.border = element_blank(),
         legend.position = "top") 
 
-Asia_Ii <- ggplot(data = world_sf) +
+USA_Ii <- ggplot(data = world_sf) +
   geom_sf(size = 0, fill = "lightgrey") + 
-  geom_sf(data = moran_mapdat_sf, aes(colour = Ii, shape = sig), alpha = 1, size = 1.5) +
-  coord_sf(xlim = c(120, 160), ylim = c(30, 55)) +
+  geom_sf(data = moran_mapdat_sf, aes(colour = Ii, shape = sig), alpha = 0.8, size = 1.5) +
+  coord_sf(xlim = c(-120, -60), ylim = c(20, 60)) +
   scale_colour_viridis_c(name = "Local morans I value", option = "C", begin = 0.2, end = 0.9) +
+  guides(colour = guide_colorbar(title.position = "top"),
+         shape = guide_legend(title.position = "top",
+                              title = "Significance",
+                              override.aes = list(size = 5))) +
   theme_bw() +
   theme(panel.grid = element_blank(),
         panel.border = element_blank(),
         legend.position = "top") 
 
-ggsave(world_Ii + Asia_Ii, 
+ggsave(world_Ii + USA_Ii, 
        filename = "plots/meta_regression/spatial_autocorrelation_localvalues_temp.jpeg",
        width = 24, height = 18, units = "cm", dpi = 600)
 
