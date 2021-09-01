@@ -111,8 +111,8 @@ precip_base <- brm(
   family = Gamma(link = "log"), 
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 1), class =  Intercept),
-    prior(normal(0, 1), class = b, coef = "sample_size"),
+    prior(normal(0, 0.8), class =  Intercept),
+    prior(normal(0, 0.8), class = b, coef = "sample_size"),
     prior(exponential(11), class = sd, group = "phylo"),
     prior(exponential(2), class = sd, group = "species"),
     prior(gamma(2,0.5), class = shape)),
@@ -151,9 +151,9 @@ precip_litter <- brm(
   family = Gamma(link = "log"), 
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 0.8), class =  Intercept),
-    prior(normal(0, 0.8), class = b, coef = "litter"),
-    prior(normal(0, 0.8), class = b, coef = "sample_size"),
+    prior(normal(0, 0.5), class =  Intercept),
+    prior(normal(0, 0.5), class = b, coef = "litter"),
+    prior(normal(0, 0.5), class = b, coef = "sample_size"),
     prior(exponential(11), class = sd, group = "phylo"),
     prior(exponential(2), class = sd, group = "species"),
     prior(gamma(2,0.5), class = shape)),
@@ -170,9 +170,9 @@ precip_bodymass <- brm(
   family = Gamma(link = "log"), 
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 0.8), class =  Intercept),
-    prior(normal(0, 0.5), class = b, coef = "bodymass"),
-    prior(normal(0, 0.8), class = b, coef = "sample_size"),
+    prior(normal(0, 0.3), class =  Intercept),
+    prior(normal(0, 0.3), class = b, coef = "bodymass"),
+    prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(11), class = sd, group = "phylo"),
     prior(exponential(2), class = sd, group = "species"),
     prior(gamma(2,0.5), class = shape)),
@@ -189,9 +189,9 @@ precip_biome <- brm(
   family = Gamma(link = "log"), 
   data2 = list(A_precip = A_precip),
   prior = c(
-    prior(normal(0, 0.8), class =  Intercept),
+    prior(normal(0, 0.3), class =  Intercept),
     prior(normal(0, 0.3), class = b),
-    prior(normal(0, 0.8), class = b, coef = "sample_size"),
+    prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(11), class = sd, group = "phylo"),
     prior(exponential(2), class = sd, group = "species"),
     prior(gamma(2,0.5), class = shape)),
@@ -221,8 +221,8 @@ save(univar_modcomp, file = "results/local_gamma_models/precipitation_univariate
 
 lh_priors <- c(
   prior(normal(0, 0.3), class =  Intercept),
-  prior(normal(0, 0.3), class = b),
-  prior(normal(0, 0.3), class = b, coef = "sample_size"),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 0.2), class = b, coef = "sample_size"),
   prior(exponential(11), class = sd, group = "phylo"),
   prior(exponential(2), class = sd, group = "species"),
   prior(gamma(2,0.6), class = shape))
@@ -322,10 +322,9 @@ mod_comp <- as.data.frame(loo_compare(precip_base, precip_longevity, precip_body
                                       precip_litbod_simple, precip_lh_uni, precip_lonbod, precip_litbod,
                                       precip_lh, criterion = "loo"))
 
-save(mod_comp, file = "output/precipitation_model_comparisons.RData")
+mod_comp
+save(mod_comp, file = "results/local_gamma_models/precipitation_model_comparisons.RData")
 
-
-
-## Best model - litter alone is the most effective, but also evidence for longevity
-
+## Best model - univariate lh effects are predictive. Longevity alone is best, but also evidence for litter as well. Precip lh uni is plausible model
+saveRDS(precip_lh_uni, file = "results/local_gamma_models/precip_lh_uni.RDS")
 

@@ -6,7 +6,7 @@
 ##                                                         ##
 ##         Posterior plots of Life-history effects         ##
 ##                                                         ##
-##                   Dec 27th 2020                         ##
+##                   Aug 27th 2021                         ##
 ##                                                         ##
 #############################################################
 
@@ -37,14 +37,14 @@ load("data/mammal_analysis_data_GAM.RData", verbose = TRUE)
 
 #_____________
 ## Best models
-temp_lh_uni <- readRDS("results/UCloud_gamma_models/temp_lh_uni_gamma.rds")
-precip_lh_uni <- readRDS("results/UCloud_gamma_models/precip_lh_uni_gamma.RDS")
+temp_lh_uni <- readRDS("results/local_gamma_models/temp_lh_uni.RDS")
+precip_lh_uni <- readRDS("results/local_gamma_models/precip_lh_uni.RDS")
 
 #______________________
 ## Model selection data
-load("results/UCloud_gamma_models/temperature_model_comparisons.RData")
+load("results/local_gamma_models/temperature_model_comparisons.RData")
 temp_modcomp <- mod_comp
-load("results/UCloud_gamma_models/precipitation_model_comparisons.RData")
+load("results/local_gamma_models/precipitation_model_comparisons.RData")
 precip_modcomp <- mod_comp
 rm(mod_comp)
 
@@ -85,19 +85,19 @@ posterior_summary_longevity <- bind_rows(lapply(unique(preddat_lon$longevity), f
   post_mn_precip = mean(precip_pred_lon[,cpos])
   
   # prediction intervals - 80% from rethinking package
-  cPI_temp = PI(temp_pred_lon[,cpos], prob = 0.8)
+  #cPI_temp = PI(temp_pred_lon[,cpos], prob = 0.8)
   cQuant_temp = quantile(temp_pred_lon[,cpos], c(0.025, 0.975))
   
-  cPI_precip = PI(precip_pred_lon[,cpos], prob = 0.8)
+  #cPI_precip = PI(precip_pred_lon[,cpos], prob = 0.8)
   cQuant_precip = quantile(precip_pred_lon[,cpos], c(0.025, 0.975))
   
   # return data
   return(tibble(longevity = x, 
                 post_mn_temp = post_mn_temp, 
                 post_mn_precip = post_mn_precip,
-                lwrPI_temp = cPI_temp[1], uprPI_temp = cPI_temp[2], 
+                #lwrPI_temp = cPI_temp[1], uprPI_temp = cPI_temp[2], 
                 lwr_temp = cQuant_temp[1], upr_temp = cQuant_temp[2],
-                lwrPI_precip = cPI_precip[1], uprPI_precip = cPI_precip[2], 
+                #lwrPI_precip = cPI_precip[1], uprPI_precip = cPI_precip[2], 
                 lwr_precip = cQuant_precip[1], upr_precip = cQuant_precip[2]))
 }))
 
@@ -132,19 +132,19 @@ posterior_summary_litter <- bind_rows(lapply(unique(preddat_lit$litter), functio
   post_mn_precip = mean(precip_pred_lit[,cpos])
   
   # prediction intervals - 80% from rethinking package
-  cPI_temp = PI(temp_pred_lit[,cpos], prob = 0.8)
-  cQuant_temp = quantile(temp_pred_lit[,cpos], c(0.025, 0.975))
+  #cPI_temp = PI(temp_pred_lit[,cpos], prob = 0.8)
+  cQuant_temp = quantile(temp_pred_lit[,cpos], c(0.1, 0.9))
   
-  cPI_precip = PI(precip_pred_lit[,cpos], prob = 0.8)
-  cQuant_precip = quantile(precip_pred_lit[,cpos], c(0.025, 0.975))
+  #cPI_precip = PI(precip_pred_lit[,cpos], prob = 0.8)
+  cQuant_precip = quantile(precip_pred_lit[,cpos], c(0.1, 0.9))
   
   # return data
   return(tibble(litter = x, 
                 post_mn_temp = post_mn_temp, 
                 post_mn_precip = post_mn_precip,
-                lwrPI_temp = cPI_temp[1], uprPI_temp = cPI_temp[2], 
+                #lwrPI_temp = cPI_temp[1], uprPI_temp = cPI_temp[2], 
                 lwr_temp = cQuant_temp[1], upr_temp = cQuant_temp[2],
-                lwrPI_precip = cPI_precip[1], uprPI_precip = cPI_precip[2], 
+                #lwrPI_precip = cPI_precip[1], uprPI_precip = cPI_precip[2], 
                 lwr_precip = cQuant_precip[1], upr_precip = cQuant_precip[2]))
 }))
 
@@ -185,11 +185,11 @@ litter_binned_data <- mam_coef %>%
 lon_temp <- ggplot(mam_coef, aes(x = longevity, y = abs_temp)) +
   geom_point(aes(size = n_obs), colour = temp_colour, alpha = 0.5) +
   geom_smooth(data = posterior_summary_longevity,
-              aes(y = post_mn_temp, ymax = uprPI_temp, ymin = lwrPI_temp),
+              aes(y = post_mn_temp, ymax = upr_temp, ymin = lwr_temp),
               colour = "black", fill = temp_colour, alpha = 0.3,
               stat = "identity") +
   coord_cartesian(ylim = c(0,4)) +
-  scale_size_continuous(range = c(2,7), guide = F) +
+  scale_size_continuous(range = c(2,7), guide = "none") +
   labs(x = "Standardised longevity", y = "|Temperature effect on abundance|",
        tag = "a)") +
   theme_bw(base_size = 13) +
@@ -198,11 +198,11 @@ lon_temp <- ggplot(mam_coef, aes(x = longevity, y = abs_temp)) +
 lit_temp <- ggplot(mam_coef, aes(x = litter, y = abs_temp)) +
   geom_point(aes(size = n_obs), colour = temp_colour, alpha = 0.5) +
   geom_smooth(data = posterior_summary_litter,
-              aes(y = post_mn_temp, ymax = uprPI_temp, ymin = lwrPI_temp),
+              aes(y = post_mn_temp, ymax = upr_temp, ymin = lwr_temp),
               colour = "black", fill = temp_colour, alpha = 0.3,
               stat = "identity") +
   coord_cartesian(ylim = c(0,4)) +
-  scale_size_continuous(range = c(2,7), guide = F) +
+  scale_size_continuous(range = c(2,7), guide = "none") +
   labs(x = "Standardised litter size", y = "|Temperature effect on abundance|",
        tag = "b)") +
   theme_bw(base_size = 13) +
@@ -211,11 +211,11 @@ lit_temp <- ggplot(mam_coef, aes(x = litter, y = abs_temp)) +
 lon_precip <- ggplot(mam_coef, aes(x = longevity, y = abs_precip)) +
   geom_point(aes(size = n_obs), colour = precip_colour, alpha = 0.5) +
   geom_smooth(data = posterior_summary_longevity,
-              aes(y = post_mn_precip, ymax = uprPI_precip, ymin = lwrPI_precip),
+              aes(y = post_mn_precip, ymax = upr_precip, ymin = lwr_precip),
               colour = "black", fill = precip_colour, alpha = 0.3,
               stat = "identity") +
   coord_cartesian(ylim = c(0,4)) +
-  scale_size_continuous(range = c(2,7), guide = F) +
+  scale_size_continuous(range = c(2,7), guide = "none") +
   labs(x = "Standardised longevity", y = "|Precipitation effect on abundance|",
        tag = "c)") +
   theme_bw(base_size = 13) +
@@ -224,11 +224,11 @@ lon_precip <- ggplot(mam_coef, aes(x = longevity, y = abs_precip)) +
 lit_precip <- ggplot(mam_coef, aes(x = litter, y = abs_precip)) +
   geom_point(aes(size = n_obs), colour = precip_colour, alpha = 0.5) +
   geom_smooth(data = posterior_summary_litter,
-              aes(y = post_mn_precip, ymax = uprPI_precip, ymin = lwrPI_precip),
+              aes(y = post_mn_precip, ymax = upr_precip, ymin = lwr_precip),
               colour = "black", fill = precip_colour, alpha = 0.3,
               stat = "identity") +
   coord_cartesian(ylim = c(0,4)) +
-  scale_size_continuous(range = c(2,7), guide = F) +
+  scale_size_continuous(range = c(2,7), guide = "none") +
   labs(x = "Standardised litter size", y = "|Precipitation effect on abundance|",
        tag = "d)") +
   theme_bw(base_size = 13) +
@@ -252,11 +252,11 @@ lon_temp_bin <- ggplot(longevity_binned_data, aes(x = lon_bin, y = mntemp)) +
   geom_point(size = 4, colour = temp_colour) +
   geom_smooth(data = posterior_summary_longevity,
               aes(x = longevity, y = post_mn_temp, 
-                  ymax = uprPI_temp, ymin = lwrPI_temp),
+                  ymax = upr_temp, ymin = lwr_temp),
               colour = "black", fill = temp_colour, alpha = 0.3,
               stat = "identity") +
   coord_cartesian(ylim = c(0,3)) +
-  scale_size_continuous(range = c(2,8), guide = F) +
+  scale_size_continuous(range = c(2,8), guide = "none") +
   labs(x = "Standardised longevity", y = "|Temperature effect on abundance|",
        tag = "a)") +
   theme_bw(base_size = 13) +
@@ -268,10 +268,10 @@ lit_temp_bin <- ggplot(litter_binned_data, aes(x = lit_bin, y = mntemp)) +
   geom_point(size = 4, colour = temp_colour) +
   geom_smooth(data = posterior_summary_litter,
               aes(x = litter, y = post_mn_temp, 
-                  ymax = uprPI_temp, ymin = lwrPI_temp),
+                  ymax = upr_temp, ymin = lwr_temp),
               colour = "black", fill = temp_colour, alpha = 0.3,
               stat = "identity") +
-  scale_size_continuous(range = c(2,8), guide = F) +
+  scale_size_continuous(range = c(2,8), guide = "none") +
   labs(x = "Standardised litter size", y = "|Temperature effect on abundance|",
        tag = "b)") +
   theme_bw(base_size = 13) +
@@ -283,11 +283,11 @@ lon_precip_bin <- ggplot(longevity_binned_data, aes(x = lon_bin, y = mnprecip)) 
   geom_point(size = 4, colour = precip_colour) +
   geom_smooth(data = posterior_summary_longevity,
               aes(x = longevity, y = post_mn_precip, 
-                  ymax = uprPI_precip, ymin = lwrPI_precip),
+                  ymax = upr_precip, ymin = lwr_precip),
               colour = "black", fill = precip_colour, alpha = 0.3,
               stat = "identity") +
   coord_cartesian(ylim = c(0,4)) +
-  scale_size_continuous(range = c(2,8), guide = F) +
+  scale_size_continuous(range = c(2,8), guide = "none") +
   labs(x = "Standardised longevity", y = "|Precipitation effect on abundance|",
        tag = "a)") +
   theme_bw(base_size = 13) +
@@ -299,10 +299,10 @@ lit_precip_bin <- ggplot(litter_binned_data, aes(x = lit_bin, y = mnprecip)) +
   geom_point(size = 4, colour = precip_colour) +
   geom_smooth(data = posterior_summary_litter,
               aes(x = litter, y = post_mn_precip, 
-                  ymax = uprPI_precip, ymin = lwrPI_precip),
+                  ymax = upr_precip, ymin = lwr_precip),
               colour = "black", fill = precip_colour, alpha = 0.3,
               stat = "identity") +
-  scale_size_continuous(range = c(2,8), guide = F) +
+  scale_size_continuous(range = c(2,8), guide = "none") +
   labs(x = "Standardised litter size", y = "|Precipitation effect on abundance|",
        tag = "b)") +
   theme_bw(base_size = 13) +
@@ -349,7 +349,7 @@ temp_modcomp %>%
                     se_diff = "elpd error difference",
                     looic = "LOO information criterion") %>% 
   colformat_double(digits = 2) %>% 
-  save_as_image("results/UCloud_gamma_models/temperature_model_selection.png")
+  save_as_image("results/local_gamma_models/temperature_model_selection.png")
 
 
 precip_modcomp %>% 
@@ -367,7 +367,7 @@ precip_modcomp %>%
                     se_diff = "elpd error difference",
                     looic = "LOO information criterion") %>% 
   colformat_double(digits = 2) %>% 
-  save_as_image("results/UCloud_gamma_models/precipitation_model_selection.png")
+  save_as_image("results/local_gamma_models/precipitation_model_selection.png")
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 6. Saving data for manuscript figure ####
