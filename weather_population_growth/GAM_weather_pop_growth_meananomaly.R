@@ -22,8 +22,8 @@ library(patchwork)
 library(gridExtra)
 library(mgcv)      # Simon Wood to the rescue again. All Hail
 
-temp_colour <- "#990a80"
-precip_colour <- "#287f79"
+temp_colour <- "#d45371"
+precip_colour <- "#30738e"
 
 ##__________________________________________________________________________________________________
 #### 1. Load data ####
@@ -149,7 +149,7 @@ temp_compare <- ggplot(lin_gam, aes(x = lin_temp, y = coef_temp, size = n_obs)) 
   geom_abline(slope = 1, intercept = 0) +
   annotate('text', x = -5, y = 7,
            label = paste0("r = ", temp_cor_val[1], ", ", temp_cor_val[2])) +
-  scale_size_continuous(range = c(1,8), guide = F) +
+  scale_size_continuous(range = c(1,8), guide = "none") +
   labs(x = "Linear temperature effect", y = "GAM temperature effect") +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank())
@@ -159,7 +159,7 @@ precip_compare <- ggplot(lin_gam, aes(x = lin_precip, y = coef_precip, size = n_
   geom_abline(slope = 1, intercept = 0) +
   annotate('text', x = -0.5, y = 5,
            label = paste0("r = ", precip_cor_val[1], ", ", precip_cor_val[2])) +
-  scale_size_continuous(range = c(1,8), guide = F) +
+  scale_size_continuous(range = c(1,8), guide = "none") +
   labs(x = "Linear precipitation effect", y = "GAM precipitation effect") +
   theme_bw(base_size = 13) +
   theme(panel.grid = element_blank())
@@ -186,15 +186,16 @@ coef_ovrdat <- pgr_weather_gam %>%
                          "Mean temperature anomaly",
                          "Mean precipitation anomaly")) 
 
-ggplot(coef_ovrdat, aes(x = value, y = label, fill = model)) +
+coef_ovr <- ggplot(coef_ovrdat, aes(x = value, y = label, fill = model)) +
   geom_vline(xintercept = 0) +
   geom_density_ridges(alpha = 0.7, scale = 1, size = 0.3) +
   coord_cartesian(xlim = c(-5,5)) +
-  scale_fill_manual(guide = F, values = c(precip_colour, temp_colour)) +
+  scale_fill_manual(guide = "none", values = c(precip_colour, temp_colour)) +
   labs(x = "Model coefficient", y = NULL) +
-  theme_ridges(center_axis_labels = TRUE, font_size = 16) +
-  ggsave(filename = "plots/weather_pop_growth/overall_coefficients_mnanom_5km_GAM.jpeg",
-         height = 5, width = 6, units = "in", dpi = 400)
+  theme_ridges(center_axis_labels = TRUE, font_size = 16)
+
+ggsave(filename = "plots/weather_pop_growth/overall_coefficients_mnanom_5km_GAM.jpeg",
+       coef_ovr, height = 5, width = 6, units = "in", dpi = 400)
 
 ## 7b. Weather coefficients by Order
 temp_sp <- ggplot(pgr_weather_gam, aes(x = coef_temp, y = Order, 

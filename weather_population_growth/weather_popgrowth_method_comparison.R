@@ -21,8 +21,8 @@ library(glmmTMB)
 library(mgcv)
 library(psych)
 
-temp_colour <- viridis(20, option = "C")[13]
-precip_colour <- viridis(20, option = "D")[10]
+temp_colour <- "#d45371"
+precip_colour <- "#30738e"
 
 ##__________________________________________________________________________________________________
 #### 1. Load data ####

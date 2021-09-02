@@ -123,7 +123,7 @@ order_freq <- ggplot(mam_coef, aes(x = order)) +
 figS1 <- map_plot / (record_length | order_freq ) +
   plot_layout(heights = c(4, 1))
 
-ggsave(figS1, filename = "plots/manuscript_figures/figureS1.jpeg", dpi = 700,
+ggsave(figS1, filename = "plots/manuscript_figures/figure1.jpeg", dpi = 700,
        width = 18, height = 13, units = "cm")
 
 
@@ -264,7 +264,7 @@ sdphylo_plot <- bind_rows(temp_sdpost, precip_sdpost) %>%
         strip.background = element_blank(), 
         strip.text = element_blank())
 
-ggsave(sdspp_plot/sdphylo_plot, filename = "plots/manuscript_figures/figure1_inset.jpeg",
+ggsave(sdspp_plot/sdphylo_plot, filename = "plots/manuscript_figures/figure2_inset.jpeg",
        width = 18.4, height = 8.5, units = "cm", dpi = 1500)
 
 layout_fig2 <- "AABB###
@@ -286,7 +286,7 @@ fig1 <- wrap_plots(A = temp_intercept_posterior,
            `F` = mamtree,
            design = layout_fig2) 
 
-ggsave(fig1, filename = "plots/manuscript_figures/figure1.jpeg",
+ggsave(fig1, filename = "plots/manuscript_figures/figure2.jpeg",
        width = 35, height = 36.3, units = "cm", dpi = 1500)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -448,7 +448,7 @@ fig2d <- lit_precip_bin +
 
 ggsave((fig2a | fig2b)/
          (fig2c | fig2d),
-       file = "plots/manuscript_figures/figure2.jpeg",
+       file = "plots/manuscript_figures/figure3.jpeg",
        width = 20, height = 20, units = "cm", dpi = 600)
 
 

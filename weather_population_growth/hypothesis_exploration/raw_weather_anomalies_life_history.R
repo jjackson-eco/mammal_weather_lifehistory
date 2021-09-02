@@ -53,8 +53,8 @@ glimpse(mammal_weather)
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 2. Explore anomaly range per life-history variable ####
 
-temp_colour <- "#990a80"
-precip_colour <- "#287f79"
+temp_colour <- "#d45371"
+precip_colour <- "#30738e"
 
 summary(mammal_weather$longevity)
 

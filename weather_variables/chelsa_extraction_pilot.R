@@ -179,6 +179,9 @@ rm(mam_chelsa1979,
 ##__________________________________________________________________________________________________
 #### 4. Plots to compare the CHELSA weather variables ####
 
+temp_colour <- "#d45371"
+precip_colour <- "#30738e"
+
 # Data
 temp_chelsa <- mam_chelsa %>% 
   dplyr::select(ID, Binomial, year, month, 
@@ -206,7 +209,7 @@ precip_chelsa <- mam_chelsa %>%
 
 # Plots
 temp_buffer_plot <- ggplot(temp_chelsa, aes(x =  temperature, y = temp_exact_cell)) +
-  geom_point(alpha = 0.01, colour = "firebrick") +
+  geom_point(alpha = 0.01, colour = temp_colour) +
   geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "black") +
   labs(x = expression(paste("Average temperature", ~degree~C)),
        y = expression(paste("Exact raster cell temperature", ~degree~C))) +
@@ -217,7 +220,7 @@ temp_buffer_plot <- ggplot(temp_chelsa, aes(x =  temperature, y = temp_exact_cel
         strip.background = element_blank())
 
 precip_buffer_plot <- ggplot(precip_chelsa, aes(x =  precipitation, y = precip_exact_cell)) +
-  geom_point(alpha = 0.01, colour = "lightblue") +
+  geom_point(alpha = 0.01, colour = precip_colour) +
   geom_abline(slope = 1, intercept = 0, size = 0.2, colour = "black") +
   labs(x = "Average precipitation (mm)",
        y = "Exact raster cell precipitation (mm)") +
