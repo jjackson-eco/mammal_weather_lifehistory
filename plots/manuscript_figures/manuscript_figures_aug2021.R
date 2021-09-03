@@ -70,7 +70,7 @@ rm(mod_comp)
 
 #______________________
 ## Posterior summaries from the gamma model
-load("results/UCloud_gamma_models/posterior_summary_Gamma.RData", verbose = TRUE)
+load("results/local_gamma_models/posterior_summary_Gamma.RData", verbose = TRUE)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### Figure 1 - World map with studies ####
@@ -483,8 +483,8 @@ quantile(mam_coef$coef_temp_raw, probs = c(0.025, 0.975))
 quantile(na.omit(mam_coef$coef_precip_raw), probs = c(0.025, 0.975))
     
 # extreme records
-filter(mam_coef, coef_temp_raw > 1 | coef_temp_raw < -1)
-filter(mam_coef, coef_precip_raw > 1 | coef_precip_raw < -1)
+filter(mam_coef, coef_temp_raw > 3 | coef_temp_raw < -3)
+filter(mam_coef, coef_precip_raw > 3 | coef_precip_raw < -3)
 
 # gaussian model
 temp_biome
@@ -527,6 +527,9 @@ summarise(posterior_summary_longevity, min_t = min(post_mn_temp),
           max_t = max(post_mn_temp), min_p = min(post_mn_precip),
           max_p = max(post_mn_precip),
           tfold = max_t/min_t, pfold = max_p/min_p)
+
+(2.36/70)*5
+(2.05/70)*5
 
 # minimum and maximum litter size
 filter(mam_coef, litter== min(litter))$species

@@ -337,6 +337,8 @@ lh_predictors <- tibble(predictors = c("longevity", "litter", "bodymass", "biome
 temp_modcomp %>% 
   mutate(model = rownames(.)) %>% 
   filter(model != "temp_biome") %>% 
+  mutate(elpd_diff = elpd_loo[1] - elpd_loo,
+         se_diff = se_elpd_loo[1] - se_elpd_loo) %>% # accounting for dropping biome (more for precip)
   left_join(x = ., y = dplyr::select(lh_predictors, - precip_name), 
             by = c("model" = "temp_name")) %>% 
   dplyr::select(model, predictors, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
@@ -355,6 +357,8 @@ temp_modcomp %>%
 precip_modcomp %>% 
   mutate(model = rownames(.)) %>% 
   filter(model != "precip_biome") %>% 
+  mutate(elpd_diff = elpd_loo[1] - elpd_loo,
+         se_diff = se_elpd_loo[1] - se_elpd_loo) %>% # accounting for dropping biome (more for precip)
   left_join(x = ., y = dplyr::select(lh_predictors, - temp_name), 
             by = c("model" = "precip_name")) %>% 
   dplyr::select(model, predictors, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
