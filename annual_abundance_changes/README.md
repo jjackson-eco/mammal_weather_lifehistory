@@ -268,7 +268,7 @@ Together with the results of section 2, this suggests that accounting for tempor
 
 ### `annual_population_growth_rate.R`
 
-Using the abundance data that has been split in to consecutive blocks, we will calculate per-capita annual population growth rates, which we will then relate to annual weather data. This is calculated as r = N~t+1~/N~t~ , where N is the abundance on the ln scale at time t. We store the results in the `mammal` data frame for future reference.
+Using the abundance data that has been split in to consecutive blocks, we will calculate per-capita annual population growth rates, which we will then relate to annual weather data. This is calculated as r = ln X[t+1]/X[t] , where X is the abundance at time t. We store the results in the `mammal` data frame for future reference.
 
 ```
 # This will remove one year from each ID_block
