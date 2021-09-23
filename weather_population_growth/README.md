@@ -1,6 +1,6 @@
 # Weather effects on population growth rates for the terrestrial mammals
 
-#### 2021-03-16
+#### 2021-09-23
 #### John Jackson
 
 ---
@@ -202,15 +202,16 @@ Apart from this, the framework for estimating the weather effects on population 
 
 ### `weather_popgrowth_method_comparison.R`
 
-To test the implications of our choice of GAMs for modelling the underlying patterns of weather effects on population growth rates, we performed a method comparison for different ways of assessing the weather effects. We evaluated a set of five candidate models for estimating the weather effects, which were as follows:
+To test the implications of our choice of GAMs for modelling the underlying patterns of weather effects on population growth rates, we performed a method comparison for different ways of assessing the weather effects. We evaluated a set of six candidate models for estimating the weather effects, which were as follows:
 
 1. A fully naive linear model only including the weather effect.
 2. A linear model accounting for the trend in population growth rate.
 3. A linear model incorporating trend and the previous years abundance.
 4. A glmmTMB model with an autoregressive term for year of order AR(1).
 5. A GAM with a corse smoothing term for the year trend and an autoregressive term for year of order AR(1)
+6. A state-space model incorporating process and observation error.
 
-These models were specified generally as follows:
+The first five models were specified generally as follows:
 
 ```
     #_______________________________________________
@@ -277,6 +278,53 @@ And for precipitation:
 <img src="../plots/weather_pop_growth/precip_effect_comparison.jpeg" width="700" />
 
 You can see that in particular for the GAM approach taken in this study, it was a good representation of the weather coefficients for both temperature and precipitation relative to other methods. And, as with our density dependence simulation in the previous section, we see that weather coefficients (environmental effects) are highly correlated even when we don't account for temporal autocorrelation or trend. The only exception to these reassuring findings is the glmmTMB method, which is not as well correlated. However these coefficients are still well related to the GAM coefficients.
+
+Now for the state-space approach
+
+### `varying_methods_individual/state_space_weather_popgrowth.R`
+
+In addition to the generalised linear approaches taken here, a common approach to handle time-series data is to use state-space models, which enable explicit auto-regressive time-series models to be fit using a Bayesian framework. Crucially, this approach also enables the incorporation of specific terms for observation and process error in the time-series. This approach was implemented here in `JAGS` using the `jagsUI` package. The general JAGs code to fit the state-space model is as follows:
+
+```
+model {
+  
+  # Priors and constraints
+  logN[1] ~ dnorm(5.6, 0.01)           # Prior for initial population size
+  b0 ~ dnorm(0, 0.001)                 # Prior for mean growth rate
+  beta ~ dnorm(0, 0.001)               # Prior for slope parameter
+  sigma.proc ~ dunif(0, 1)             # Prior for sd of state process
+  sigma2.proc <- pow(sigma.proc, 2)
+  tau.proc <- pow(sigma.proc, -2)
+  sigma.obs ~ dunif(0, 1)              # Prior for sd of observation process
+  sigma2.obs <- pow(sigma.obs, 2)
+  tau.obs <- pow(sigma.obs, -2)
+  
+  # Likelihood
+  # State process
+  for (t in 1:(T-1)){
+    r[t] <- b0 + beta * x[t] + epsilon[t]   # Linear model for the population growth rate
+    epsilon[t] ~ dnorm(0, tau.proc)         # Random noise of the population growth rate
+    logN[t+1] <- logN[t] + r[t]
+  }
+  # Observation process
+  for (t in 1:T) {
+    y[t] ~ dnorm(logN[t], tau.obs)
+  }
+  
+  # Population sizes on real scale
+  for (t in 1:T) {
+    N[t] <- exp(logN[t])
+  }
+  }
+```
+
+Here the weather effect on population growth rate is captured with the `beta` term for each timeseries. Application of this approach across all timeseries revealed a close correlation between GAM models and the state-space approach:
+
+<img src="../plots/weather_pop_growth/ssm_method_comparison.jpeg" width="700" />
+
+The state-space approach also had a strong fit-to-sample:
+
+<img src="../plots/weather_pop_growth/ssm_insample_prediction.jpeg" width="700" />
 
 </details>
 

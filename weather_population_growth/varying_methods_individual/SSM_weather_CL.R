@@ -36,7 +36,7 @@ IDs <- unique(mammal_weather_CL$ID)
 record <- mammal_weather_CL[mammal_weather_CL$ID==IDs[1],]
 
 # Specify model in BUGS language
-cat(file="ssm.jags", "
+cat(file="weather_population_growth/varying_methods_individual/ssm.jags", "
   model {
 
   # Priors and constraints
@@ -86,7 +86,7 @@ nc <- 3
 na <- 5000
 
 # Call JAGS from R (BRT 3 min)
-record.ssm <- jags(jags.data, inits, parameters, "ssm.jags", 
+record.ssm <- jags(jags.data, inits, parameters, "weather_population_growth/varying_methods_individual/ssm.jags", 
                    n.chains=nc, n.thin=nt, n.iter=ni, 
                    n.burnin=nb, n.adapt=na)
 

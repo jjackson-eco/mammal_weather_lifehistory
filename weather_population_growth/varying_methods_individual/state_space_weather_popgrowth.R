@@ -75,7 +75,7 @@ for (i in 440:length(IDs)){
   #### 3a. Temperature ####
   
   # Specify model in BUGS
-  cat(file="ssmtemp.jags", "
+  cat(file="weather_population_growth/varying_methods_individual/ssmtemp.jags", "
   model {
   
   # Priors and constraints
@@ -131,7 +131,7 @@ for (i in 440:length(IDs)){
   na <- 5000
   
   # Call JAGS from R (BRT 3 min)
-  ssmtemptot <- jags(jags.data, inits, parameters, "ssmtemp.jags", 
+  ssmtemptot <- jags(jags.data, inits, parameters, "weather_population_growth/varying_methods_individual/ssmtemp.jags", 
                      n.chains=nc, n.thin=nt, n.iter=ni, n.burnin=nb, n.adapt=na)
   tempbetaSSM <- ssmtemptot$mean$beta
   
@@ -139,7 +139,7 @@ for (i in 440:length(IDs)){
   #### 3b. Precipitation ####
   
   # Specify model in BUGS language
-  cat(file="ssmprec.jags", "
+  cat(file="weather_population_growth/varying_methods_individual/ssmprec.jags", "
   model {
 
   # Priors and constraints
@@ -191,7 +191,7 @@ for (i in 440:length(IDs)){
   
   # Call JAGS from R (BRT 3 min)
   ssmprectot <- jags(jags.data, inits, 
-                     parameters, "ssmprec.jags", 
+                     parameters, "weather_population_growth/varying_methods_individual/ssmprec.jags", 
                      n.chains=nc, n.thin=nt, 
                      n.iter=ni, n.burnin=nb, 
                      n.adapt=na)
