@@ -158,7 +158,7 @@ mammal20 <- mam_IDblocks_20yr %>%
 ##__________________________________________________________________________________________________
 #### 5. Save ####
 
-save(mammal5, mammal20, file = "../rawdata/mammal_alternate_lengths.RData")
+save(mammal5, mammal20, file = "../rawdata/mammal_varied_record_length.RData")
 
 
 

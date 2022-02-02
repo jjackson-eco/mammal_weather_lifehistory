@@ -29,7 +29,7 @@ precip_colour <- "#30738e"
 #### 1. Load data ####
 
 # mammal data
-load("../rawdata/mammal_alternate_lengths.RData", verbose = TRUE)
+load("../rawdata/mammal_varied_record_length.RData", verbose = TRUE)
 glimpse(mammal5)
 glimpse(mammal20)
 
