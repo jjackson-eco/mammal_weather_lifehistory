@@ -15,12 +15,10 @@ library(grid)
 library(gridExtra)
 library(xts)
 library(MASS)
-library(ggfortify)
 
 library(sf)
 
 library(rnaturalearth)
-library(rnaturalearthdata)
 
 # load the data
 mam_chelsa <- readRDS("data/mam_chelsa.RDS")
@@ -84,12 +82,14 @@ filter(precip_dat, ID == 4920)$precip_5km
 #### 2. Additive seasonal Decomposition by Loess (STL) - Cheetah Temp Test ####
 
 # 2a. Have a look at the temperature test
-ggplot(temp_test, aes(x = date, y = temp)) +
+cheetah_test <- ggplot(temp_test, aes(x = date, y = temp)) +
   geom_line(colour = "firebrick", size = 0.2) +
   labs(x = NULL, y = "Scaled temperature") +
-  theme_bw(base_size = 9) +
-  ggsave(filename = "plots/developing_annual_weather_variables/temp_scale_cheetah_example.jpeg",
-         width = 5, height = 3, units = "in", dpi = 400)
+  theme_bw(base_size = 9)
+
+ggsave(cheetah_test,
+       filename = "plots/developing_annual_weather_variables/temp_scale_cheetah_example.jpeg",
+       width = 5, height = 3, units = "in", dpi = 400)
 
 # 2b. Convert to a timeseries
 test_ts <- ts(zoo(temp_test$temp, order.by= temp_test$date),
