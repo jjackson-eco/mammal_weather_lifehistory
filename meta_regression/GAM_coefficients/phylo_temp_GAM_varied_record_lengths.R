@@ -2,18 +2,17 @@
 ##                                                             ##
 ##           Global climate and population dynamics            ##
 ##                                                             ##
-## Precipitation with GAM coefficients - Varied Record Lengths ##
+##  Temperature with GAM coefficients - Varied Record Lengths  ##
 ##                                                             ##
 ##             brms Phylogenetic meta-regression               ##
 ##                   and spatial effects                       ##
 ##                                                             ##
-##                      Feb 2nd 2022                           ##
+##                      Feb 4th 2022                           ##
 ##                                                             ##
 #################################################################
 
 ## Investigating the effects of biome on population responses
-## from GAM ARMA models. Implementing the meta-regression framework for precipitation
-
+## from GAM ARMA models. Implementing the meta-regression framework for temperature
 rm(list = ls())
 options(width = 100)
 
@@ -55,7 +54,7 @@ load("../rawdata/GBIF_species_names_mamUPDATE.RData", verbose = TRUE)
 #### 2. Mammal coefficient data ####
 
 # Short records
-mam_precip_5yr <- mnanom_5km_GAM_5yr %>% 
+mam_temp_5yr <- mnanom_5km_GAM_5yr %>% 
   ungroup() %>%  ## <- The groups ruin the z-transformations
   left_join(x = ., y = dplyr::select(lpd_gbif, Binomial, gbif.species.id), 
             by = "Binomial") %>% 
@@ -78,11 +77,11 @@ mam_precip_5yr <- mnanom_5km_GAM_5yr %>%
                 biome, lat, iucn = IUCNstatus, litter,
                 longevity, bodymass, coef_temp, 
                 coef_precip) %>% 
-  drop_na(litter, longevity, bodymass, coef_precip) %>% 
+  drop_na(litter, longevity, bodymass, coef_temp) %>% 
   filter(phylo != "Damaliscus_korrigum")
 
 # Long records
-mam_precip_20yr <- mnanom_5km_GAM_20yr %>% 
+mam_temp_20yr <- mnanom_5km_GAM_20yr %>% 
   ungroup() %>%  ## <- The groups ruin the z-transformations
   left_join(x = ., y = dplyr::select(lpd_gbif, Binomial, gbif.species.id), 
             by = "Binomial") %>% 
@@ -105,34 +104,34 @@ mam_precip_20yr <- mnanom_5km_GAM_20yr %>%
                 biome, lat, iucn = IUCNstatus, litter,
                 longevity, bodymass, coef_temp, 
                 coef_precip) %>% 
-  drop_na(litter, longevity, bodymass, coef_precip)
+  drop_na(litter, longevity, bodymass, coef_temp)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 3. Phylogenetic covariance matrices ####
 
 ## Short Records
 # Trim tree to right data
-mamMCC_precip_5yr <- keep.tip(mamMCC_pruned, mam_precip_5yr$phylo) 
+mamMCC_temp_5yr <- keep.tip(mamMCC_pruned, mam_temp_5yr$phylo) 
 
 # Covariance matrix - Brownian motion model
-A_precip_5yr <- ape::vcv.phylo(mamMCC_precip_5yr)
+A_temp_5yr <- ape::vcv.phylo(mamMCC_temp_5yr)
 
 ## Long Records
 # Trim tree to right data
-mamMCC_precip_20yr <- keep.tip(mamMCC_pruned, mam_precip_20yr$phylo) 
+mamMCC_temp_20yr <- keep.tip(mamMCC_pruned, mam_temp_20yr$phylo) 
 
 # Covariance matrix - Brownian motion model
-A_precip_20yr <- ape::vcv.phylo(mamMCC_precip_20yr)
+A_temp_20yr <- ape::vcv.phylo(mamMCC_temp_20yr)
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
-#### 4. Precipitation models - Short records ####
+#### 4. Temperature models - Short records ####
 
 ## Base model
 set.seed(666)
-precip_base_5yr <- brm(
-  coef_precip ~ 1 + sample_size + (1|gr(phylo, cov = A_precip_5yr)) + (1| species),  
-  data = mam_precip_5yr, family = gaussian(),
-  data2 = list(A_precip_5yr = A_precip_5yr),
+temp_base_5yr <- brm(
+  coef_temp ~ 1 + sample_size + (1|gr(phylo, cov = A_temp_5yr)) + (1| species),  
+  data = mam_temp_5yr, family = gaussian(),
+  data2 = list(A_temp_5yr = A_temp_5yr),
   prior = c(
     prior(normal(0, 0.3), class =  Intercept),
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
@@ -145,10 +144,10 @@ precip_base_5yr <- brm(
 
 ## Biome
 set.seed(666)
-precip_biome_5yr <- brm(
-  coef_precip ~ 1 + biome + sample_size + (1|gr(phylo, cov = A_precip_5yr)) + (1| species),  
-  data = mam_precip_5yr, family = gaussian(),
-  data2 = list(A_precip_5yr = A_precip_5yr),
+temp_biome_5yr <- brm(
+  coef_temp ~ 1 + biome + sample_size + (1|gr(phylo, cov = A_temp_5yr)) + (1| species),  
+  data = mam_temp_5yr, family = gaussian(),
+  data2 = list(A_temp_5yr = A_temp_5yr),
   prior = c(
     prior(normal(0, 0.2), class =  Intercept),
     prior(normal(0, 0.1), class = b),
@@ -164,21 +163,21 @@ precip_biome_5yr <- brm(
 ### 4b. Model comparisons
 
 ## Model comparisons
-precip_base_5yr <- add_criterion(precip_base_5yr, criterion = c("loo","waic"))
-precip_biome_5yr <- add_criterion(precip_biome_5yr, criterion = c("loo","waic"))
+temp_base_5yr <- add_criterion(temp_base_5yr, criterion = c("loo","waic"))
+temp_biome_5yr <- add_criterion(temp_biome_5yr, criterion = c("loo","waic"))
 
-mod_comp_precip_5yr <- as.data.frame(loo_compare(precip_base_5yr, 
-                                                 precip_biome_5yr, criterion = "loo"))
+mod_comp_temp_5yr <- as.data.frame(loo_compare(temp_base_5yr, 
+                                                 temp_biome_5yr, criterion = "loo"))
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
-#### 5. Precipitation models - Long records ####
+#### 5. Temperature models - Long records ####
 
 ## Base model
 set.seed(666)
-precip_base_20yr <- brm(
-  coef_precip ~ 1 + sample_size + (1|gr(phylo, cov = A_precip_20yr)) + (1| species),  
-  data = mam_precip_20yr, family = gaussian(),
-  data2 = list(A_precip_20yr = A_precip_20yr),
+temp_base_20yr <- brm(
+  coef_temp ~ 1 + sample_size + (1|gr(phylo, cov = A_temp_20yr)) + (1| species),  
+  data = mam_temp_20yr, family = gaussian(),
+  data2 = list(A_temp_20yr = A_temp_20yr),
   prior = c(
     prior(normal(0, 0.3), class =  Intercept),
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
@@ -191,17 +190,17 @@ precip_base_20yr <- brm(
 
 ## Biome
 set.seed(666)
-precip_biome_20yr <- brm(
-  coef_precip ~ 1 + biome + sample_size + (1|gr(phylo, cov = A_precip_20yr)) + (1| species),  
-  data = mam_precip_20yr, family = gaussian(),
-  data2 = list(A_precip_20yr = A_precip_20yr),
+temp_biome_20yr <- brm(
+  coef_temp ~ 1 + biome + sample_size + (1|gr(phylo, cov = A_temp_20yr)) + (1| species),  
+  data = mam_temp_20yr, family = gaussian(),
+  data2 = list(A_temp_20yr = A_temp_20yr),
   prior = c(
     prior(normal(0, 0.2), class =  Intercept),
     prior(normal(0, 0.1), class = b),
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(8), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.98,
                  max_treedepth = 15),
   chains = 3, cores = 3, iter = 4000, warmup = 2000
 )
@@ -210,38 +209,27 @@ precip_biome_20yr <- brm(
 ### 5b. Model comparisons
 
 ## Model comparisons
-precip_base_20yr <- add_criterion(precip_base_20yr, criterion = c("loo","waic"))
-precip_biome_20yr <- add_criterion(precip_biome_20yr, criterion = c("loo","waic"))
+temp_base_20yr <- add_criterion(temp_base_20yr, criterion = c("loo","waic"))
+temp_biome_20yr <- add_criterion(temp_biome_20yr, criterion = c("loo","waic"))
 
-mod_comp_precip_20yr <- as.data.frame(loo_compare(precip_base_20yr, 
-                                                 precip_biome_20yr, criterion = "loo"))
+mod_comp_temp_20yr <- as.data.frame(loo_compare(temp_base_20yr, 
+                                                temp_biome_20yr, criterion = "loo"))
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
-#### 6. Model plots ####
-
-load("results/gaussian_models/model_comparison_precip_rawcoef.RData")
-load("results/gaussian_models/precip_biome_rawcoef.RData")
-
-# Model comparison table
-mod_comp_precip %>% 
-  mutate(model = c("Base model", "Biome effect")) %>% 
-  dplyr::select(model, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
-  flextable(cwidth = 1.2) %>% 
-  set_header_labels(model = "Model",
-                    elpd_loo = "LOO elpd",
-                    se_elpd_loo = "LOO elpd error",
-                    elpd_diff = "elpd difference",
-                    se_diff = "elpd error difference",
-                    looic = "LOO information criterion") %>% 
-  colformat_double(digits = 2) %>% 
-  save_as_image("plots/meta_regression/precipitation_gaussian_model_comparison.png")
-
-# Model plot
-precip_biome_pars <- parnames(precip_biome)
-
-jpeg("plots/meta_regression/precip_biome_mod_parms.jpeg", 
-     width = 13, height = 15, res = 500, units = "cm")
-plot(precip_biome, pars = c("b_Intercept", "b_sample_size","sd_species__Intercept", 
-                          "sd_phylo__Intercept", "sigma"))
-dev.off()
-
+#### 5. Temperature model plots ####
+ 
+temp_plot <- temp_biome %>%
+  gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
+  ungroup() %>% 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye(show.legend = FALSE, fill = temp_colour) +
+  geom_vline(xintercept = 0, size = 0.8) +
+  scale_y_discrete(labels = c(expression(paste("Global intercept ", bar(alpha))),
+                              expression(paste("Sample size ", beta[N])),
+                              expression(paste("Phylogenetic covariance ", sigma[PHYLO])),
+                              expression(paste("Species level variance ", sigma[SPECIES])),
+                              "Population-level variance")) +
+  labs(x = "Posterior estimate", y = NULL, tag = "a)") +
+  theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 10))
