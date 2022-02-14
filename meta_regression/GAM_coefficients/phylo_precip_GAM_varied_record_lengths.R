@@ -219,29 +219,40 @@ mod_comp_precip_20yr <- as.data.frame(loo_compare(precip_base_20yr,
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
 #### 6. Model plots ####
 
-load("results/gaussian_models/model_comparison_precip_rawcoef.RData")
-load("results/gaussian_models/precip_biome_rawcoef.RData")
+precip_colour <- "#287f79"
 
-# Model comparison table
-mod_comp_precip %>% 
-  mutate(model = c("Base model", "Biome effect")) %>% 
-  dplyr::select(model, elpd_loo, se_elpd_loo, elpd_diff, se_diff, looic) %>% 
-  flextable(cwidth = 1.2) %>% 
-  set_header_labels(model = "Model",
-                    elpd_loo = "LOO elpd",
-                    se_elpd_loo = "LOO elpd error",
-                    elpd_diff = "elpd difference",
-                    se_diff = "elpd error difference",
-                    looic = "LOO information criterion") %>% 
-  colformat_double(digits = 2) %>% 
-  save_as_image("plots/meta_regression/precipitation_gaussian_model_comparison.png")
+## 6a. 5 years 
+precip_post_5yr <- precip_base_5yr %>%
+  gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
+  ungroup() %>% 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye(show.legend = FALSE, fill = precip_colour) +
+  geom_vline(xintercept = 0, size = 0.6) +
+  scale_y_discrete(labels = c(expression(paste("Global intercept ", bar(alpha))),
+                              expression(paste("Sample size ", beta[N])),
+                              expression(paste("Phylogenetic covariance ", sigma[PHYLO])),
+                              expression(paste("Species level variance ", sigma[SPECIES])),
+                              "Population-level variance")) +
+  labs(x = "Posterior estimate", y = NULL, title = "Records with > 5 years of data") +
+  theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
+  theme(axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16))
 
-# Model plot
-precip_biome_pars <- parnames(precip_biome)
+precip_post_20yr <- precip_base_20yr %>%
+  gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
+  ungroup() %>% 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye(show.legend = FALSE, fill = precip_colour) +
+  geom_vline(xintercept = 0, size = 0.6) +
+  scale_y_discrete(labels = NULL) +
+  labs(x = "Posterior estimate", y = NULL, title = "Records with > 20 years of data") +
+  theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
+  theme(axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16))
 
-jpeg("plots/meta_regression/precip_biome_mod_parms.jpeg", 
-     width = 13, height = 15, res = 500, units = "cm")
-plot(precip_biome, pars = c("b_Intercept", "b_sample_size","sd_species__Intercept", 
-                          "sd_phylo__Intercept", "sigma"))
-dev.off()
+precip_post_5yr + precip_post_20yr
+ggsave(precip_post_5yr + precip_post_20yr,
+       filename = "plots/manuscript_figures/Supplementary figures/precip_varyinglength_posterior.jpeg",
+       width = 30, height = 20, units = "cm", dpi = 1000)
+
 

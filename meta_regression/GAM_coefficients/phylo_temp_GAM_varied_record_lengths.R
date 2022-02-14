@@ -183,7 +183,7 @@ temp_base_20yr <- brm(
     prior(normal(0, 0.3), class = b, coef = "sample_size"),
     prior(exponential(8), class = sd, group = "phylo"),
     prior(exponential(8), class = sd, group = "species")),
-  control = list(adapt_delta = 0.97,
+  control = list(adapt_delta = 0.99,
                  max_treedepth = 15),
   chains = 3, cores = 3, iter = 4000, warmup = 2000
 )
@@ -216,20 +216,43 @@ mod_comp_temp_20yr <- as.data.frame(loo_compare(temp_base_20yr,
                                                 temp_biome_20yr, criterion = "loo"))
 
 ##____________________________________________________________________________________________________________________________________________________________________________________________________________
-#### 5. Temperature model plots ####
+#### 6. Temperature model plots ####
+
+temp_colour <- "#990a80"
  
-temp_plot <- temp_biome %>%
+## 6a. 5 years 
+temp_post_5yr <- temp_base_5yr %>%
   gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
   ungroup() %>% 
   ggplot(aes(y = .variable, x = .value)) + 
   stat_halfeye(show.legend = FALSE, fill = temp_colour) +
-  geom_vline(xintercept = 0, size = 0.8) +
+  geom_vline(xintercept = 0, size = 0.6) +
   scale_y_discrete(labels = c(expression(paste("Global intercept ", bar(alpha))),
                               expression(paste("Sample size ", beta[N])),
                               expression(paste("Phylogenetic covariance ", sigma[PHYLO])),
                               expression(paste("Species level variance ", sigma[SPECIES])),
                               "Population-level variance")) +
-  labs(x = "Posterior estimate", y = NULL, tag = "a)") +
+  labs(x = "Posterior estimate", y = NULL, title = "Records with > 5 years of data") +
   theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
-  theme(axis.text = element_text(size = 10),
-        axis.title = element_text(size = 10))
+  theme(axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16))
+
+temp_post_20yr <- temp_base_20yr %>%
+  gather_draws(`b_Intercept|sd_.*|b_sample_size|sigma`, regex = TRUE) %>% #tidybayes
+  ungroup() %>% 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye(show.legend = FALSE, fill = temp_colour) +
+  geom_vline(xintercept = 0, size = 0.6) +
+  scale_y_discrete(labels = NULL) +
+  labs(x = "Posterior estimate", y = NULL, title = "Records with > 20 years of data") +
+  theme_ridges(center_axis_labels = TRUE, grid = T, line_size = 0.3) +
+  theme(axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16))
+
+temp_post_5yr + temp_post_20yr
+ggsave(temp_post_5yr + temp_post_20yr,
+       filename = "plots/manuscript_figures/Supplementary figures/temp_varyinglength_posterior.jpeg",
+       width = 30, height = 20, units = "cm", dpi = 1000)
+
+
+
