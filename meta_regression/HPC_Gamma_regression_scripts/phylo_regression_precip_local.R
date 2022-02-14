@@ -4,7 +4,7 @@
 ##                                                ##
 ##      Absolute precipitation effect with GAM    ##
 ##                                                ##
-##    Local - brms Phylogenetic meta-regression  ##
+##    Local - brms Phylogenetic meta-regression   ##
 ##        life-history and spatial effects        ##
 ##                                                ##
 ##                 Aug 24th 2021                  ##
