@@ -24,7 +24,7 @@ $$
 \alpha_j &\sim \operatorname{Normal}(\bar{\alpha},\sigma_{SPECIES}) \\
 \underline{\text{Priors}} \\
 \bar{\alpha} &\sim \operatorname{Normal}(0,0.3) \\
-\beta_{BIOME} &\sim \operatorname{Normal}(0,0.15) \\ 
+\beta_{BIOME} &\sim \operatorname{Normal}(0,0.15), \,\,\,\,\,\text{for}\,b\,\text{in}\,1:13\\ 
 \beta_N &\sim \operatorname{Normal}(0,0.5) \\
 \sigma_{PHYLO}^2 &\sim \operatorname{Exponential}(8) \\
 \sigma_{SPECIES} &\sim \operatorname{Exponential}(8) \\

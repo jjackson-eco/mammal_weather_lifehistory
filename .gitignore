@@ -5,3 +5,13 @@
 .Rhistory
 annual_abundance_changes/README.html
 README.html
+results/lognormal_models/.DS_Store
+weather_variables/Cloud_scripts/.DS_Store
+plots/mam_raw/.DS_Store
+plots/chelsa_raw/.DS_Store
+plots/annual_abundance/annual_population_growth_rates/.DS_Store
+plots/annual_abundance/linear_trend_and_detrending/.DS_Store
+plots/annual_abundance/timeseries_gaps/.DS_Store
+plots/annual_abundance/timeseries_gaps/record_timelines/.DS_Store
+meta_regression/GAM_coefficients/.DS_Store
+data/.DS_Store

@@ -614,3 +614,35 @@ ggsave(temp_n + precip_n,
        filename = "plots/meta_regression/sample_size_posterior_prediction.jpeg",
        width = 25, height = 14, units = "cm", dpi = 500)
 
+##____________________________________________________________________________________________________________________________________________________________________________________________________________
+#### Figure SXX - Sample size vs. coefficient plots ####
+
+mam_coef %>% 
+  group_by(n_obs) %>% 
+  summarise(mn = mean(coef_temp),
+            se = sd(coef_temp)/sqrt(n())) %>% 
+  ggplot(aes(x = n_obs, y = mn)) +
+  geom_hline(yintercept = 0) +
+  geom_point(data = mam_coef, aes(x = n_obs, y = coef_temp), 
+             alpha = 0.1, size = 1, colour = temp_colour) +
+  geom_errorbar(width = 0.05, aes(ymax = mn + se, ymin = mn - se), 
+                colour = temp_colour) +
+  geom_point(size = 3, colour = temp_colour) +
+  labs(x = "Record length (years)", y = "Temperature effect on abundance") +
+  theme_bw(base_size = 13) +
+  theme(panel.grid = element_blank()) 
+
+temp_nobs <- ggplot(mam_coef, aes(x = sample_size, y = coef_temp)) +
+  geom_hline(yintercept = 0) +
+  geom_point(alpha = 0.3, size = 3, colour = temp_colour) +
+  scale_x_continuous(breaks = seq(min(mam_coef$sample_size),max(mam_coef$sample_size), length = 10),
+                     labels = round(seq(9,35, length = 10), 1)) +
+  labs(x = "Record length (years)", y = "Temperature effect on abundance") +
+  theme_bw(base_size = 13) +
+  theme(panel.grid = element_blank()) 
+
+ggsave(temp_nobs, filename = "plots/manuscript_figures/Supplementary figures/Figure_SX_samplesize_temp_coef.jpeg",
+       width = 13, height = 11.5, units = "cm", dpi = 1000)
+
+
+

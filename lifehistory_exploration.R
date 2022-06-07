@@ -18,6 +18,7 @@ options(width = 100)
 
 library(tidyverse)
 library(patchwork)
+library(psych)
 
 ##__________________________________________________________________________________________________
 #### 1. Loading data ####
@@ -27,6 +28,9 @@ glimpse(mam_dski)
 
 load("../rawdata/mam_alhd.RData")
 glimpse(mam_alhd)
+
+load("../rawdata/mam_comadre.RData")
+glimpse(mam_comadre)
 
 ##__________________________________________________________________________________________________
 #### 2. Summary of the DSKI data ####
@@ -229,4 +233,41 @@ ggsave(bm_lon + bm_lit,
 #### 6. Save aggregated species-level data for analysis ####
 
 save(lifehistory, file = "data/lifehistory.RData")
+
+##__________________________________________________________________________________________________
+#### 7. Combining with comadre data ####
+
+# comadre at the species level
+mam_comadre_spp <- mam_comadre %>% 
+  group_by(gbif.species.id) %>% 
+  summarise(gbif.species = gbif.species[1],
+            generation_time = mean(generation_time, na.rm = T),
+            life_expectancy = mean(life_expectancy, na.rm = T),
+            adult_survival = mean(adult_survival, na.rm = T)) %>% 
+  ungroup()
+
+# combine
+lifehistory_all <- lifehistory %>% 
+  left_join(x = ., y = select(mam_comadre_spp, -2), by = "gbif.species.id")
+
+# pairs plots
+lifehistory_complete <- lifehistory_all %>% 
+  na.omit() %>% 
+  mutate_at(.vars = 10:12, .funs = function(x){log(x + 1)}) %>% 
+  rename_all(.funs = str_to_sentence) %>% 
+  rename(`Generation time` = Generation_time, 
+         `Life expectancy` = Life_expectancy,
+         `Adult survival` = Adult_survival)
+
+jpeg("plots/lifehistory_raw/life_history_covariance.jpeg",
+     width = 15, height = 15, units = "cm",res = 600)
+pairs.panels(lifehistory_complete[,7:12], 
+             ellipses = FALSE, lm = TRUE, method = "spearman")
+dev.off()
+
+
+
+
+
+
 
